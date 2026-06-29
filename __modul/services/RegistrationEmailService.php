@@ -10,7 +10,7 @@ class RegistrationEmailService
 {
     public static function sendOtp(UserRegistration $registration, string $otp): bool
     {
-        $subject = 'Kode OTP Verifikasi Email SIPKK';
+        $subject = 'Kode OTP Verifikasi Email Puskesmas';
         $body = self::wrapHtml(
             'Verifikasi Email',
             '<p>Gunakan kode OTP berikut untuk verifikasi email Anda:</p>' .
@@ -23,11 +23,11 @@ class RegistrationEmailService
 
     public static function sendApproved(UserRegistration $registration): bool
     {
-        $subject = 'Pendaftaran SIPKK Disetujui';
+        $subject = 'Pendaftaran Puskesmas Disetujui';
         $body = self::wrapHtml(
             'Pendaftaran Disetujui',
             '<p>Halo ' . htmlspecialchars($registration->nama_lengkap, ENT_QUOTES, 'UTF-8') . ',</p>' .
-            '<p>Pengajuan akses SIPKK Anda telah disetujui. Anda sudah dapat login menggunakan username yang didaftarkan.</p>'
+            '<p>Pengajuan akses Puskesmas Anda telah disetujui. Anda sudah dapat login menggunakan username yang didaftarkan.</p>'
         );
 
         return self::send($registration->email, $subject, $body);
@@ -40,11 +40,11 @@ class RegistrationEmailService
             ? '<p><strong>Alasan:</strong> ' . htmlspecialchars($reason, ENT_QUOTES, 'UTF-8') . '</p>'
             : '';
 
-        $subject = 'Pendaftaran SIPKK Ditolak';
+        $subject = 'Pendaftaran Puskesmas Ditolak';
         $body = self::wrapHtml(
             'Pendaftaran Ditolak',
             '<p>Halo ' . htmlspecialchars($registration->nama_lengkap, ENT_QUOTES, 'UTF-8') . ',</p>' .
-            '<p>Mohon maaf, pengajuan akses SIPKK Anda belum dapat disetujui.</p>' .
+            '<p>Mohon maaf, pengajuan akses Puskesmas Anda belum dapat disetujui.</p>' .
             $reasonHtml
         );
 
@@ -59,17 +59,17 @@ class RegistrationEmailService
 
         $loginUrl = \yii\helpers\Url::to(['/site/login'], true);
         $loginLinkHtml = $loginUrl !== ''
-            ? '<p style="margin:20px 0;"><a href="' . htmlspecialchars($loginUrl, ENT_QUOTES, 'UTF-8') . '" style="display:inline-block;padding:10px 18px;background:#0f766e;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:bold;">Buka Dashboard Utama SIPKK</a></p>'
+            ? '<p style="margin:20px 0;"><a href="' . htmlspecialchars($loginUrl, ENT_QUOTES, 'UTF-8') . '" style="display:inline-block;padding:10px 18px;background:#0f766e;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:bold;">Buka Beranda Utama Puskesmas</a></p>'
             : '';
         $loginTextHtml = $loginUrl !== ''
-            ? '<p>Silakan kunjungi dashboard utama SIPKK melalui tautan berikut:<br><a href="' . htmlspecialchars($loginUrl, ENT_QUOTES, 'UTF-8') . '">' . htmlspecialchars($loginUrl, ENT_QUOTES, 'UTF-8') . '</a></p>'
+            ? '<p>Silakan kunjungi beranda utama Puskesmas melalui tautan berikut:<br><a href="' . htmlspecialchars($loginUrl, ENT_QUOTES, 'UTF-8') . '">' . htmlspecialchars($loginUrl, ENT_QUOTES, 'UTF-8') . '</a></p>'
             : '';
 
-        $subject = 'Akun SIPKK Anda Telah Dibuat';
+        $subject = 'Akun Puskesmas Anda Telah Dibuat';
         $body = self::wrapHtml(
             'Akun Berhasil Dibuat',
             '<p>Halo <strong>' . htmlspecialchars($displayName, ENT_QUOTES, 'UTF-8') . '</strong>,</p>' .
-            '<p>Akun Anda telah berhasil dibuat oleh admin/pengelola SIPKK dengan rincian login berikut:</p>' .
+            '<p>Akun Anda telah berhasil dibuat oleh admin/pengelola Puskesmas dengan rincian login berikut:</p>' .
             '<div style="background:#f1f5f9;padding:15px;border-radius:6px;margin:15px 0;border:1px solid #e2e8f0;font-family:monospace;">' .
             '<strong>Username/Email:</strong> ' . htmlspecialchars($user->username, ENT_QUOTES, 'UTF-8') . '<br>' .
             '<strong>Password:</strong> ' . htmlspecialchars($plainPassword, ENT_QUOTES, 'UTF-8') .
@@ -113,7 +113,7 @@ class RegistrationEmailService
         return '<div style="font-family:Arial,sans-serif;line-height:1.6;color:#243b53;">' .
             '<h2 style="color:#0f766e;">' . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . '</h2>' .
             $content .
-            '<p style="margin-top:24px;color:#829ab1;font-size:12px;">Email ini dikirim otomatis oleh SIPKK.</p>' .
+            '<p style="margin-top:24px;color:#829ab1;font-size:12px;">Email ini dikirim otomatis oleh Puskesmas.</p>' .
             '</div>';
     }
 }

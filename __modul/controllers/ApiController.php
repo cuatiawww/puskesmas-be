@@ -108,14 +108,17 @@ class ApiController extends BaseController
             return ['success' => false, 'message' => 'Username dan password wajib diisi.'];
         }
 
-        if (empty($captchaKey) || empty($captchaValue)) {
-            $response->statusCode = 400;
-            return ['success' => false, 'message' => 'Captcha wajib diisi.'];
-        }
+        $isDev = YII_ENV === 'dev' || YII_DEBUG;
+        if (!$isDev) {
+            if (empty($captchaKey) || empty($captchaValue)) {
+                $response->statusCode = 400;
+                return ['success' => false, 'message' => 'Captcha wajib diisi.'];
+            }
 
-        if (!$this->validateCaptcha($captchaKey, $captchaValue)) {
-            $response->statusCode = 400;
-            return ['success' => false, 'message' => 'Jawaban Captcha salah atau sudah kadaluarsa. Silakan coba lagi.'];
+            if (!$this->validateCaptcha($captchaKey, $captchaValue)) {
+                $response->statusCode = 400;
+                return ['success' => false, 'message' => 'Jawaban Captcha salah atau sudah kadaluarsa. Silakan coba lagi.'];
+            }
         }
 
         $user = User::findByUsername($username);
@@ -148,9 +151,9 @@ class ApiController extends BaseController
         $levelName = $this->getUserLevelName($user);
         $wilayahScope = $this->buildUserWilayahScope($user);
 
-        $secret = $_ENV['JWT_SECRET'] ?? 'kemkes_sipkk_jwt_secret_key_2026';
+        $secret = $_ENV['JWT_SECRET'] ?? 'kemkes_puskesmas_jwt_secret_key_2026';
         $payload = [
-            'iss' => 'sipkk-backend',
+            'iss' => 'puskesmas-backend',
             'iat' => time(),
             'exp' => time() + (3600 * 24), // Expire in 24 hours
             'sub' => $userId,
@@ -247,14 +250,17 @@ class ApiController extends BaseController
         $captchaKey = $data['captcha_key'] ?? null;
         $captchaValue = $data['captcha_value'] ?? null;
 
-        if (empty($captchaKey) || empty($captchaValue)) {
-            $response->statusCode = 400;
-            return ['success' => false, 'message' => 'Captcha wajib diisi.'];
-        }
+        $isDev = YII_ENV === 'dev' || YII_DEBUG;
+        if (!$isDev) {
+            if (empty($captchaKey) || empty($captchaValue)) {
+                $response->statusCode = 400;
+                return ['success' => false, 'message' => 'Captcha wajib diisi.'];
+            }
 
-        if (!$this->validateCaptcha($captchaKey, $captchaValue)) {
-            $response->statusCode = 400;
-            return ['success' => false, 'message' => 'Jawaban Captcha salah atau sudah kadaluarsa. Silakan coba lagi.'];
+            if (!$this->validateCaptcha($captchaKey, $captchaValue)) {
+                $response->statusCode = 400;
+                return ['success' => false, 'message' => 'Jawaban Captcha salah atau sudah kadaluarsa. Silakan coba lagi.'];
+            }
         }
 
         $model = new \app\models\RegisterMasyarakatForm();
@@ -734,7 +740,7 @@ class ApiController extends BaseController
             $authHeader = $matches[1];
         }
 
-        $secret = $_ENV['JWT_SECRET'] ?? 'kemkes_sipkk_jwt_secret_key_2026';
+        $secret = $_ENV['JWT_SECRET'] ?? 'kemkes_puskesmas_jwt_secret_key_2026';
         $payload = $this->decodeJwt($authHeader, $secret);
         if (!$payload) {
             $fallbackSecret = Yii::$app->request->cookieValidationKey ?: "kemkes!@#$%^&*()_api";
@@ -1112,7 +1118,7 @@ class ApiController extends BaseController
         $cipher = "aes-256-cbc";
         $secret = Yii::$app->request->cookieValidationKey;
         if (empty($secret)) {
-            $secret = "sipkk-secret-key-fallback-123456";
+            $secret = "puskesmas-secret-key-fallback-123456";
         }
         $ivlen = openssl_cipher_iv_length($cipher);
         $iv = openssl_random_pseudo_bytes($ivlen);
@@ -1175,6 +1181,9 @@ class ApiController extends BaseController
 
     private function validateCaptcha(?string $key, ?string $value): bool
     {
+        if (YII_ENV === 'dev' || YII_DEBUG) {
+            return true;
+        }
         if (empty($key) || empty($value)) {
             return false;
         }
@@ -1182,7 +1191,7 @@ class ApiController extends BaseController
             $cipher = "aes-256-cbc";
             $secret = Yii::$app->request->cookieValidationKey;
             if (empty($secret)) {
-                $secret = "sipkk-secret-key-fallback-123456";
+                $secret = "puskesmas-secret-key-fallback-123456";
             }
             $raw = base64_decode($key);
             $ivlen = openssl_cipher_iv_length($cipher);

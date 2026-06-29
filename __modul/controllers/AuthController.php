@@ -39,9 +39,9 @@ class AuthController extends BaseController
         $scope       = $this->buildUserWilayahScope($user);
 
         // Buat JWT token (expire 24 jam)
-        $secret  = $_ENV['JWT_SECRET'] ?? 'kemkes_sipkk_jwt_secret_key_2026';
+        $secret  = $_ENV['JWT_SECRET'] ?? 'kemkes_puskesmas_jwt_secret_key_2026';
         $payload = [
-            'iss'           => 'sipkk-backend',
+            'iss'           => 'puskesmas-backend',
             'iat'           => time(),
             'exp'           => time() + 86400,
             'sub'           => $userId,
