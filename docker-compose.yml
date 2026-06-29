@@ -1,64 +1,9 @@
+version: '2'
 services:
-  puskesmas-be:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        APP_UID: ${APP_UID:-1000}
-        APP_GID: ${APP_GID:-1000}
-    image: puskesmas-be
-    container_name: puskesmas-be
-    restart: unless-stopped
-    # ports:   # akses via nginx proxy (puskesmas-be.localhost:80)
-    #   - "8080:8080"
-    environment:
-      - TZ=Asia/Jakarta
-      - YII_ENV=prod
+  php:
+    image: yiisoftware/yii2-php:7.4-apache
     volumes:
-      - puskesmas_runtime:/var/www/html/runtime
-      - puskesmas_runtime_api:/var/www/html/runtime_api
-      - puskesmas_runtime_sessions:/var/www/html/runtime_sessions
-      - puskesmas_assets:/var/www/html/assets
-      - ./app_asset:/var/www/html/app_asset:ro
-      - ./uploads:/var/www/html/uploads
-      - puskesmas_tmp:/tmp
-      - puskesmas_nginx_cache:/var/cache/nginx
-      - puskesmas_nginx_run:/run/nginx
-      - ./vendor:/var/www/html/vendor:ro
-      - ./.env:/var/www/html/.env:ro
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro
-      - ./config/php/php.ini:/usr/local/etc/php/php.ini:ro
-      - ./logs/nginx:/var/log/nginx
-      - ./logs/php:/var/log/php
-      - ./logs/supervisor:/var/log/supervisord
-    networks:
-      - backend
-      - proxynet
-    read_only: true
-    security_opt:
-      - no-new-privileges:true
-    ulimits:
-      nofile:
-        soft: 65535
-        hard: 65535
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "2"
-
-volumes:
-  puskesmas_runtime:
-  puskesmas_runtime_api:
-  puskesmas_runtime_sessions:
-  puskesmas_assets:
-  puskesmas_tmp:
-  puskesmas_nginx_run:
-  puskesmas_nginx_cache:
-
-networks:
-  backend:
-    external: true
-  proxynet:
-    external: true
+      - ~/.composer-docker/cache:/root/.composer/cache:delegated
+      - ./:/app:delegated
+    ports:
+      - '8000:80'
