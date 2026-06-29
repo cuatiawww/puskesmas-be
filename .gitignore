@@ -57,3 +57,6 @@ runtime_sessions/
 # user uploads
 /uploads
 /__modul/db.txt
+
+# runtime
+/logs
