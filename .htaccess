@@ -1,0 +1,21 @@
+
+# ── CORS Headers untuk endpoint /api/* yang diakses langsung dari browser ────────
+# Set header ini di level Apache SEBELUM Yii2 dijalankan, agar OPTIONS preflight
+# (yang dikirim browser sebelum POST /api/login) tidak diblokir.
+
+<IfModule mod_headers.c>
+    SetEnvIf Request_Method OPTIONS IsOptions
+    Header always set Access-Control-Allow-Origin "*" env=IsOptions
+    Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS" env=IsOptions
+    Header always set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With" env=IsOptions
+    Header always set Access-Control-Max-Age "86400" env=IsOptions
+</IfModule>
+
+# Tangani OPTIONS preflight langsung — return 204 tanpa masuk PHP/Yii2
+RewriteEngine on
+RewriteCond %{REQUEST_METHOD} OPTIONS
+RewriteRule ^(.*)$ - [R=204,L]
+
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule . index.php [L]

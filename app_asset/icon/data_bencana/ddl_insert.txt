@@ -1,0 +1,64 @@
+-- ppk_puskris_new.master_dt_bencana definition
+
+CREATE TABLE `master_dt_bencana` (
+  `id_master_dt_bencana` int(11) NOT NULL AUTO_INCREMENT,
+  `kd_bencana` varchar(255) NOT NULL,
+  `jenis_bencana` int(11) NOT NULL,
+  `nama_bencana` varchar(255) NOT NULL,
+  `nama_bencana_eng` varchar(255) NOT NULL,
+  `jml_dokter` int(11) NOT NULL,
+  `jml_perawat` int(11) NOT NULL,
+  `jml_perahu_karet` int(11) NOT NULL,
+  `jml_tenda` int(11) NOT NULL,
+  `keterangan` varchar(255) NOT NULL,
+  `nomor` varchar(255) NOT NULL,
+  `icon` varchar(255) NOT NULL,
+  `graph_color` varchar(255) NOT NULL,
+  PRIMARY KEY (`id_master_dt_bencana`),
+  KEY `index_master_dt_bencana` (`kd_bencana`,`jenis_bencana`,`nama_bencana`,`icon`)
+) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+INSERT INTO master_dt_bencana (id_master_dt_bencana, kd_bencana, jenis_bencana, nama_bencana, nama_bencana_eng, jml_dokter, jml_perawat, jml_perahu_karet, jml_tenda, keterangan, nomor, icon, graph_color) VALUES(3, '1.01', 1, 'Banjir', 'Flood', 12, 13, 20, 5, 'Banjir akibat luapan sungai, banjir akibat cuaca ekstrim, banjir rob, banjir lahar dingin dll (selain banjir bandang)', '01
+                              ', 'banjir.png', '');
+INSERT INTO master_dt_bencana (id_master_dt_bencana, kd_bencana, jenis_bencana, nama_bencana, nama_bencana_eng, jml_dokter, jml_perawat, jml_perahu_karet, jml_tenda, keterangan, nomor, icon, graph_color) VALUES(5, '1.02', 1, 'Letusan Gunung Api', 'Volcano Eruption', 50, 50, 50, 50, 'Letusan Gunung Api', '02
+                              ', 'letusangnapi.png', '');
+INSERT INTO master_dt_bencana (id_master_dt_bencana, kd_bencana, jenis_bencana, nama_bencana, nama_bencana_eng, jml_dokter, jml_perawat, jml_perahu_karet, jml_tenda, keterangan, nomor, icon, graph_color) VALUES(6, '1.03', 1, 'Gempa Bumi', 'Earthquake', 0, 0, 0, 0, 'Gempa Bumi', '03
+                              ', 'gempabumi.png', '');
+INSERT INTO master_dt_bencana (id_master_dt_bencana, kd_bencana, jenis_bencana, nama_bencana, nama_bencana_eng, jml_dokter, jml_perawat, jml_perahu_karet, jml_tenda, keterangan, nomor, icon, graph_color) VALUES(7, '1.04', 1, 'Gempa Bumi dan Tsunami', 'Earthquake and Tsunami', 0, 0, 0, 0, 'Gempa Bumi yang disertai Tsunami', '04
+                              ', 'gempabumitsunami.png', '');
+INSERT INTO master_dt_bencana (id_master_dt_bencana, kd_bencana, jenis_bencana, nama_bencana, nama_bencana_eng, jml_dokter, jml_perawat, jml_perahu_karet, jml_tenda, keterangan, nomor, icon, graph_color) VALUES(8, '1.05', 1, 'Tanah Longsor', 'Landslides', 0, 0, 0, 0, 'Tanah Longsor', '05
+                              ', 'tanahlongsor.png', '');
+INSERT INTO master_dt_bencana (id_master_dt_bencana, kd_bencana, jenis_bencana, nama_bencana, nama_bencana_eng, jml_dokter, jml_perawat, jml_perahu_karet, jml_tenda, keterangan, nomor, icon, graph_color) VALUES(9, '1.06', 1, 'Banjir Bandang', 'Flash Flood', 0, 0, 0, 0, 'Banjir Bandang', '06
+                              ', 'banjirbandang.png', '');
+INSERT INTO master_dt_bencana (id_master_dt_bencana, kd_bencana, jenis_bencana, nama_bencana, nama_bencana_eng, jml_dokter, jml_perawat, jml_perahu_karet, jml_tenda, keterangan, nomor, icon, graph_color) VALUES(10, '1.07', 1, 'Kekeringan', 'Drought', 0, 0, 0, 0, 'Kekeringan', '07
+                              ', 'kekeringan.png', '');
+INSERT INTO master_dt_bencana (id_master_dt_bencana, kd_bencana, jenis_bencana, nama_bencana, nama_bencana_eng, jml_dokter, jml_perawat, jml_perahu_karet, jml_tenda, keterangan, nomor, icon, graph_color) VALUES(11, '2.01', 2, 'Kebakaran', 'Fire', 0, 0, 0, 0, 'Kebakaran permukiman, pertokoan, pasar, bangunan dll (selain kebakaran hutan dan kebakaran akibat kecelakaan industri)', '01
+                              ', 'kebakaran.png', '');
+INSERT INTO master_dt_bencana (id_master_dt_bencana, kd_bencana, jenis_bencana, nama_bencana, nama_bencana_eng, jml_dokter, jml_perawat, jml_perahu_karet, jml_tenda, keterangan, nomor, icon, graph_color) VALUES(12, '2.02', 2, 'Kebakaran Hutan dan Lahan', 'Forest and Field Fires', 0, 0, 0, 0, 'Kebakaran Hutan', '02
+                              ', 'karhutla.png', '');
+INSERT INTO master_dt_bencana (id_master_dt_bencana, kd_bencana, jenis_bencana, nama_bencana, nama_bencana_eng, jml_dokter, jml_perawat, jml_perahu_karet, jml_tenda, keterangan, nomor, icon, graph_color) VALUES(13, '1.08', 1, 'Angin Puting Beliung', 'Windstorm', 0, 0, 0, 0, 'Angin Puting Beliung', '08
+                              ', 'anginputingbeliung.png', '');
+INSERT INTO master_dt_bencana (id_master_dt_bencana, kd_bencana, jenis_bencana, nama_bencana, nama_bencana_eng, jml_dokter, jml_perawat, jml_perahu_karet, jml_tenda, keterangan, nomor, icon, graph_color) VALUES(14, '1.09', 1, 'Gelombang Pasang/Badai', 'Tidal Wave', 0, 0, 0, 0, 'Gelombang Pasang akibat badai di daerah pesisir.', '09
+                              ', 'gelombangpasangbadai.png', '');
+INSERT INTO master_dt_bencana (id_master_dt_bencana, kd_bencana, jenis_bencana, nama_bencana, nama_bencana_eng, jml_dokter, jml_perawat, jml_perahu_karet, jml_tenda, keterangan, nomor, icon, graph_color) VALUES(16, '2.03', 2, 'Kecelakaan Transportasi Darat', 'Transportation Accident', 0, 0, 0, 0, 'Kecelakaan Transportasi Darat', '03
+                              ', 'kecelakaantrans.png', '');
+INSERT INTO master_dt_bencana (id_master_dt_bencana, kd_bencana, jenis_bencana, nama_bencana, nama_bencana_eng, jml_dokter, jml_perawat, jml_perahu_karet, jml_tenda, keterangan, nomor, icon, graph_color) VALUES(17, '2.04', 2, 'Kecelakaan Industri', 'Industry Accident', 0, 0, 0, 0, 'Kecelakaan Industri', '04
+                              ', 'kecelakaanindustrial.png', '');
+INSERT INTO master_dt_bencana (id_master_dt_bencana, kd_bencana, jenis_bencana, nama_bencana, nama_bencana_eng, jml_dokter, jml_perawat, jml_perahu_karet, jml_tenda, keterangan, nomor, icon, graph_color) VALUES(18, '2.05', 2, 'Penyakit ', 'Extraordinary Event (KLB) - Disease', 0, 0, 0, 0, 'KLB akibat penyakit', '05
+                              ', 'klbpenyakit.png', '');
+INSERT INTO master_dt_bencana (id_master_dt_bencana, kd_bencana, jenis_bencana, nama_bencana, nama_bencana_eng, jml_dokter, jml_perawat, jml_perahu_karet, jml_tenda, keterangan, nomor, icon, graph_color) VALUES(19, '3.01', 3, 'Konflik Sosial atau Kerusuhan Sosial', 'Social Conflict', 0, 0, 0, 0, 'Konflik Sosial atau Kerusuhan Sosial', '01
+                              ', 'konfliksosial.png', '');
+INSERT INTO master_dt_bencana (id_master_dt_bencana, kd_bencana, jenis_bencana, nama_bencana, nama_bencana_eng, jml_dokter, jml_perawat, jml_perahu_karet, jml_tenda, keterangan, nomor, icon, graph_color) VALUES(20, '3.03', 3, 'Aksi Teror dan Sabotase', 'Terror Act and Sabotasm', 0, 0, 0, 0, 'Aksi Teror dan Sabotase', '03
+                              ', '6737sabotase.png', '');
+INSERT INTO master_dt_bencana (id_master_dt_bencana, kd_bencana, jenis_bencana, nama_bencana, nama_bencana_eng, jml_dokter, jml_perawat, jml_perahu_karet, jml_tenda, keterangan, nomor, icon, graph_color) VALUES(22, '2.08', 2, 'Keracunan ', 'Extraordinary Event (KLB) - Poisoned', 0, 0, 0, 0, 'keracunan makanan, minuman, gas, dll.', '08
+                              ', 'klbkeracunan.png', '');
+INSERT INTO master_dt_bencana (id_master_dt_bencana, kd_bencana, jenis_bencana, nama_bencana, nama_bencana_eng, jml_dokter, jml_perawat, jml_perahu_karet, jml_tenda, keterangan, nomor, icon, graph_color) VALUES(25, '2.06', 2, 'Gagal Teknologi', 'Failed Technology', 0, 0, 0, 0, 'Gagal Teknologi', '06
+                              ', 'gagalteknologi.png', '');
+INSERT INTO master_dt_bencana (id_master_dt_bencana, kd_bencana, jenis_bencana, nama_bencana, nama_bencana_eng, jml_dokter, jml_perawat, jml_perahu_karet, jml_tenda, keterangan, nomor, icon, graph_color) VALUES(28, '1.13', 1, 'Banjir dan Tanah Longsor', 'Flood and Landslides', 0, 0, 0, 0, 'Banjir yang disertai Tanah Longsor', '13
+                              ', 'banjirdantanahlongsor.png', '');
+INSERT INTO master_dt_bencana (id_master_dt_bencana, kd_bencana, jenis_bencana, nama_bencana, nama_bencana_eng, jml_dokter, jml_perawat, jml_perahu_karet, jml_tenda, keterangan, nomor, icon, graph_color) VALUES(29, '2.09', 2, 'Wabah Penyakit (Epidemi - Pandemi)', 'Epidemic of Disease', 0, 0, 0, 0, 'Wabah Penyakit (Epidemi - Pandemi)', '09
+                              ', 'wabahpenyakit.png', '');
+INSERT INTO master_dt_bencana (id_master_dt_bencana, kd_bencana, jenis_bencana, nama_bencana, nama_bencana_eng, jml_dokter, jml_perawat, jml_perahu_karet, jml_tenda, keterangan, nomor, icon, graph_color) VALUES(33, '1.14', 1, 'Tsunami', '', 0, 0, 0, 0, 'Tsunami', '14
+                              ', '6119tsunami.png', '');
+INSERT INTO master_dt_bencana (id_master_dt_bencana, kd_bencana, jenis_bencana, nama_bencana, nama_bencana_eng, jml_dokter, jml_perawat, jml_perahu_karet, jml_tenda, keterangan, nomor, icon, graph_color) VALUES(34, '2.10', 2, 'Kecelakaan Transportasi Laut-Udara', '', 0, 0, 0, 0, 'Kecelakaan Transportasi Laut', '10
+                              ', '6353ktl.png', '');

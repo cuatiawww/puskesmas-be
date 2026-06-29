@@ -1,0 +1,15 @@
+stages:
+  - deploy
+
+deploy_staging:
+  stage: deploy
+  environment: bui
+  only:
+    - main
+  tags:
+    - build
+  variables:
+    GIT_STRATEGY: none
+    GIT_CLEAN_FLAGS: -ffdx   
+  script:
+    - bash "/home/mediacipta/domains/sipkk-new.mediaciptainformasi.co.id/sipkk-new.sh"
