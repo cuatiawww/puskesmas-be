@@ -1,5 +1,7 @@
 <?php
 
+error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
+
 $params = require __DIR__ . '/params.php';
 $db = require __DIR__ . '/db.php';
 $db_user = require __DIR__ . '/db_user.php';
@@ -42,7 +44,7 @@ $config = [
     'id' => 'basic',    
     'bootstrap' => ['log'],
     'basePath' => dirname(__DIR__) . '/__modul',
-    'runtimePath' => dirname(dirname(dirname(__DIR__))) . '/runtime_backend',
+    'runtimePath' => dirname(__DIR__) . '/runtime',
     'vendorPath' => dirname(__DIR__) . '/vendor',
     'language' => 'id',
     'aliases' => [
