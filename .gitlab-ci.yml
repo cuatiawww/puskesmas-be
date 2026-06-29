@@ -1,15 +1,17 @@
 stages:
   - deploy
 
-deploy_staging:
+deploy:
   stage: deploy
-  environment: bui
   only:
     - main
   tags:
     - build
   variables:
     GIT_STRATEGY: none
-    GIT_CLEAN_FLAGS: -ffdx   
   script:
-    - bash "/home/mediacipta/domains/sipkk-new.mediaciptainformasi.co.id/sipkk-new.sh"
+    - cd $DEPLOY_DIR
+    - git -C git pull origin main
+    - if git -C git diff --name-only HEAD~1 HEAD 2>/dev/null | grep -q composer.json; then docker run --rm -v "$PWD/git:/app" -w /app composer:2 sh -c "git config --global --add safe.directory /app && composer install --no-dev --optimize-autoloader --no-blocking --ignore-platform-reqs"; fi
+    - docker compose -f docker-compose.yml build
+    - docker compose -f docker-compose.yml up -d
