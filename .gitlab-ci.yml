@@ -10,7 +10,7 @@ deploy:
   variables:
     GIT_STRATEGY: none
   script:
-    - cd $DEPLOY_DIR
+    - cd $DEPLOY_DIR_STAGING
     - git -C git pull origin main
     - if git -C git diff --name-only HEAD~1 HEAD 2>/dev/null | grep -q composer.json; then docker run --rm -v "$PWD/git:/app" -w /app composer:2 sh -c "git config --global --add safe.directory /app && composer install --no-dev --optimize-autoloader --no-blocking --ignore-platform-reqs"; fi
     - docker compose -f docker-compose.yml build

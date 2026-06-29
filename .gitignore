@@ -49,3 +49,11 @@ tests/_support/_generated
 
 #vagrant folder
 /.vagrant
+
+# runtime
+runtime_api/
+runtime_sessions/
+
+# user uploads
+/uploads
+/__modul/db.txt
