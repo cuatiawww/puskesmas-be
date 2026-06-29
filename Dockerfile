@@ -79,4 +79,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
 WORKDIR /var/www/html
 EXPOSE 8080
 
-CMD ["/bin/sh", "-c", "chown app:app /var/www/html/runtime /var/www/html/runtime_api /var/www/html/runtime_sessions /var/www/html/assets /var/www/html/app_asset /var/www/html/uploads /tmp /var/cache/nginx /run/nginx 2>/dev/null || true; exec su-exec app /usr/bin/supervisord -c /etc/supervisord.conf -n"]
+CMD ["/bin/sh", "-c", "chown app:app /var/www/html/runtime /var/www/html/runtime_api /var/www/html/runtime_sessions /var/www/html/assets /var/www/html/app_asset /var/www/html/uploads /tmp /var/cache/nginx /run/nginx 2>/dev/null || true; chmod 755 /run/nginx; exec su-exec app /usr/bin/supervisord -c /etc/supervisord.conf -n"]
