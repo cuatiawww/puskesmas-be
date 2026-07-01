@@ -1,4 +1,4 @@
-<?php
+  <?php
 
 /** @var yii\web\View $this */
 /** @var string $content */
@@ -136,6 +136,17 @@ ul.pagination > li.next > a{
     color: #176b87 !important;
 }
 
+@media (min-width: 1025px) {
+    .pc-sidebar {
+        width: 285px !important;
+    }
+    .pc-container {
+        margin-left: 285px !important;
+    }
+    .pc-header {
+        left: 285px !important;
+    }
+}
 </style>
 	
 	

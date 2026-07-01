@@ -103,6 +103,20 @@ function normalizeRoute($route) {
   return $r; // hasil: "pemeriksaan/get-list-history"
 }
 
+function getMenuUrl($route) {
+  $r = trim((string)$route);
+  if ($r === '' || $r === '#' || $r === '#!') {
+    return $r;
+  }
+  if (preg_match('~^(https?:)?//~i', $r)) {
+    return $r;
+  }
+  if (strpos($r, '/') === 0) {
+    return $r;
+  }
+  $cleanRoute = '/' . ltrim($r, '/');
+  return Url::to([$cleanRoute]);
+}
 ?>
 
 <nav class="pc-sidebar">
@@ -200,7 +214,7 @@ function normalizeRoute($route) {
                 <?= $hasChildren ? 'pc-hasmenu' : '' ?>
                 <?= $trigger ? 'pc-trigger' : '' ?>
             ">
-              <a href="<?php echo $hasChildren ? '#!' : htmlspecialchars($subModul['route']); ?>" class="pc-link">
+              <a href="<?php echo $hasChildren ? '#!' : htmlspecialchars(getMenuUrl($subModul['route'])); ?>" class="pc-link">
                 <span class="pc-micon">
                   <i class="<?php echo htmlspecialchars($subModul['icon']); ?>"></i>
                 </span>
@@ -217,7 +231,7 @@ function normalizeRoute($route) {
                     $isChildActive = ($childRoute !== '' && $childRoute === $currentRoute);
                   ?>
                   <li class="pc-item <?= $isChildActive ? 'active' : '' ?>">
-                    <a class="pc-link" href="<?php echo htmlspecialchars($child['route']); ?>">
+                    <a class="pc-link" href="<?php echo htmlspecialchars(getMenuUrl($child['route'])); ?>">
                       <?php echo htmlspecialchars($child['label']); ?>
                     </a>
                   </li>

@@ -63,6 +63,9 @@ class ApiController extends BaseController
             'captcha',
             'bencana-stats',
             'wilayah-geojson',
+            'dashboard-stats',
+            'dashboard-charts',
+            'top-diseases',
         ];
     }
 
@@ -76,6 +79,12 @@ class ApiController extends BaseController
             'wilayah-geojson',
             'wilayahgeojson',
             'searchregion',
+            'dashboard-stats',
+            'dashboardstats',
+            'dashboard-charts',
+            'dashboardcharts',
+            'top-diseases',
+            'topdiseases',
         ], true);
     }
 
@@ -1216,5 +1225,193 @@ class ApiController extends BaseController
         } catch (\Throwable $e) {
             return false;
         }
+    }
+
+    public function actionDashboardStats()
+    {
+        $response = Yii::$app->response;
+        $response->format = Response::FORMAT_JSON;
+        
+        $db = Yii::$app->db;
+        
+        // 1. Total Puskesmas
+        $totalPuskesmas = (int)$db->createCommand("SELECT COUNT(*) FROM public.puskesmas_profile WHERE status_aktif = true")->queryScalar();
+        
+        // 2. Total Penduduk & Beban Kerja
+        $totalPenduduk = (int)$db->createCommand("SELECT SUM(jumlah_penduduk) FROM public.puskesmas_profile WHERE status_aktif = true")->queryScalar();
+        $bebanKerja = $totalPuskesmas > 0 ? (int)($totalPenduduk / $totalPuskesmas) : 0;
+        
+        // 3. Ketersediaan Dokter & Nakes (Latest snapshots per Puskesmas)
+        $latestKinerjaQuery = "
+            SELECT DISTINCT ON (puskesmas_id) * 
+            FROM public.puskesmas_kinerja 
+            ORDER BY puskesmas_id, tahun DESC, periode_nilai DESC
+        ";
+        
+        $stats = $db->createCommand("
+            WITH latest_kinerja AS ($latestKinerjaQuery)
+            SELECT 
+                SUM(CASE WHEN dokter_tersedia = true THEN 1 ELSE 0 END) as dokter_lengkap,
+                SUM(CASE WHEN nakes_9_jenis = true THEN 1 ELSE 0 END) as nakes_9_lengkap,
+                SUM(CASE WHEN persen_alkes >= 60.0 THEN 1 ELSE 0 END) as alkes_60_plus,
+                SUM(CASE WHEN persen_spa >= 60.0 THEN 1 ELSE 0 END) as spa_60_plus,
+                SUM(CASE WHEN jumlah_obat_esensial >= 40 THEN 1 ELSE 0 END) as obat_40_plus
+            FROM latest_kinerja
+        ")->queryOne();
+        
+        // 4. Kategori Ranap vs Non Ranap
+        $ranapStats = $db->createCommand("
+            SELECT status_pelayanan, COUNT(*) as jumlah
+            FROM public.puskesmas_profile
+            WHERE status_aktif = true
+            GROUP BY status_pelayanan
+        ")->queryAll();
+        
+        // 5. Kategori Wilayah & Jenis
+        $wilayahStats = $db->createCommand("
+            SELECT kategori_wilayah, COUNT(*) as jumlah
+            FROM public.puskesmas_profile
+            WHERE status_aktif = true
+            GROUP BY kategori_wilayah
+        ")->queryAll();
+        
+        // 6. Jumlah Kecamatan & Kecamatan Tanpa Puskesmas
+        $totalKecamatan = (int)$db->createCommand("SELECT COUNT(*) FROM public.wilayah_kecamatan")->queryScalar();
+        $kecamatanDenganPuskesmas = (int)$db->createCommand("SELECT COUNT(DISTINCT kecamatan_id) FROM public.puskesmas_profile WHERE status_aktif = true")->queryScalar();
+        $kecamatanTanpaPuskesmas = max(0, $totalKecamatan - $kecamatanDenganPuskesmas);
+        
+        // 7. Tabel Provinsi Data (DLI & Tata Kelola)
+        $provinsiList = $db->createCommand("
+            WITH latest_kinerja AS ($latestKinerjaQuery)
+            SELECT 
+                p.code as provinsi_code,
+                p.name as provinsi_name,
+                COUNT(prof.id) as jumlah_puskesmas,
+                SUM(CASE WHEN k.status_blud = true THEN 1 ELSE 0 END) as blud,
+                SUM(CASE WHEN k.status_ilp = true THEN 1 ELSE 0 END) as ilp,
+                SUM(CASE WHEN k.skor_pkp_total >= 80.0 THEN 1 ELSE 0 END) as pkp_baik,
+                SUM(CASE WHEN k.nakes_9_jenis = true THEN 1 ELSE 0 END) as nakes_9,
+                SUM(CASE WHEN k.persen_alkes >= 60.0 THEN 1 ELSE 0 END) as alkes_60
+            FROM public.wilayah_provinsi p
+            LEFT JOIN public.puskesmas_profile prof ON prof.provinsi_id = p.code AND prof.status_aktif = true
+            LEFT JOIN latest_kinerja k ON k.puskesmas_id = prof.id
+            GROUP BY p.code, p.name
+            ORDER BY p.name ASC
+        ")->queryAll();
+
+        return [
+            'success' => true,
+            'summary' => [
+                'total_puskesmas' => $totalPuskesmas,
+                'total_penduduk' => $totalPenduduk,
+                'beban_kerja_rasio' => $bebanKerja,
+                'dokter_lengkap_count' => (int)($stats['dokter_lengkap'] ?? 0),
+                'nakes_9_lengkap_count' => (int)($stats['nakes_9_lengkap'] ?? 0),
+                'alkes_60_plus_count' => (int)($stats['alkes_60_plus'] ?? 0),
+                'spa_60_plus_count' => (int)($stats['spa_60_plus'] ?? 0),
+                'obat_40_plus_count' => (int)($stats['obat_40_plus'] ?? 0),
+                'total_kecamatan' => $totalKecamatan,
+                'kecamatan_tanpa_puskesmas' => $kecamatanTanpaPuskesmas,
+            ],
+            'kategori_ranap' => $ranapStats,
+            'kategori_wilayah' => $wilayahStats,
+            'provinsi_data' => $provinsiList,
+        ];
+    }
+
+    public function actionDashboardCharts()
+    {
+        $response = Yii::$app->response;
+        $response->format = Response::FORMAT_JSON;
+        
+        $db = Yii::$app->db;
+        $latestKinerjaQuery = "
+            SELECT DISTINCT ON (puskesmas_id) * 
+            FROM public.puskesmas_kinerja 
+            ORDER BY puskesmas_id, tahun DESC, periode_nilai DESC
+        ";
+        
+        // 1. Pie BLUD
+        $blud = $db->createCommand("
+            WITH latest_kinerja AS ($latestKinerjaQuery)
+            SELECT 
+                SUM(CASE WHEN status_blud = true THEN 1 ELSE 0 END) as blud,
+                SUM(CASE WHEN status_blud = false OR status_blud IS NULL THEN 1 ELSE 0 END) as non_blud
+            FROM latest_kinerja
+        ")->queryOne();
+        
+        // 2. Pie ILP
+        $ilp = $db->createCommand("
+            WITH latest_kinerja AS ($latestKinerjaQuery)
+            SELECT 
+                SUM(CASE WHEN status_ilp = true THEN 1 ELSE 0 END) as ilp,
+                SUM(CASE WHEN status_ilp = false OR status_ilp IS NULL THEN 1 ELSE 0 END) as non_ilp
+            FROM latest_kinerja
+        ")->queryOne();
+        
+        // 3. Pie PKP
+        $pkp = $db->createCommand("
+            WITH latest_kinerja AS ($latestKinerjaQuery)
+            SELECT 
+                SUM(CASE WHEN skor_pkp_total >= 80.0 THEN 1 ELSE 0 END) as baik,
+                SUM(CASE WHEN skor_pkp_total >= 60.0 AND skor_pkp_total < 80.0 THEN 1 ELSE 0 END) as cukup,
+                SUM(CASE WHEN skor_pkp_total < 60.0 OR skor_pkp_total IS NULL THEN 1 ELSE 0 END) as kurang
+            FROM latest_kinerja
+        ")->queryOne();
+        
+        // 4. Realisasi BOK & Insentif UKM (aggregate by year)
+        $pembiayaan = $db->createCommand("
+            SELECT 
+                tahun,
+                SUM(COALESCE(alokasi_bok, 0)) as alokasi_bok,
+                SUM(COALESCE(realisasi_bok, 0)) as realisasi_bok,
+                SUM(COALESCE(realisasi_insentif_ukm, 0)) as realisasi_insentif_ukm
+            FROM public.puskesmas_kinerja
+            GROUP BY tahun
+            ORDER BY tahun ASC
+        ")->queryAll();
+        
+        return [
+            'success' => true,
+            'blud' => [
+                'blud' => (int)($blud['blud'] ?? 0),
+                'non_blud' => (int)($blud['non_blud'] ?? 0),
+            ],
+            'ilp' => [
+                'ilp' => (int)($ilp['ilp'] ?? 0),
+                'non_ilp' => (int)($ilp['non_ilp'] ?? 0),
+            ],
+            'pkp' => [
+                'baik' => (int)($pkp['baik'] ?? 0),
+                'cukup' => (int)($pkp['cukup'] ?? 0),
+                'kurang' => (int)($pkp['kurang'] ?? 0),
+            ],
+            'pembiayaan' => $pembiayaan,
+        ];
+    }
+
+    public function actionTopDiseases()
+    {
+        $response = Yii::$app->response;
+        $response->format = Response::FORMAT_JSON;
+        
+        $db = Yii::$app->db;
+        $data = $db->createCommand("
+            SELECT nama_penyakit, SUM(jumlah_kasus) as total_kasus
+            FROM public.puskesmas_penyakit
+            GROUP BY nama_penyakit
+            ORDER BY total_kasus DESC
+            LIMIT 10
+        ")->queryAll();
+        
+        foreach ($data as &$row) {
+            $row['total_kasus'] = (int)$row['total_kasus'];
+        }
+        unset($row);
+        
+        return [
+            'success' => true,
+            'data' => $data,
+        ];
     }
 }
