@@ -35,10 +35,24 @@ class SystemSetting extends \yii\db\ActiveRecord
             [['key', 'label'], 'required'],
             [['value'], 'string'],
             [['created_at', 'updated_at'], 'safe'],
-            [['key', 'type', 'category'], 'string', 'max' => 100],
+            [['key'], 'string', 'max' => 100],
+            [['type', 'category'], 'string', 'max' => 50],
             [['label'], 'string', 'max' => 255],
             [['key'], 'unique'],
         ];
+    }
+
+    /**
+     * Auto-set updated_at on every save so Yii detects dirty state
+     * and PostgreSQL actually runs the UPDATE query.
+     */
+    public function beforeSave($insert)
+    {
+        if (parent::beforeSave($insert)) {
+            $this->updated_at = date('Y-m-d H:i:s');
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -47,12 +61,12 @@ class SystemSetting extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => 'ID',
-            'key' => 'Key',
-            'value' => 'Value',
-            'label' => 'Label',
-            'type' => 'Type',
-            'category' => 'Category',
+            'id'         => 'ID',
+            'key'        => 'Key',
+            'value'      => 'Value',
+            'label'      => 'Label',
+            'type'       => 'Type',
+            'category'   => 'Category',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];
