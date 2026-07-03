@@ -1,0 +1,523 @@
+{
+	"info": {
+		"_postman_id": "8b51d459-7b64-4e9b-b0b2-38600d832e8f",
+		"name": "Puskesmas Backend API",
+		"description": "Postman Collection untuk testing API Puskesmas Backend (Hosted & Local).",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Public Endpoints",
+			"item": [
+				{
+					"name": "System Settings",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/system-settings",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"system-settings"
+							]
+						},
+						"description": "Mendapatkan konfigurasi umum sistem (seperti logo, background, dll)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Captcha",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/captcha",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"captcha"
+							]
+						},
+						"description": "Mendapatkan captcha image (base64) dan captcha key untuk login/registrasi."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Regions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/regions?province_id=&kabupaten_id=&kecamatan_id=",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"regions"
+							],
+							"query": [
+								{
+									"key": "province_id",
+									"value": "",
+									"description": "Kosongkan untuk list semua Provinsi. Isi ID Provinsi untuk list Kabupaten."
+								},
+								{
+									"key": "kabupaten_id",
+									"value": "",
+									"description": "Isi ID Kabupaten untuk list Kecamatan."
+								},
+								{
+									"key": "kecamatan_id",
+									"value": "",
+									"description": "Isi ID Kecamatan untuk list Desa."
+								}
+							]
+						},
+						"description": "Mendapatkan list wilayah berjenjang (Provinsi, Kabupaten, Kecamatan, Desa)."
+					},
+					"response": []
+				},
+				{
+					"name": "Search Region",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/search-region?q=bogor",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"search-region"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "bogor",
+									"description": "Kata kunci pencarian wilayah"
+								}
+							]
+						},
+						"description": "Mencari wilayah (Provinsi, Kabupaten, Kecamatan, Desa) berdasarkan kata kunci."
+					},
+					"response": []
+				},
+				{
+					"name": "Bencana Stats",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/bencana-stats?province=&kabupaten=",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"bencana-stats"
+							],
+							"query": [
+								{
+									"key": "province",
+									"value": "",
+									"description": "Filter nama provinsi (opsional)"
+								},
+								{
+									"key": "kabupaten",
+									"value": "",
+									"description": "Filter nama kabupaten (opsional)"
+								}
+							]
+						},
+						"description": "Mendapatkan statistik kebencanaan beserta marker lokasinya."
+					},
+					"response": []
+				},
+				{
+					"name": "Wilayah GeoJSON",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/wilayah-geojson?level=provinsi&province=",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"wilayah-geojson"
+							],
+							"query": [
+								{
+									"key": "level",
+									"value": "provinsi",
+									"description": "'provinsi' atau 'kabupaten'"
+								},
+								{
+									"key": "province",
+									"value": "",
+									"description": "Filter provinsi jika level = kabupaten (opsional)"
+								}
+							]
+						},
+						"description": "Mendapatkan data GeoJSON batas wilayah peta."
+					},
+					"response": []
+				},
+				{
+					"name": "Dashboard Stats",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard-stats",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"dashboard-stats"
+							]
+						},
+						"description": "Mendapatkan summary statistik kinerja puskesmas nasional."
+					},
+					"response": []
+				},
+				{
+					"name": "Dashboard Charts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard-charts",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"dashboard-charts"
+							]
+						},
+						"description": "Mendapatkan data chart dashboard (BLUD, ILP, PKP, Pembiayaan)."
+					},
+					"response": []
+				},
+				{
+					"name": "Top Diseases",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/top-diseases",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"top-diseases"
+							]
+						},
+						"description": "Mendapatkan data 10 penyakit terbanyak."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Auth & Registration",
+			"item": [
+				{
+					"name": "Register Account",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"kategori_akses\": \"Masyarakat\",\n  \"nama_lengkap\": \"Jane Doe\",\n  \"username\": \"janedoe\",\n  \"email\": \"janedoe@mailinator.com\",\n  \"telp\": \"081234567890\",\n  \"nama_institusi\": \"Institusi Test\",\n  \"pekerjaan_posisi\": \"Staff\",\n  \"alamat_user\": \"Jl. Perintis Kemerdekaan No. 10\",\n  \"provinsi_id\": 32,\n  \"kabupaten_id\": 3201,\n  \"tujuan_akses\": \"Penelitian/Studi\",\n  \"captcha_key\": \"isi_key_dari_api_captcha\",\n  \"captcha_value\": \"isi_jawaban_captcha\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"register"
+							]
+						},
+						"description": "Melakukan registrasi akun masyarakat baru."
+					},
+					"response": []
+				},
+				{
+					"name": "Verify Register OTP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"registration_id\": 1,\n  \"otp\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/verify-register-otp",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"verify-register-otp"
+							]
+						},
+						"description": "Verifikasi kode OTP pendaftaran yang dikirim lewat email."
+					},
+					"response": []
+				},
+				{
+					"name": "Resend Register OTP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"registration_id\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/resend-register-otp",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"resend-register-otp"
+							]
+						},
+						"description": "Kirim ulang OTP pendaftaran jika belum diterima."
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.success && jsonData.token) {",
+									"        pm.environment.set(\"token\", jsonData.token);",
+									"        console.log(\"Token JWT berhasil disimpan ke environment: \" + jsonData.token);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"superadmin\",\n  \"password\": \"superadmin123\",\n  \"captcha_key\": \"\",\n  \"captcha_value\": \"\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"login"
+							]
+						},
+						"description": "Login ke sistem menggunakan username dan password. Jika di host production, captcha wajib diisi."
+					},
+					"response": []
+				},
+				{
+					"name": "Forgot Password Request",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"janedoe@mailinator.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/forgot-password-request",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"forgot-password-request"
+							]
+						},
+						"description": "Request reset password OTP ke email."
+					},
+					"response": []
+				},
+				{
+					"name": "Forgot Password Verify & Reset",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"janedoe@mailinator.com\",\n  \"otp\": \"123456\",\n  \"password\": \"newpassword123\",\n  \"password_confirm\": \"newpassword123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/forgot-password-verify",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"forgot-password-verify"
+							]
+						},
+						"description": "Verifikasi OTP reset password dan memasukkan password baru."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Protected Profile Management",
+			"item": [
+				{
+					"name": "Change Password",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"old_password\": \"superadmin123\",\n  \"new_password\": \"superadminnew123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/change-password",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"change-password"
+							]
+						},
+						"description": "Mengubah password user yang sedang login (Butuh JWT Token)."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"superadmin\",\n  \"nama_lengkap\": \"Super Administrator\",\n  \"email\": \"superadmin@kemkes.go.id\",\n  \"no_telpon\": \"089988887777\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/update-profile",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"update-profile"
+							]
+						},
+						"description": "Memperbarui profil user yang sedang login (Butuh JWT Token)."
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://puskesmas-be.mediaciptainformasi.co.id/api",
+			"type": "string"
+		}
+	]
+}

@@ -1488,7 +1488,7 @@ class ApiController extends BaseController
                 SUM(CASE WHEN k.nakes_9_jenis = true THEN 1 ELSE 0 END) as nakes_9,
                 SUM(CASE WHEN k.persen_alkes >= 60.0 THEN 1 ELSE 0 END) as alkes_60
             FROM public.wilayah_provinsi p
-            LEFT JOIN public.puskesmas_profile prof ON prof.provinsi_id = p.code AND prof.status_aktif = true
+            LEFT JOIN public.puskesmas_profile prof ON prof.provinsi_id = CAST(p.code AS bigint) AND prof.status_aktif = true
             LEFT JOIN latest_kinerja k ON k.puskesmas_id = prof.id
             GROUP BY p.code, p.name
             ORDER BY p.name ASC
