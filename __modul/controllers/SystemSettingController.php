@@ -76,26 +76,28 @@ class SystemSettingController extends BaseController
                             continue;
                         }
 
-                        $filename  = time() . '_' . bin2hex(random_bytes(8)) . '.' . $ext;
-                        $uploadDir = rtrim(Yii::getAlias('@webroot'), '/') . '/uploads/system-setting/';
+                        try {
+                            $filename  = time() . '_' . bin2hex(random_bytes(8)) . '.' . $ext;
+                            $uploadDir = rtrim(Yii::getAlias('@webroot'), '/') . '/uploads/system-setting/';
 
-                        if (!is_dir($uploadDir)) {
-                            if (!FileHelper::createDirectory($uploadDir, 0775, true)) {
-                                Yii::error("Gagal buat folder: $uploadDir", __METHOD__);
+                            // createDirectory() throws exception on failure
+                            if (!is_dir($uploadDir)) {
+                                FileHelper::createDirectory($uploadDir, 0775, true);
+                            }
+
+                            $filePath = $uploadDir . $filename;
+
+                            if ($file->saveAs($filePath, false)) {
+                                $setting->value = 'uploads/system-setting/' . $filename;
+                                Yii::info("File berhasil disimpan [{$setting->key}]: $filePath", __METHOD__);
+                            } else {
                                 $success = false;
+                                Yii::error("saveAs gagal [{$setting->key}]: $filePath | err={$file->error}", __METHOD__);
                                 continue;
                             }
-                        }
-
-                        $filePath = $uploadDir . $filename;
-
-                        if ($file->saveAs($filePath, false)) {
-                            // Simpan path relatif ke DB
-                            $setting->value = 'uploads/system-setting/' . $filename;
-                            Yii::info("File berhasil disimpan: $filePath", __METHOD__);
-                        } else {
+                        } catch (\Throwable $ex) {
                             $success = false;
-                            Yii::error("Gagal simpan file [{$setting->key}]: $filePath | PHP error: {$file->error}", __METHOD__);
+                            Yii::error("Exception upload [{$setting->key}]: " . $ex->getMessage() . ' | ' . $ex->getFile() . ':' . $ex->getLine(), __METHOD__);
                             continue;
                         }
                     }
