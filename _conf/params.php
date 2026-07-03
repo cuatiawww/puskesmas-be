@@ -8,7 +8,7 @@ return [
     'adminEmail'   => 'admin@example.com',
     'senderEmail'  => $_ENV['MAIL_FROM_ADDRESS'] ?? 'noreply@example.com',
     'senderName'   => $_ENV['MAIL_FROM_NAME'] ?? 'Puskesmas Notification',
-    'base_url'     => '//' . $_SERVER['HTTP_HOST'] . '/puskesmas',
+    'base_url'     => '',
     'frontend_url' => DASHBOARD_URL,
 ];
 

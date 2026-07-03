@@ -14,6 +14,7 @@ Thumbs.db
 
 # composer vendor dir
 /vendor
+/docker-compose.yml
 
 .env
 **/.env
@@ -48,3 +49,11 @@ tests/_support/_generated
 
 #vagrant folder
 /.vagrant
+
+# runtime
+runtime_api/
+runtime_sessions/
+
+# user uploads
+/uploads
+/__modul/db.txt
