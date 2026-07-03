@@ -124,10 +124,10 @@ function getMenuUrl($route) {
     <div class="m-header">
       <a href="<?=Yii::$app->params['base_url']?>" class="b-brand text-primary">
         <!-- ========   Change your logo from here   ============ -->
-        <img src="<?=Yii::$app->params['base_url']?>/app_asset/images/logo-haji.png" 
+        <img src="<?= \app\components\SystemSettingHelper::getAssetUrl('inner_logo', '/app_asset/images/logo-haji.png') ?>" 
              alt="logo image" 
              class="logo-md" 
-             style="width: 240px; height: auto; margin-top: 20px" />
+             style="max-width: 240px; height: auto; margin-top: 20px" />
       </a>
     </div>
     <div class="card pc-user-card">

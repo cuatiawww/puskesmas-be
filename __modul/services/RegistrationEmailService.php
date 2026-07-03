@@ -10,11 +10,11 @@ class RegistrationEmailService
 {
     public static function sendOtp(UserRegistration $registration, string $otp): bool
     {
-        $subject = 'Kode OTP Verifikasi Email - Asisten Penilaian Kinerja Puskesmas';
+        $subject = 'Kode OTP Verifikasi Email - Asistensi Kinerja Puskesmas';
         $body = self::wrapHtml(
             'Verifikasi Email',
             '<p>Halo <strong>' . htmlspecialchars($registration->nama_lengkap, ENT_QUOTES, 'UTF-8') . '</strong>,</p>' .
-            '<p>Terima kasih telah melakukan pendaftaran pada aplikasi <strong>Asisten Penilaian Kinerja Puskesmas</strong>. Gunakan kode OTP berikut untuk memverifikasi alamat email Anda:</p>' .
+            '<p>Terima kasih telah melakukan pendaftaran akun masyarakat pada aplikasi <strong>Asistensi Kinerja Puskesmas</strong>. Gunakan kode OTP berikut untuk memverifikasi alamat email Anda:</p>' .
             '<div style="font-size:28px;font-weight:700;letter-spacing:6px;margin:18px 0;background:#f8fafc;padding:12px;border-radius:6px;border:1px solid #e2e8f0;display:inline-block;color:#0f766e;">' . htmlspecialchars($otp, ENT_QUOTES, 'UTF-8') . '</div>' .
             '<p>Kode OTP berlaku selama <strong>10 menit</strong>. Demi keamanan, mohon tidak membagikan kode OTP ini kepada siapa pun.</p>'
         );
@@ -29,11 +29,11 @@ class RegistrationEmailService
             ? '<p style="margin:20px 0;"><a href="' . htmlspecialchars($loginUrl, ENT_QUOTES, 'UTF-8') . '" style="display:inline-block;padding:10px 18px;background:#0f766e;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:bold;">Masuk ke Aplikasi</a></p>'
             : '';
 
-        $subject = 'Pendaftaran Akun Disetujui - Asisten Penilaian Kinerja Puskesmas';
+        $subject = 'Pendaftaran Akun Disetujui - Asistensi Kinerja Puskesmas';
         $body = self::wrapHtml(
             'Pendaftaran Disetujui',
             '<p>Halo <strong>' . htmlspecialchars($registration->nama_lengkap, ENT_QUOTES, 'UTF-8') . '</strong>,</p>' .
-            '<p>Selamat! Pengajuan akses Anda untuk aplikasi <strong>Asisten Penilaian Kinerja Puskesmas</strong> telah disetujui.</p>' .
+            '<p>Selamat! Pengajuan akses akun masyarakat Anda untuk aplikasi <strong>Asistensi Kinerja Puskesmas</strong> telah disetujui.</p>' .
             '<p>Anda kini dapat masuk ke dalam sistem menggunakan username dan password yang telah Anda daftarkan.</p>' .
             $loginLinkHtml
         );
@@ -48,11 +48,11 @@ class RegistrationEmailService
             ? '<p><strong>Alasan Penolakan:</strong><br><span style="color:#d32f2f;font-style:italic;">"' . htmlspecialchars($reason, ENT_QUOTES, 'UTF-8') . '"</span></p>'
             : '';
 
-        $subject = 'Pendaftaran Akun Ditolak - Asisten Penilaian Kinerja Puskesmas';
+        $subject = 'Pendaftaran Akun Ditolak - Asistensi Kinerja Puskesmas';
         $body = self::wrapHtml(
             'Pendaftaran Ditolak',
             '<p>Halo <strong>' . htmlspecialchars($registration->nama_lengkap, ENT_QUOTES, 'UTF-8') . '</strong>,</p>' .
-            '<p>Terima kasih telah mengajukan pendaftaran akun pada aplikasi <strong>Asisten Penilaian Kinerja Puskesmas</strong>.</p>' .
+            '<p>Terima kasih telah mengajukan pendaftaran akun masyarakat pada aplikasi <strong>Asistensi Kinerja Puskesmas</strong>.</p>' .
             '<p>Mohon maaf, pengajuan akses Anda belum dapat disetujui saat ini.</p>' .
             $reasonHtml .
             '<p>Silakan melakukan pendaftaran ulang dengan data yang sesuai atau hubungi Administrator untuk informasi lebih lanjut.</p>'
@@ -75,11 +75,11 @@ class RegistrationEmailService
             ? '<p>Silakan kunjungi halaman login aplikasi melalui tautan berikut:<br><a href="' . htmlspecialchars($loginUrl, ENT_QUOTES, 'UTF-8') . '">' . htmlspecialchars($loginUrl, ENT_QUOTES, 'UTF-8') . '</a></p>'
             : '';
 
-        $subject = 'Akun Asisten Penilaian Kinerja Puskesmas Telah Dibuat';
+        $subject = 'Akun Asistensi Kinerja Puskesmas Telah Dibuat';
         $body = self::wrapHtml(
             'Akun Berhasil Dibuat',
             '<p>Halo <strong>' . htmlspecialchars($displayName, ENT_QUOTES, 'UTF-8') . '</strong>,</p>' .
-            '<p>Akun Anda telah berhasil dibuat oleh Administrator pada aplikasi <strong>Asisten Penilaian Kinerja Puskesmas</strong> dengan rincian login sebagai berikut:</p>' .
+            '<p>Akun masyarakat Anda telah berhasil dibuat oleh Administrator pada aplikasi <strong>Asistensi Kinerja Puskesmas</strong> dengan rincian login sebagai berikut:</p>' .
             '<div style="background:#f1f5f9;padding:15px;border-radius:6px;margin:15px 0;border:1px solid #e2e8f0;font-family:monospace;">' .
             '<strong>Username/Email:</strong> ' . htmlspecialchars($user->username, ENT_QUOTES, 'UTF-8') . '<br>' .
             '<strong>Password:</strong> ' . htmlspecialchars($plainPassword, ENT_QUOTES, 'UTF-8') .
@@ -123,7 +123,7 @@ class RegistrationEmailService
         return '<div style="font-family:Arial,sans-serif;line-height:1.6;color:#243b53;">' .
             '<h2 style="color:#0f766e;">' . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . '</h2>' .
             $content .
-            '<p style="margin-top:24px;color:#829ab1;font-size:12px;">Email ini dikirim otomatis oleh sistem Asisten Penilaian Kinerja Puskesmas.</p>' .
+            '<p style="margin-top:24px;color:#829ab1;font-size:12px;">Email ini dikirim otomatis oleh sistem Asistensi Kinerja Puskesmas.</p>' .
             '</div>';
     }
 }

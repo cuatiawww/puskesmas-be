@@ -383,17 +383,17 @@ $this->registerJs(<<<JS
 JS);
 ?>
 
-<div class="register-page" style="background-image: url('<?= Yii::$app->params['base_url'] ?>/app_asset/images/background-sipkk.png');">
+<div class="register-page" style="background-image: url('<?= \app\components\SystemSettingHelper::getAssetUrl('login_background', '/app_asset/images/background-sipkk.png') ?>'); background-size: cover; background-position: center;">
   <div class="register-shell">
     <div class="register-topbar">
       <div class="register-brand">
         <a href="<?= Url::to(['site/login']) ?>">
-          <img src="<?= Yii::$app->params['base_url'] ?>/app_asset/images/logo-kemenkes-warna.png" alt="SIPKK">
+          <img src="<?= \app\components\SystemSettingHelper::getAssetUrl('login_logo', '/app_asset/images/logo-kemenkes-warna.png') ?>" style="max-width:300px; height:auto;" alt="SIPKK">
         </a>
       </div>
       <div>
         <h2 class="register-title">Pendaftaran Akses Masyarakat</h2>
-        <p class="register-subtitle">Lengkapi data berikut untuk mengajukan akses SIPKK.</p>
+        <p class="register-subtitle">Lengkapi data berikut untuk mengajukan akses <?= \yii\helpers\Html::encode(\app\components\SystemSettingHelper::get('system_title', 'SIPKK')) ?>.</p>
       </div>
     </div>
 

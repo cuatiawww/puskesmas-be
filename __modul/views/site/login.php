@@ -120,14 +120,14 @@ $error_message = \Yii::$app->session['error_login_message'];
 <?php } ?>
 
 
-<div class="auth-main v1" style="background-image: url('<?= Yii::$app->params['base_url'] ?>/app_asset/images/background-sipkk.png'); background-size: cover; background-position: center; background-attachment: fixed;">
+<div class="auth-main v1" style="background-image: url('<?= \app\components\SystemSettingHelper::getAssetUrl('login_background', '/app_asset/images/background-sipkk.png') ?>'); background-size: cover; background-position: center; background-attachment: fixed;">
 	<div class="auth-wrapper">
 		<div class="auth-form">
-			<a href="<?= Yii::$app->params['base_url'] ?>" class="d-block mt-5"><img src="<?= Yii::$app->params['base_url'] ?>/app_asset/images/logo-kemenkes-warna.png" style="width:300px;" alt="img" /></a>
+			<a href="<?= Yii::$app->params['base_url'] ?>" class="d-block mt-5"><img src="<?= \app\components\SystemSettingHelper::getAssetUrl('login_logo', '/app_asset/images/logo-kemenkes-warna.png') ?>" style="max-width:300px; height:auto;" alt="img" /></a>
 			<div class="card mb-5 mt-3">
 				<div class="card-header" style="background-color: #2AB2A8;">
 					<!-- <h4 class="text-center text-white f-w-500 mb-0">Sistem Komputerisasi Haji Terpadu Bidang Kesehatan <br>SISKOHATKES ARAB SAUDI</h4> -->
-					 <h4 class="text-center text-white f-w-500 mb-0">AKSES SISTEM</h4>
+					 <h4 class="text-center text-white f-w-500 mb-0"><?= \yii\helpers\Html::encode(\app\components\SystemSettingHelper::get('login_title', 'AKSES SISTEM')) ?></h4>
 				</div>
 				<div class="card-body">
 
@@ -258,11 +258,15 @@ $error_message = \Yii::$app->session['error_login_message'];
 					<div class="form-group" style="text-align: left;">
 
 						<div class="col-sm-12 col-xs-12">
-							<?= Html::submitButton("Login", ['class' => 'btn btn-primary btn-login', 'name' => 'login-button']) ?>
-
+							<?= Html::submitButton("Login", ['class' => 'btn btn-primary btn-login w-100', 'name' => 'login-button']) ?>
 						</div>
 
+					</div>
 
+					<div class="form-group mt-3" style="text-align: center;">
+						<a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#modal_panduan_teknis" class="text-primary font-weight-bold text-decoration-underline" style="font-size: 0.85rem;">
+							<i class="ti ti-book me-1"></i>Panduan Teknis Penggunaan
+						</a>
 					</div>
 
 					<?php ActiveForm::end(); ?>
@@ -273,7 +277,7 @@ $error_message = \Yii::$app->session['error_login_message'];
 
 				<div class="card-footer border-top">
 					<div class="text-center">
-						<p class="text-muted mb-0" style="font-size: 0.875rem; font-weight: 300;">SIPKK 2026</p>
+						<p class="text-muted mb-0" style="font-size: 0.875rem; font-weight: 300;"><?= \yii\helpers\Html::encode(\app\components\SystemSettingHelper::get('footer_text', 'SIPKK 2026')) ?></p>
 					</div>
 				</div>
 
@@ -284,7 +288,7 @@ $error_message = \Yii::$app->session['error_login_message'];
 
 
 
-<!-- Modal -->
+<!-- Modal Lupa Pass -->
 <div id="modal_lupa_pass" class="modal" role="dialog">
 	<div class="modal-dialog">
 
@@ -302,5 +306,25 @@ $error_message = \Yii::$app->session['error_login_message'];
 			</div>
 		</div>
 
+	</div>
+</div>
+
+<!-- Modal Panduan Teknis -->
+<div id="modal_panduan_teknis" class="modal fade" role="dialog" tabindex="-1" aria-labelledby="modalPanduanLabel" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title font-weight-bold" id="modalPanduanLabel">
+					<i class="ti ti-help me-1 text-primary"></i>Petunjuk Teknis Penggunaan
+				</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+				<?= \app\components\SystemSettingHelper::get('frontend_technical_guidelines') ?>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+			</div>
+		</div>
 	</div>
 </div>

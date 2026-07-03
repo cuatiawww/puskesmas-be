@@ -55,11 +55,11 @@ $this->registerCss(<<<CSS
 CSS);
 ?>
 
-<div class="auth-main v1 forgot-password-auth" style="background-image: url('<?= Yii::$app->params['base_url'] ?>/app_asset/images/background-sipkk.png'); background-size: cover; background-position: center; background-attachment: fixed;">
+<div class="auth-main v1 forgot-password-auth" style="background-image: url('<?= \app\components\SystemSettingHelper::getAssetUrl('login_background', '/app_asset/images/background-sipkk.png') ?>'); background-size: cover; background-position: center; background-attachment: fixed;">
     <div class="auth-wrapper">
         <div class="auth-form">
             <a href="<?= Yii::$app->params['base_url'] ?>" class="d-block mt-5 text-center">
-                <img src="<?= Yii::$app->params['base_url'] ?>/app_asset/images/logo-kemenkes-warna.png" class="brand-logo" alt="SIPKK">
+                <img src="<?= \app\components\SystemSettingHelper::getAssetUrl('login_logo', '/app_asset/images/logo-kemenkes-warna.png') ?>" class="brand-logo" style="max-width:300px; height:auto;" alt="SIPKK">
             </a>
 
             <div class="card mb-4 mt-3">
@@ -118,7 +118,7 @@ CSS);
 
                 <div class="card-footer border-top">
                     <div class="text-center">
-                        <p class="text-muted mb-0" style="font-size: 0.875rem; font-weight: 300;">SIPKK 2026</p>
+                        <p class="text-muted mb-0" style="font-size: 0.875rem; font-weight: 300;"><?= \yii\helpers\Html::encode(\app\components\SystemSettingHelper::get('footer_text', 'SIPKK 2026')) ?></p>
                     </div>
                 </div>
             </div>

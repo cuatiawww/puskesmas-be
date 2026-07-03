@@ -6,6 +6,7 @@ use Yii;
 use yii\web\Response;
 use app\models\User;
 use app\services\WilayahService;
+use app\models\UserRegistration;
 
 /**
  * ApiController consolidates all AJAX and frontend endpoints for the Next.js application.
@@ -52,6 +53,7 @@ class ApiController extends BaseController
     {
         return [
             'change-password', 
+            'update-profile',
             'login', 
             'register', 
             'forgot-password-request', 
@@ -66,6 +68,7 @@ class ApiController extends BaseController
             'dashboard-stats',
             'dashboard-charts',
             'top-diseases',
+            'system-settings',
         ];
     }
 
@@ -73,7 +76,7 @@ class ApiController extends BaseController
     {
         return in_array($actionId, [
             'login', 'register', 'forgot-password-request', 'forgot-password-verify', 'regions', 'search-region',
-            'verify-register-otp', 'resend-register-otp', 'captcha', 'change-password',
+            'verify-register-otp', 'resend-register-otp', 'captcha', 'change-password', 'update-profile',
             'bencana-stats',
             'bencanastats',
             'wilayah-geojson',
@@ -85,7 +88,34 @@ class ApiController extends BaseController
             'dashboardcharts',
             'top-diseases',
             'topdiseases',
+            'system-settings',
+            'systemsettings',
         ], true);
+    }
+
+    public function actionSystemSettings()
+    {
+        $settings = \app\models\SystemSetting::find()->all();
+        $data = [];
+        foreach ($settings as $setting) {
+            $value = $setting->value;
+            if ($setting->type === 'image' && !empty($value)) {
+                if (!preg_match('~^(https?:)?//~i', $value)) {
+                    $baseUrl = rtrim(Yii::$app->params['base_url'] ?? '', '/');
+                    $value = $baseUrl . '/' . ltrim($value, '/');
+                }
+                if (strpos($value, '//') === 0) {
+                    $protocol = Yii::$app->request->isSecureConnection ? 'https:' : 'http:';
+                    $value = $protocol . $value;
+                }
+            }
+            $data[$setting->key] = $value;
+        }
+
+        return [
+            'success' => true,
+            'data' => $data
+        ];
     }
 
     /**
@@ -175,6 +205,27 @@ class ApiController extends BaseController
 
         $token = $this->generateJwt($payload, $secret);
 
+        $regDetails = null;
+        $registration = UserRegistration::findOne(['user_id' => $userId]);
+        if ($registration) {
+            $wilayah = new WilayahService();
+            $provName = $wilayah->findProvinsiName($registration->provinsi_id ? (string)$registration->provinsi_id : null);
+            $kabName = $wilayah->findKabupatenName($registration->kabupaten_id ? (string)$registration->kabupaten_id : null);
+            
+            $regDetails = [
+                'kategori_akses' => $registration->kategori_akses,
+                'nama_institusi' => $registration->nama_institusi,
+                'pekerjaan_posisi' => $registration->pekerjaan_posisi,
+                'tujuan_akses' => $registration->tujuan_akses,
+                'tujuan_akses_lainnya' => $registration->tujuan_akses_lainnya,
+                'alamat_user' => $registration->alamat_user,
+                'provinsi_id' => $registration->provinsi_id,
+                'provinsi_name' => $provName,
+                'kabupaten_id' => $registration->kabupaten_id,
+                'kabupaten_name' => $kabName,
+            ];
+        }
+
         return [
             'success' => true,
             'message' => 'Login berhasil',
@@ -184,9 +235,11 @@ class ApiController extends BaseController
                 'username' => (string) $this->getUserAttribute($user, 'username', ''),
                 'email' => $userEmail,
                 'nama_lengkap' => $userFullName,
+                'no_telpon' => (string) $this->getUserAttribute($user, 'no_telpon', ''),
                 'level_user_id' => $levelUserId,
                 'level_name' => $levelName,
                 'wilayah_scope' => $wilayahScope,
+                'registration_details' => $regDetails,
             ]
         ];
     }
@@ -205,7 +258,8 @@ class ApiController extends BaseController
             return ['success' => false, 'message' => 'Invalid request method'];
         }
 
-        $userId = $req->post('user_id') ?? Yii::$app->user->id ?? null;
+        $tokenUser = $this->getUserFromToken();
+        $userId = $tokenUser ? $tokenUser->id : ($req->post('user_id') ?? Yii::$app->user->id ?? null);
         $old = $req->post('old_password');
         $new = $req->post('new_password');
 
@@ -236,6 +290,147 @@ class ApiController extends BaseController
         }
 
         return ['success' => false, 'message' => 'Gagal menyimpan password baru'];
+    }
+
+    /**
+     * API Update Profile endpoint
+     * POST: username, nama_lengkap, email, no_telpon
+     */
+    public function actionUpdateProfile()
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $req = Yii::$app->request;
+
+        if (!$req->isPost) {
+            return ['success' => false, 'message' => 'Invalid request method'];
+        }
+
+        $user = $this->getUserFromToken();
+        if (!$user) {
+            return ['success' => false, 'message' => 'Silakan login terlebih dahulu'];
+        }
+
+        $bodyParams = $req->getBodyParams();
+        $rawJson = json_decode((string) $req->getRawBody(), true);
+        $rawJson = is_array($rawJson) ? $rawJson : [];
+
+        $username = $req->post('username') ?? ($bodyParams['username'] ?? ($rawJson['username'] ?? null));
+        $namaLengkap = $req->post('nama_lengkap') ?? ($bodyParams['nama_lengkap'] ?? ($rawJson['nama_lengkap'] ?? null));
+        $email = $req->post('email') ?? ($bodyParams['email'] ?? ($rawJson['email'] ?? null));
+        $noTelpon = $req->post('no_telpon') ?? ($bodyParams['no_telpon'] ?? ($rawJson['no_telpon'] ?? null));
+
+        if (empty($username) || empty($namaLengkap) || empty($email)) {
+            return ['success' => false, 'message' => 'Username, Nama Lengkap, dan Email wajib diisi.'];
+        }
+
+        // Validate username uniqueness (excluding current user)
+        $existingUser = User::find()->where(['username' => $username])->andWhere(['!=', 'id', $user->id])->one();
+        if ($existingUser) {
+            return ['success' => false, 'message' => 'Username sudah digunakan oleh akun lain.'];
+        }
+
+        // Validate email uniqueness (excluding current user)
+        $existingEmail = User::find()->where(['email' => $email])->andWhere(['!=', 'id', $user->id])->one();
+        if ($existingEmail) {
+            return ['success' => false, 'message' => 'Email sudah digunakan oleh akun lain.'];
+        }
+
+        $user->username = $username;
+        $user->nama_lengkap = $namaLengkap;
+        $user->email = $email;
+        $user->no_telpon = $noTelpon;
+
+        if ($user->save(false)) {
+            // Re-generate token with updated user information
+            $userId = (int) $user->getId();
+            $levelUserId = $user->getIdUserLevel();
+            $levelName = $this->getUserLevelName($user);
+            $wilayahScope = $this->buildUserWilayahScope($user);
+
+            $secret = $_ENV['JWT_SECRET'] ?? 'kemkes_puskesmas_jwt_secret_key_2026';
+            $payload = [
+                'iss' => 'puskesmas-backend',
+                'iat' => time(),
+                'exp' => time() + (3600 * 24), // Expire in 24 hours
+                'sub' => $userId,
+                'username' => $user->username,
+                'email' => $user->email,
+                'level_user_id' => $levelUserId,
+                'level_name' => $levelName,
+                'wilayah_scope' => $wilayahScope,
+            ];
+
+            $token = $this->generateJwt($payload, $secret);
+
+            $regDetails = null;
+            $registration = UserRegistration::findOne(['user_id' => $userId]);
+            if ($registration) {
+                $wilayah = new WilayahService();
+                $provName = $wilayah->findProvinsiName($registration->provinsi_id ? (string)$registration->provinsi_id : null);
+                $kabName = $wilayah->findKabupatenName($registration->kabupaten_id ? (string)$registration->kabupaten_id : null);
+                
+                $regDetails = [
+                    'kategori_akses' => $registration->kategori_akses,
+                    'nama_institusi' => $registration->nama_institusi,
+                    'pekerjaan_posisi' => $registration->pekerjaan_posisi,
+                    'tujuan_akses' => $registration->tujuan_akses,
+                    'tujuan_akses_lainnya' => $registration->tujuan_akses_lainnya,
+                    'alamat_user' => $registration->alamat_user,
+                    'provinsi_id' => $registration->provinsi_id,
+                    'provinsi_name' => $provName,
+                    'kabupaten_id' => $registration->kabupaten_id,
+                    'kabupaten_name' => $kabName,
+                ];
+            }
+
+            return [
+                'success' => true,
+                'message' => 'Profil berhasil diperbarui.',
+                'token' => $token,
+                'user' => [
+                    'id_user' => $userId,
+                    'username' => $user->username,
+                    'email' => $user->email,
+                    'nama_lengkap' => $user->nama_lengkap,
+                    'no_telpon' => $user->no_telpon,
+                    'level_user_id' => $levelUserId,
+                    'level_name' => $levelName,
+                    'wilayah_scope' => $wilayahScope,
+                    'registration_details' => $regDetails,
+                ]
+            ];
+        }
+
+        return ['success' => false, 'message' => 'Gagal memperbarui profil.'];
+    }
+
+    private function getUserFromToken(): ?User
+    {
+        $authHeader = Yii::$app->request->headers->get('Authorization');
+        if (empty($authHeader)) {
+            $authHeader = Yii::$app->request->get('token');
+            if (empty($authHeader)) {
+                return null;
+            }
+        } elseif (preg_match('/Bearer\s+(.*)$/i', $authHeader, $matches)) {
+            $authHeader = $matches[1];
+        }
+
+        $secret = $_ENV['JWT_SECRET'] ?? 'kemkes_puskesmas_jwt_secret_key_2026';
+        $payload = $this->decodeJwt($authHeader, $secret);
+        if (!$payload) {
+            $fallbackSecret = Yii::$app->request->cookieValidationKey ?: "kemkes!@#$%^&*()_api";
+            $payload = $this->decodeJwt($authHeader, $fallbackSecret);
+        }
+        if (!$payload) {
+            $payload = $this->decodeJwt($authHeader, "kemkes!@#$%^&*()");
+        }
+
+        if ($payload && isset($payload['sub'])) {
+            return User::findOne((int)$payload['sub']);
+        }
+
+        return null;
     }
 
     /**
