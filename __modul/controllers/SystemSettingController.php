@@ -51,16 +51,27 @@ class SystemSettingController extends BaseController
      */
     public function actionIndex()
     {
-        $settings = SystemSetting::find()->all();
+        $settings = SystemSetting::find()->orderBy(['id' => SORT_ASC])->all();
 
         if (Yii::$app->request->isPost) {
-            $post    = Yii::$app->request->post('Setting', []);
-            $success = true;
+            $post          = Yii::$app->request->post('Setting', []);
+            $processedKeys = [];
+            $success       = true;
 
             foreach ($settings as $setting) {
+                if (isset($processedKeys[$setting->key])) {
+                    Yii::warning("Duplicate system_setting key dilewati: {$setting->key} (id={$setting->id})", __METHOD__);
+                    continue;
+                }
+                $processedKeys[$setting->key] = true;
+
+                $hasChange = false;
+
                 if ($setting->type === 'image') {
                     $file = UploadedFile::getInstanceByName("SettingFile[{$setting->key}]");
                     if ($file) {
+                        Yii::info("Upload diterima [{$setting->key}]: name={$file->name}, size={$file->size}, type={$file->type}, error={$file->error}", __METHOD__);
+
                         // Cek error PHP upload
                         if (!empty($file->error) && $file->error !== UPLOAD_ERR_OK) {
                             $success = false;
@@ -89,6 +100,7 @@ class SystemSettingController extends BaseController
 
                             if ($file->saveAs($filePath, false)) {
                                 $setting->value = 'uploads/system-setting/' . $filename;
+                                $hasChange = true;
                                 Yii::info("File berhasil disimpan [{$setting->key}]: $filePath", __METHOD__);
                             } else {
                                 $success = false;
@@ -102,13 +114,23 @@ class SystemSettingController extends BaseController
                         }
                     }
                 } else {
-                    if (isset($post[$setting->key])) {
+                    if (isset($post[$setting->key]) && $setting->value !== $post[$setting->key]) {
                         $setting->value = $post[$setting->key];
+                        $hasChange = true;
                     }
                 }
 
+                if (!$hasChange) {
+                    continue;
+                }
+
                 try {
-                    $saved = $setting->save();
+                    $attributes = ['value'];
+                    if ($setting->hasAttribute('updated_at')) {
+                        $setting->updated_at = date('Y-m-d H:i:s');
+                        $attributes[] = 'updated_at';
+                    }
+                    $saved = $setting->save(false, $attributes);
                 } catch (\Throwable $ex) {
                     $success = false;
                     Yii::error("Exception save setting [{$setting->key}]: " . $ex->getMessage() . ' | ' . $ex->getFile() . ':' . $ex->getLine(), __METHOD__);
