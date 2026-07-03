@@ -8,6 +8,7 @@ set_error_handler(function($severity, $message, $file, $line) {
     if (!(error_reporting() & $severity)) {
         return;
     }
+    @header("HTTP/1.1 200 OK");
     echo "<div style='padding: 20px; background: #fff3cd; color: #856404; border: 1px solid #ffeeba; font-family: monospace;'>";
     echo "<h2>[RAW PHP ERROR]</h2>";
     echo "<strong>Pesan:</strong> $message<br>";
@@ -17,6 +18,7 @@ set_error_handler(function($severity, $message, $file, $line) {
 });
 
 set_exception_handler(function($exception) {
+    @header("HTTP/1.1 200 OK");
     echo "<div style='padding: 20px; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; font-family: monospace;'>";
     echo "<h2>[RAW PHP EXCEPTION]</h2>";
     echo "<strong>Pesan:</strong> " . $exception->getMessage() . "<br>";
@@ -42,4 +44,8 @@ require __DIR__ . '/vendor/yiisoft/yii2/Yii.php';
 
 $config = require __DIR__ . '/_conf/web.php';
 
-(new yii\web\Application($config))->run();
+$application = new yii\web\Application($config);
+if (YII_DEBUG) {
+    Yii::$app->errorHandler->unregister();
+}
+$application->run();
