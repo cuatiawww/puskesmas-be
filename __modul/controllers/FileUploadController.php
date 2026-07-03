@@ -222,19 +222,40 @@ class FileUploadController extends BaseController
             $modelName = 'app\\models\\' . $modelName;
         }
 
+        if (strpos($modelName, 'app\\models\\') !== 0) {
+            return Json::encode(['error' => 'Model upload tidak valid.']);
+        }
+
         // Validasi model dinamis
         if (!class_exists($modelName)) {
             return Json::encode(['error' => 'Invalid model class.']);
         }
 
         $model = new $modelName();
-        $file = UploadedFile::getInstance($model, $attribute);
+        $file = UploadedFile::getInstanceByName($model->formName() . '[' . $attribute . ']');
 
         if (!$file) {
             return Json::encode(['error' => 'No file uploaded.']);
         }
 
+        if (!empty($file->error) && $file->error !== UPLOAD_ERR_OK) {
+            $map = [
+                UPLOAD_ERR_INI_SIZE   => 'File melebihi batas upload server.',
+                UPLOAD_ERR_FORM_SIZE  => 'File melebihi batas form upload.',
+                UPLOAD_ERR_PARTIAL    => 'Upload terputus sebagian.',
+                UPLOAD_ERR_NO_FILE    => 'Tidak ada file yang diupload.',
+                UPLOAD_ERR_NO_TMP_DIR => 'Folder temporary upload tidak tersedia.',
+                UPLOAD_ERR_CANT_WRITE => 'Gagal menulis file upload ke disk.',
+                UPLOAD_ERR_EXTENSION  => 'Upload dihentikan oleh ekstensi PHP.',
+            ];
+            return Json::encode(['error' => $map[$file->error] ?? ('Upload error code: ' . $file->error)]);
+        }
+
         $useObjectStorage = $this->storageEnabled();
+
+        if (empty($file->tempName) || !is_file($file->tempName) || !is_readable($file->tempName)) {
+            return Json::encode(['error' => 'File temporary tidak tersedia. Silakan upload ulang.']);
+        }
 
         $ext = strtolower($file->extension);
         $mime = FileHelper::getMimeType($file->tempName);
@@ -243,10 +264,10 @@ class FileUploadController extends BaseController
             $allowedTypes = [
             // Images
             'jpg'  => 'image/jpeg',
-            //'jpeg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
             'png'  => 'image/png',
-            //'gif'  => 'image/gif',
-            //'webp' => 'image/webp'
+            'gif'  => 'image/gif',
+            'webp' => 'image/webp'
             ];
 
         }elseif($tipe_file == 'pdf'){
@@ -280,7 +301,21 @@ class FileUploadController extends BaseController
         }
         $allowedExtList = implode(', ', array_keys($allowedTypes));
         // Validasi ekstensi dan mime
-        if (!isset($allowedTypes[$ext]) || $allowedTypes[$ext] !== $mime) {
+        $acceptedMime = $allowedTypes[$ext] ?? null;
+        $mimeAliases = [
+            'image/jpeg' => ['image/jpeg', 'image/pjpeg'],
+            'image/png' => ['image/png', 'image/x-png'],
+            'image/gif' => ['image/gif'],
+            'image/webp' => ['image/webp'],
+            'application/pdf' => ['application/pdf', 'application/x-pdf'],
+            'text/csv' => ['text/csv', 'text/plain', 'application/csv', 'application/vnd.ms-excel'],
+            'application/vnd.ms-excel' => ['application/vnd.ms-excel', 'application/octet-stream'],
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/zip'],
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/zip'],
+        ];
+        $acceptedMimes = $acceptedMime ? ($mimeAliases[$acceptedMime] ?? [$acceptedMime]) : [];
+
+        if (!isset($allowedTypes[$ext]) || !in_array($mime, $acceptedMimes, true)) {
             //return Json::encode(['error' => 'Tipe File Tidak Diizinkan.']);
            
             return Json::encode([
@@ -289,7 +324,7 @@ class FileUploadController extends BaseController
         }
 
         //$isImage = in_array($ext, ['jpg','jpeg','png','gif','webp'], true);
-        $isImage = in_array($ext, ['jpg','png'], true);
+        $isImage = in_array($ext, ['jpg','jpeg','png','gif','webp'], true);
         $contents = '';
         $dangerousPatterns = [];
 

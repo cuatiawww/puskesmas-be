@@ -4,7 +4,6 @@ namespace app\controllers;
 
 use Yii;
 use app\models\SystemSetting;
-use yii\web\UploadedFile;
 use yii\web\Response;
 use yii\helpers\FileHelper;
 
@@ -68,50 +67,9 @@ class SystemSettingController extends BaseController
                 $hasChange = false;
 
                 if ($setting->type === 'image') {
-                    $file = UploadedFile::getInstanceByName("SettingFile[{$setting->key}]");
-                    if ($file) {
-                        Yii::info("Upload diterima [{$setting->key}]: name={$file->name}, size={$file->size}, type={$file->type}, error={$file->error}", __METHOD__);
-
-                        // Cek error PHP upload
-                        if (!empty($file->error) && $file->error !== UPLOAD_ERR_OK) {
-                            $success = false;
-                            Yii::error("Upload error [{$setting->key}]: PHP error code {$file->error}", __METHOD__);
-                            continue;
-                        }
-
-                        $ext     = strtolower($file->extension);
-                        $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-                        if (!in_array($ext, $allowed, true)) {
-                            $success = false;
-                            Yii::error("Ekstensi tidak diizinkan [{$setting->key}]: $ext", __METHOD__);
-                            continue;
-                        }
-
-                        try {
-                            $filename  = time() . '_' . bin2hex(random_bytes(8)) . '.' . $ext;
-                            $uploadDir = rtrim(Yii::getAlias('@webroot'), '/') . '/uploads/system-setting/';
-
-                            // createDirectory() throws exception on failure
-                            if (!is_dir($uploadDir)) {
-                                FileHelper::createDirectory($uploadDir, 0775, true);
-                            }
-
-                            $filePath = $uploadDir . $filename;
-
-                            if ($file->saveAs($filePath, false)) {
-                                $setting->value = 'uploads/system-setting/' . $filename;
-                                $hasChange = true;
-                                Yii::info("File berhasil disimpan [{$setting->key}]: $filePath", __METHOD__);
-                            } else {
-                                $success = false;
-                                Yii::error("saveAs gagal [{$setting->key}]: $filePath | err={$file->error}", __METHOD__);
-                                continue;
-                            }
-                        } catch (\Throwable $ex) {
-                            $success = false;
-                            Yii::error("Exception upload [{$setting->key}]: " . $ex->getMessage() . ' | ' . $ex->getFile() . ':' . $ex->getLine(), __METHOD__);
-                            continue;
-                        }
+                    if (isset($post[$setting->key]) && $setting->value !== $post[$setting->key]) {
+                        $setting->value = $post[$setting->key];
+                        $hasChange = true;
                     }
                 } else {
                     if (isset($post[$setting->key]) && $setting->value !== $post[$setting->key]) {
