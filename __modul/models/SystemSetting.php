@@ -43,13 +43,14 @@ class SystemSetting extends \yii\db\ActiveRecord
     }
 
     /**
-     * Auto-set updated_at on every save so Yii detects dirty state
-     * and PostgreSQL actually runs the UPDATE query.
+     * Auto-set updated_at when the column exists.
      */
     public function beforeSave($insert)
     {
         if (parent::beforeSave($insert)) {
-            $this->updated_at = date('Y-m-d H:i:s');
+            if ($this->hasAttribute('updated_at')) {
+                $this->updated_at = date('Y-m-d H:i:s');
+            }
             return true;
         }
         return false;

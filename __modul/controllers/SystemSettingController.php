@@ -107,7 +107,15 @@ class SystemSettingController extends BaseController
                     }
                 }
 
-                if (!$setting->save()) {
+                try {
+                    $saved = $setting->save();
+                } catch (\Throwable $ex) {
+                    $success = false;
+                    Yii::error("Exception save setting [{$setting->key}]: " . $ex->getMessage() . ' | ' . $ex->getFile() . ':' . $ex->getLine(), __METHOD__);
+                    continue;
+                }
+
+                if (!$saved) {
                     $success = false;
                     Yii::error("Gagal save setting [{$setting->key}]: " . json_encode($setting->errors), __METHOD__);
                 }
