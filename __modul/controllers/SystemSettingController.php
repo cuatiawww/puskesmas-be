@@ -5,10 +5,38 @@ namespace app\controllers;
 use Yii;
 use app\models\SystemSetting;
 use yii\web\UploadedFile;
+use yii\web\Response;
 use yii\helpers\FileHelper;
 
 class SystemSettingController extends BaseController
 {
+    /**
+     * Serve uploaded image via PHP (bypass Nginx static routing issue)
+     * URL: /system-setting/serve-image?file=uploads/system-setting/xxx.jpg
+     */
+    public function actionServeImage()
+    {
+        $relativePath = Yii::$app->request->get('file', '');
+
+        // Keamanan: hanya izinkan path di bawah uploads/system-setting/
+        $relativePath = ltrim(str_replace('\\', '/', $relativePath), '/');
+        if (!preg_match('#^uploads/system-setting/[a-zA-Z0-9._-]+$#', $relativePath)) {
+            throw new \yii\web\ForbiddenHttpException('Akses ditolak.');
+        }
+
+        $filePath = rtrim(Yii::getAlias('@webroot'), '/') . '/' . $relativePath;
+        if (!is_file($filePath)) {
+            throw new \yii\web\NotFoundHttpException('File tidak ditemukan.');
+        }
+
+        $mime = FileHelper::getMimeType($filePath) ?: 'application/octet-stream';
+        Yii::$app->response->format = Response::FORMAT_RAW;
+        Yii::$app->response->headers->set('Content-Type', $mime);
+        Yii::$app->response->headers->set('Cache-Control', 'public, max-age=86400');
+        Yii::$app->response->headers->set('X-Content-Type-Options', 'nosniff');
+        return file_get_contents($filePath);
+    }
+
     /**
      * Display configuration form and handle updates
      */
@@ -17,7 +45,7 @@ class SystemSettingController extends BaseController
         $settings = SystemSetting::find()->all();
 
         if (Yii::$app->request->isPost) {
-            $post = Yii::$app->request->post('Setting', []);
+            $post    = Yii::$app->request->post('Setting', []);
             $success = true;
 
             foreach ($settings as $setting) {
@@ -31,17 +59,15 @@ class SystemSettingController extends BaseController
                             continue;
                         }
 
-                        $ext      = strtolower($file->extension);
-                        $allowed  = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+                        $ext     = strtolower($file->extension);
+                        $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
                         if (!in_array($ext, $allowed, true)) {
                             $success = false;
                             Yii::error("Ekstensi tidak diizinkan [{$setting->key}]: $ext", __METHOD__);
                             continue;
                         }
 
-                        $filename = time() . '_' . bin2hex(random_bytes(8)) . '.' . $ext;
-
-                        // Simpan langsung ke /var/www/html/uploads/system-setting/
+                        $filename  = time() . '_' . bin2hex(random_bytes(8)) . '.' . $ext;
                         $uploadDir = rtrim(Yii::getAlias('@webroot'), '/') . '/uploads/system-setting/';
 
                         if (!is_dir($uploadDir)) {
@@ -55,7 +81,7 @@ class SystemSettingController extends BaseController
                         $filePath = $uploadDir . $filename;
 
                         if ($file->saveAs($filePath, false)) {
-                            // Berhasil simpan ke local
+                            // Simpan path relatif ke DB
                             $setting->value = 'uploads/system-setting/' . $filename;
                             Yii::info("File berhasil disimpan: $filePath", __METHOD__);
                         } else {
