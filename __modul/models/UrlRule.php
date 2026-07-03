@@ -70,6 +70,8 @@ class UrlRule extends yii\web\UrlRule
         // Skip custom processing untuk AJAX endpoints dan API endpoints
         $ajaxRoutes = [
             'api/',  // ← semua /api/* ditangani oleh explicit rules di urlManager
+            'file-upload/',
+            'system-setting/',
             'formulir-bencana/get-kabupaten', 
             'formulir-bencana/get-kecamatan', 
             'formulir-bencana/debug-provinsi', 

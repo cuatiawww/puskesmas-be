@@ -13,6 +13,11 @@ use yii\web\UploadedFile;
 
 class FileUploadController extends BaseController
 {
+    public function isActionPublic(string $actionId): bool
+    {
+        return in_array($actionId, ['render', 'lihat-pdf'], true);
+    }
+
     protected function csrfExemptActions(): array
     {
         return ['upload-file', 'verify-visa-photo'];
@@ -564,12 +569,13 @@ class FileUploadController extends BaseController
             ]);
         }///end resize image
 
-        if ($useObjectStorage || $file->saveAs($filePath, false)) {
+        if ($file->saveAs($filePath, false)) {
             $storedMime = $mime;
             $storedSize = (int)$file->size;
 
             if ($useObjectStorage) {
-                $uploadResult = $this->fsUploadFromLocal($file->tempName, $storageKey, 'private');
+                $uploadResult = $this->fsUploadFromLocal($filePath, $storageKey, 'private');
+                @unlink($filePath);
                 if (($uploadResult['ok'] ?? false) !== true) {
                     return Json::encode(['error' => 'Failed to upload file to storage.']);
                 }

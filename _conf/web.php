@@ -187,6 +187,12 @@ $config = [
                 // Wildcard fallback untuk semua api/* lainnya
                 'api/<action:[\w-]+>'           => 'api/<action>',
 
+                'file-upload/upload-file'        => 'file-upload/upload-file',
+                'file-upload/render'             => 'file-upload/render',
+                'file-upload/lihat-pdf'          => 'file-upload/lihat-pdf',
+                'system-setting/index'           => 'system-setting/index',
+                'system-setting/serve-image'     => 'system-setting/serve-image',
+
                 // ── Custom DB-based UrlRule (untuk routing halaman lainnya) ─────────────
                 ['class' => 'app\\models\\UrlRule', 'connectionID' => 'db'],
             ],
@@ -282,6 +288,10 @@ $config = [
 
                 // Dynamic check for public actions from the controller
                 if (method_exists($action->controller, 'isActionPublic') && $action->controller->isActionPublic($actionId)) {
+                    return true;
+                }
+
+                if ($controller === 'file-upload' && in_array($actionId, ['render', 'lihat-pdf'], true)) {
                     return true;
                 }
 
