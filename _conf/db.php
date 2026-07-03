@@ -1,9 +1,14 @@
 <?php
 
+$dbName = $_ENV['DB_NAME'] ?? 'db_puskesmas';
+if ($dbName === 'puskesmas-be') {
+    $dbName = 'db_puskesmas';
+}
+
 return [
     'class' => 'yii\db\Connection',
     
-    'dsn' => 'pgsql:host='.$_ENV['DB_ADDR'].';port='.$_ENV['DB_PORT'].';dbname='.$_ENV['DB_NAME'].'', // Maybe other DBMS such as psql (PostgreSQL),...
+    'dsn' => 'pgsql:host='.$_ENV['DB_ADDR'].';port='.$_ENV['DB_PORT'].';dbname='.$dbName.'', 
     'username' => $_ENV['DB_USER'],   
     'password' => $_ENV['DB_PASS'],
     'charset' => 'utf8',
