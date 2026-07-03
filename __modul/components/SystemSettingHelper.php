@@ -27,7 +27,11 @@ class SystemSettingHelper
     }
 
     /**
-     * Get setting URL for images/files
+     * Get URL for image settings.
+     * - If value is a file_asset hash (stored via FileUploadController), return render URL
+     * - If value is a plain path (uploads/...), return web-accessible URL
+     * - Otherwise return default
+     *
      * @param string $key
      * @param string $defaultPath
      * @return string
@@ -44,7 +48,21 @@ class SystemSettingHelper
             return $value;
         }
 
-        // Add base_url
+        // Jika value adalah hash (dari FileUploadController dengan db=true)
+        // Hash format: panjang > 30 karakter dan tidak mengandung slash
+        if (!str_contains($value, '/') && strlen($value) > 20) {
+            $baseUrl = rtrim(Yii::$app->params['base_url'] ?? '', '/');
+            return $baseUrl . '/file-upload/render?inline=1&uxid=' . urlencode($value);
+        }
+
+        // Jika value adalah path file lokal (uploads/system-setting/xxx.jpg)
+        // Serve via system-setting/serve-image untuk bypass Nginx routing
+        if (str_starts_with($value, 'uploads/system-setting/')) {
+            $baseUrl = rtrim(Yii::$app->params['base_url'] ?? '', '/');
+            return $baseUrl . '/system-setting/serve-image?file=' . urlencode($value);
+        }
+
+        // Default: path statis (app_asset, dll)
         $baseUrl = rtrim(Yii::$app->params['base_url'] ?? '', '/');
         $value = '/' . ltrim($value, '/');
         return $baseUrl . $value;

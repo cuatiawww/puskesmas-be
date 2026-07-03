@@ -11,6 +11,15 @@ use yii\helpers\FileHelper;
 class SystemSettingController extends BaseController
 {
     /**
+     * serve-image harus bisa diakses tanpa login
+     * (gambar tampil di halaman login yang belum auth)
+     */
+    public function isActionPublic(string $actionId): bool
+    {
+        return $actionId === 'serve-image';
+    }
+
+    /**
      * Serve uploaded image via PHP (bypass Nginx static routing issue)
      * URL: /system-setting/serve-image?file=uploads/system-setting/xxx.jpg
      */
