@@ -3,12 +3,12 @@
 namespace app\controllers;
 
 use Yii;
-use app\models\Tutorial;
+use app\models\Kontak;
 use yii\data\ActiveDataProvider;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
-class TutorialController extends BaseController
+class KontakController extends BaseController
 {
     public $enableCsrfValidation = false;
 
@@ -26,7 +26,7 @@ class TutorialController extends BaseController
 
     public function actionIndex()
     {
-        $query = Tutorial::find();
+        $query = Kontak::find();
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort' => [
@@ -41,14 +41,14 @@ class TutorialController extends BaseController
 
     public function actionCreate()
     {
-        $model = new Tutorial();
+        $model = new Kontak();
 
         if (Yii::$app->request->isPost) {
             if ($model->load(Yii::$app->request->post()) && $model->save()) {
                 Yii::$app->session->setFlash('swal', [
                     'icon' => 'success',
                     'title' => 'Berhasil',
-                    'text' => 'Data tutorial berhasil ditambahkan.',
+                    'text' => 'Data kontak berhasil ditambahkan.',
                 ]);
                 return $this->redirect(['index']);
             }
@@ -66,7 +66,7 @@ class TutorialController extends BaseController
                 Yii::$app->session->setFlash('swal', [
                     'icon' => 'success',
                     'title' => 'Berhasil',
-                    'text' => 'Data tutorial berhasil diperbarui.',
+                    'text' => 'Data kontak berhasil diperbarui.',
                 ]);
                 return $this->redirect(['index']);
             }
@@ -81,14 +81,14 @@ class TutorialController extends BaseController
         Yii::$app->session->setFlash('swal', [
             'icon' => 'success',
             'title' => 'Berhasil',
-            'text' => 'Data tutorial berhasil dihapus.',
+            'text' => 'Data kontak berhasil dihapus.',
         ]);
         return $this->redirect(['index']);
     }
 
     protected function findModel($id)
     {
-        if (($model = Tutorial::findOne($id)) !== null) {
+        if (($model = Kontak::findOne($id)) !== null) {
             return $model;
         }
         throw new NotFoundHttpException('Data tidak ditemukan.');

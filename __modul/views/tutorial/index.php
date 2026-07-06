@@ -3,8 +3,8 @@
 use yii\helpers\Html;
 use yii\helpers\Url;
 
-$this->title = 'Versi Sistem';
-$this->params['active_menu'] = 'versi-sistem';
+$this->title = 'Tutorial Sistem';
+$this->params['active_menu'] = 'tutorial';
 
 $isAdmin = Yii::$app->user->identity && (int)(Yii::$app->user->identity->id_user_level ?? Yii::$app->user->identity->level_user_id ?? 0) === 1;
 
@@ -26,8 +26,8 @@ JS;
     <div class="row align-items-center justify-content-between">
       <div class="col-sm-auto">
         <div class="page-header-title">
-          <h5 class="mb-0 fw-bold">VERSI SISTEM</h5>
-          <p>Informasi rilis dan log pembaruan Sistem Informasi Kesehatan</p>
+          <h5 class="mb-0 fw-bold">TUTORIAL SISTEM</h5>
+          <p>Panduan penggunaan aplikasi Siskohatkes</p>
         </div>
       </div>
       <div class="col-sm-auto">
@@ -37,7 +37,7 @@ JS;
               <i class="ph-duotone ph-house"></i>
             </a>
           </li>
-          <li class="breadcrumb-item">Versi Sistem</li>
+          <li class="breadcrumb-item">Tutorial</li>
         </ul>
       </div>
     </div>
@@ -45,46 +45,16 @@ JS;
 </div>
 
 <div class="row">
-  <!-- Section 1: Ringkasan Integrasi Sistem -->
-  <div class="col-md-12 mb-4">
-    <div class="card shadow-sm border-0">
-      <div class="card-body">
-        <h5 class="fw-bold mb-3">Informasi Sistem Informasi</h5>
-        <p class="text-dark">
-          <strong>Versi terbaru sistem</strong> telah diluncurkan dengan peningkatan signifikan
-          untuk mendukung layanan kesehatan yang lebih efisien dan akurat.
-          Sistem ini telah diintegrasikan dengan <strong>API Daftarin</strong> dan
-          <strong>Satu Sehat</strong>, memungkinkan sinkronisasi data pasien secara real-time.
-        </p>
-
-        <p class="text-dark">
-          Antarmuka pengguna kini dirancang lebih intuitif dengan
-          <strong>dashboard analitik interaktif</strong> yang membantu manajemen
-          dalam pengambilan keputusan berbasis data.
-          Fitur pelaporan juga lebih komprehensif dan otomatis menghasilkan
-          laporan keuangan serta kinerja klinis sesuai standar Kementerian Kesehatan.
-        </p>
-
-        <p class="text-dark mb-0">
-          Dari sisi keamanan, sistem telah dilengkapi dengan
-          <strong>enkripsi end-to-end</strong> dan <strong>kontrol akses berbasis peran</strong>
-          untuk melindungi data kesehatan yang bersifat sensitif.
-        </p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Section 2: Matriks Log Pembaruan Sistem (Changelog) -->
   <div class="col-md-12">
     <div class="card shadow-sm">
       <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div>
-          <h5 class="mb-0 fw-bold">MATRIKS UPDATE LOG</h5>
-          <p class="mb-0 text-muted">Daftar riwayat pembaruan sistem dan catatan rilis</p>
+          <h5 class="mb-0 fw-bold">DAFTAR TUTORIAL</h5>
+          <p class="mb-0 text-muted">Dokumen dan video tutorial penggunaan sistem</p>
         </div>
         <?php if ($isAdmin): ?>
-          <a href="<?= Url::to(['versi-sistem/create']) ?>" class="btn btn-sm btn-primary">
-            <i class="ti ti-plus me-1"></i> Tambah Log Versi
+          <a href="<?= Url::to(['tutorial/create']) ?>" class="btn btn-sm btn-primary">
+            <i class="ti ti-plus me-1"></i> Tambah Tutorial
           </a>
         <?php endif; ?>
       </div>
@@ -95,11 +65,12 @@ JS;
             <thead class="text-white text-center" style="background-color: #1abc9c; border-color: #1abc9c;">
               <tr>
                 <th width="5%">NO</th>
-                <th width="15%">VERSI</th>
-                <th width="20%">TANGGAL RILIS</th>
-                <th>KETERANGAN / LOG UPDATE</th>
+                <th width="25%">NAMA TUTORIAL</th>
+                <th>KETERANGAN</th>
+                <th width="15%">TUTORIAL</th>
+                <th width="15%">LIHAT VIDEO</th>
                 <?php if ($isAdmin): ?>
-                  <th width="12%">AKSI</th>
+                  <th width="10%">AKSI</th>
                 <?php endif; ?>
               </tr>
             </thead>
@@ -109,7 +80,7 @@ JS;
               if (empty($models)): 
               ?>
                 <tr>
-                  <td colspan="<?= $isAdmin ? 5 : 4 ?>" class="text-center text-muted py-4">Data versi sistem belum tersedia.</td>
+                  <td colspan="<?= $isAdmin ? 6 : 5 ?>" class="text-center text-muted py-4">Data tutorial belum tersedia.</td>
                 </tr>
               <?php 
               else: 
@@ -118,16 +89,29 @@ JS;
               ?>
                 <tr>
                   <td class="text-center"><?= $no++ ?></td>
-                  <td>
-                    <span class="badge bg-light-primary text-primary fw-bold px-3 py-2 fs-6">
-                      <?= Html::encode($model->versi) ?>
-                    </span>
+                  <td class="fw-semibold"><?= Html::encode($model->nama_tutorial) ?></td>
+                  <td class="text-dark"><?= nl2br(Html::encode($model->keterangan)) ?></td>
+                  <td class="text-center">
+                    <?php if (!empty($model->link_tutorial)): ?>
+                      <?= Html::a(
+                        '<i class="ti ti-download me-1"></i> Download',
+                        $model->link_tutorial,
+                        ['class' => 'btn btn-sm btn-primary rounded-1', 'target' => '_blank']
+                      ) ?>
+                    <?php else: ?>
+                      <span class="text-muted small">-</span>
+                    <?php endif; ?>
                   </td>
-                  <td class="text-center fw-medium">
-                    <?= date('d-M-Y', strtotime($model->tanggal)) ?>
-                  </td>
-                  <td class="text-dark">
-                    <?= nl2br(Html::encode($model->keterangan)) ?>
+                  <td class="text-center">
+                    <?php if (!empty($model->link_video)): ?>
+                      <?= Html::a(
+                        '<i class="ti ti-player-play me-1"></i> Lihat',
+                        $model->link_video,
+                        ['class' => 'btn btn-sm btn-success rounded-1', 'target' => '_blank']
+                      ) ?>
+                    <?php else: ?>
+                      <span class="text-muted small">-</span>
+                    <?php endif; ?>
                   </td>
                   <?php if ($isAdmin): ?>
                     <td class="text-center">
@@ -136,7 +120,7 @@ JS;
                         <?= Html::a('<i class="ti ti-trash"></i>', ['delete', 'id' => $model->id], [
                           'class' => 'btn btn-xs btn-danger',
                           'data' => [
-                            'confirm' => 'Apakah Anda yakin ingin menghapus log versi ini?',
+                            'confirm' => 'Apakah Anda yakin ingin menghapus tutorial ini?',
                             'method' => 'post',
                           ]
                         ]) ?>

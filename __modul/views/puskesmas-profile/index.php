@@ -8,6 +8,8 @@ use yii\widgets\Pjax;
 $this->title = 'Tata Kelola Kinerja Puskesmas';
 $this->params['active_menu'] = 'puskesmas';
 
+$isAdmin = Yii::$app->user->identity && (int)(Yii::$app->user->identity->id_user_level ?? Yii::$app->user->identity->level_user_id ?? 0) === 1;
+
 $swal = Yii::$app->session->getFlash('swal', null);
 if ($swal) {
     $swalJson = \yii\helpers\Json::encode($swal);
@@ -53,111 +55,121 @@ JS;
       <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div>
           <h5>DAFTAR PUSKESMAS</h5>
-          <p>Kelola data profil faskes dan isi laporan kesiapan.</p>
+          <p>Daftar data profil faskes dan isi laporan kesiapan.</p>
         </div>
+        <?php if ($isAdmin): ?>
         <div class="d-flex gap-2">
           <a href="<?= Url::to(['puskesmas-profile/create']) ?>" class="btn btn-sm btn-primary">
             <i class="ti ti-plus me-1"></i> Tambah Puskesmas
           </a>
         </div>
+        <?php endif; ?>
       </div>
       <div class="card-body table-border-style">
         <div class="table-responsive">
 
           <?php Pjax::begin(); ?>
 
-          <?= GridView::widget([
-            'summary' => 'Menampilkan {begin} - {end} dari {totalCount} Puskesmas',
-            'tableOptions' => ['class' => 'table table-striped table-hover table-bordered align-middle'],
-            'dataProvider' => $dataProvider,
-            'columns' => [
-              ['class' => 'yii\grid\SerialColumn', 'header' => 'NO'],
-              [
-                'attribute' => 'kode_faskes',
-                'header' => 'Kode Faskes',
-                'options' => ['style' => 'width: 120px'],
-              ],
-              [
-                'attribute' => 'nama_puskesmas',
-                'header' => 'Nama Puskesmas',
-                'format' => 'raw',
-                'value' => function($model) {
-                  return '<strong>' . Html::encode($model->nama_puskesmas) . '</strong>';
+          <?php
+          $gridColumns = [
+            ['class' => 'yii\grid\SerialColumn', 'header' => 'NO'],
+            [
+              'attribute' => 'kode_faskes',
+              'header' => 'Kode Faskes',
+              'options' => ['style' => 'width: 120px'],
+            ],
+            [
+              'attribute' => 'nama_puskesmas',
+              'header' => 'Nama Puskesmas',
+              'format' => 'raw',
+              'value' => function($model) {
+                return '<strong>' . Html::encode($model->nama_puskesmas) . '</strong>';
+              }
+            ],
+            [
+              'attribute' => 'kategori_wilayah',
+              'header' => 'Kategori Wilayah',
+              'value' => function($model) {
+                return $model->kategori_wilayah ?: '-';
+              }
+            ],
+            [
+              'attribute' => 'status_pelayanan',
+              'header' => 'Status Pelayanan',
+              'format' => 'raw',
+              'value' => function($model) {
+                $class = $model->status_pelayanan === 'Rawat Inap' ? 'bg-success' : 'bg-secondary';
+                return '<span class="badge ' . $class . '">' . ($model->status_pelayanan ?: 'Non Ranap') . '</span>';
+              }
+            ],
+            [
+              'header' => 'LOKASI',
+              'format' => 'raw',
+              'contentOptions' => ['style' => 'min-width:200px; vertical-align:middle;'],
+              'value' => function($model) {
+                $levelLabel = match(strtolower($model->level_wilayah ?? 'kabupaten')) {
+                  'provinsi' => '<span style="font-size:0.75rem; font-weight:600; color:#e05c2d;">Provinsi</span>',
+                  default    => '<span style="font-size:0.75rem; font-weight:600; color:#e05c2d;">Kab/Kota</span>',
+                };
+                $kabName  = $model->kabupaten ? strtoupper($model->kabupaten->name) : '-';
+                $kecName  = $model->kecamatan ? ucwords(strtolower($model->kecamatan->name)) : '';
+                $provName = $model->provinsi  ? ucwords(strtolower($model->provinsi->name))  : '';
+                $html = $levelLabel . '<br><strong>' . Html::encode($kabName) . '</strong>';
+                if ($kecName) {
+                  $html .= '<br><small class="text-muted">' . Html::encode($kecName);
+                  if ($provName) $html .= ', ' . Html::encode($provName);
+                  $html .= '</small>';
                 }
-              ],
-              [
-                'attribute' => 'kategori_wilayah',
-                'header' => 'Kategori Wilayah',
-                'value' => function($model) {
-                  return $model->kategori_wilayah ?: '-';
+                return $html;
+              }
+            ],
+            [
+              'header' => 'FORMULIR',
+              'format' => 'raw',
+              'contentOptions' => ['style' => 'width: 150px; text-align: center; vertical-align: middle;'],
+              'value' => function($model) use ($isAdmin) {
+                $kinerjaCreateUrl = \yii\helpers\Url::to(['kinerja-create', 'id' => $model->id]);
+                $kinerjaListUrl   = \yii\helpers\Url::to(['kinerja',        'id' => $model->id]);
+                $penyakitUrl      = \yii\helpers\Url::to(['penyakit',       'id' => $model->id]);
+                
+                $createBtn = '';
+                if ($isAdmin) {
+                    $createBtn = '
+                      <li>
+                        <a class="dropdown-item" href="' . $kinerjaCreateUrl . '">
+                          <i class="ti ti-file-plus me-2"></i>ISI LAPORAN KINERJA
+                        </a>
+                      </li>
+                    ';
                 }
-              ],
-              [
-                'attribute' => 'status_pelayanan',
-                'header' => 'Status Pelayanan',
-                'format' => 'raw',
-                'value' => function($model) {
-                  $class = $model->status_pelayanan === 'Rawat Inap' ? 'bg-success' : 'bg-secondary';
-                  return '<span class="badge ' . $class . '">' . ($model->status_pelayanan ?: 'Non Ranap') . '</span>';
-                }
-              ],
-              [
-                'header' => 'LOKASI',
-                'format' => 'raw',
-                'contentOptions' => ['style' => 'min-width:200px; vertical-align:middle;'],
-                'value' => function($model) {
-                  $levelLabel = match(strtolower($model->level_wilayah ?? 'kabupaten')) {
-                    'provinsi' => '<span style="font-size:0.75rem; font-weight:600; color:#e05c2d;">Provinsi</span>',
-                    default    => '<span style="font-size:0.75rem; font-weight:600; color:#e05c2d;">Kab/Kota</span>',
-                  };
-                  $kabName  = $model->kabupaten ? strtoupper($model->kabupaten->name) : '-';
-                  $kecName  = $model->kecamatan ? ucwords(strtolower($model->kecamatan->name)) : '';
-                  $provName = $model->provinsi  ? ucwords(strtolower($model->provinsi->name))  : '';
-                  $html = $levelLabel . '<br><strong>' . Html::encode($kabName) . '</strong>';
-                  if ($kecName) {
-                    $html .= '<br><small class="text-muted">' . Html::encode($kecName);
-                    if ($provName) $html .= ', ' . Html::encode($provName);
-                    $html .= '</small>';
-                  }
-                  return $html;
-                }
-              ],
-              [
-                'header' => 'FORMULIR',
-                'format' => 'raw',
-                'contentOptions' => ['style' => 'width: 150px; text-align: center; vertical-align: middle;'],
-                'value' => function($model) {
-                  $kinerjaCreateUrl = \yii\helpers\Url::to(['kinerja-create', 'id' => $model->id]);
-                  $kinerjaListUrl   = \yii\helpers\Url::to(['kinerja',        'id' => $model->id]);
-                  $penyakitUrl      = \yii\helpers\Url::to(['penyakit',       'id' => $model->id]);
-                  return '
-                    <div class="btn-group">
-                      <button type="button" class="btn btn-primary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="ti ti-clipboard-list me-1"></i>FORMULIR
-                      </button>
-                      <ul class="dropdown-menu dropdown-menu-end">
-                        <li>
-                          <a class="dropdown-item" href="' . $kinerjaCreateUrl . '">
-                            <i class="ti ti-file-plus me-2"></i>ISI LAPORAN KINERJA
-                          </a>
-                        </li>
-                        <li>
-                          <a class="dropdown-item" href="' . $kinerjaListUrl . '">
-                            <i class="ti ti-report-analytics me-2"></i>RIWAYAT KINERJA
-                          </a>
-                        </li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li>
-                          <a class="dropdown-item" href="' . $penyakitUrl . '">
-                            <i class="ti ti-activity me-2"></i>DATA KASUS PENYAKIT
-                          </a>
-                        </li>
-                      </ul>
-                    </div>
-                  ';
-                }
-              ],
-              [
+
+                return '
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-primary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                      <i class="ti ti-clipboard-list me-1"></i>FORMULIR
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                      ' . $createBtn . '
+                      <li>
+                        <a class="dropdown-item" href="' . $kinerjaListUrl . '">
+                          <i class="ti ti-report-analytics me-2"></i>RIWAYAT KINERJA
+                        </a>
+                      </li>
+                      <li><hr class="dropdown-divider"></li>
+                      <li>
+                        <a class="dropdown-item" href="' . $penyakitUrl . '">
+                          <i class="ti ti-activity me-2"></i>DATA KASUS PENYAKIT
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                ';
+              }
+            ],
+          ];
+
+          if ($isAdmin) {
+              $gridColumns[] = [
                 'class' => 'yii\grid\ActionColumn',
                 'header' => 'Aksi',
                 'options' => ['style' => 'width: 120px; text-align: center;'],
@@ -177,8 +189,15 @@ JS;
                     ]);
                   },
                 ],
-              ],
-            ],
+              ];
+          }
+          ?>
+
+          <?= GridView::widget([
+            'summary' => 'Menampilkan {begin} - {end} dari {totalCount} Puskesmas',
+            'tableOptions' => ['class' => 'table table-striped table-hover table-bordered align-middle'],
+            'dataProvider' => $dataProvider,
+            'columns' => $gridColumns,
           ]); ?>
 
           <?php Pjax::end(); ?>
@@ -188,3 +207,4 @@ JS;
     </div>
   </div>
 </div>
+

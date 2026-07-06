@@ -164,7 +164,20 @@ ul.pagination > li.next > a{
 		}
 	 </script>
 
-
+	 <?php
+	 $swalFlash = Yii::$app->session->getFlash('swal', null);
+	 if ($swalFlash) {
+		 $swalFlashJson = \yii\helpers\Json::encode($swalFlash);
+		 $this->registerJs("
+			 (function(){
+				 var opt = $swalFlashJson;
+				 if (typeof Swal !== 'undefined') {
+					 Swal.fire(opt);
+				 }
+			 })();
+		 ");
+	 }
+	 ?>
 
 </head>
 <body data-pc-preset="preset-1" data-pc-sidebar-theme="dark" data-pc-sidebar-caption="true" data-pc-direction="ltr" data-pc-theme="light">

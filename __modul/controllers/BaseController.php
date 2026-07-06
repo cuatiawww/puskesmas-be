@@ -74,7 +74,28 @@ class BaseController extends Controller
         }
 
         if (!$this->checkRoutePermission($action)) {
-            throw new ForbiddenHttpException('Anda tidak memiliki hak akses untuk aksi ini.');
+            if (Yii::$app->request->isAjax) {
+                throw new ForbiddenHttpException('Anda tidak memiliki hak akses untuk aksi ini.');
+            }
+
+            Yii::$app->session->setFlash('swal', [
+                'icon' => 'error',
+                'title' => 'Akses Ditolak',
+                'text' => 'Anda tidak memiliki hak akses untuk halaman atau aksi tersebut.',
+                'showConfirmButton' => true,
+                'confirmButtonColor' => '#229799',
+            ]);
+
+            $referrer = Yii::$app->request->getReferrer();
+            $requestedUrl = Yii::$app->request->getAbsoluteUrl();
+
+            if (empty($referrer) || $referrer === $requestedUrl) {
+                $homeUrl = Yii::$app->user->isGuest ? ['site/login'] : ['beranda/index'];
+                $this->redirect($homeUrl)->send();
+            } else {
+                $this->redirect($referrer)->send();
+            }
+            return false;
         }
 
         return parent::beforeAction($action);
