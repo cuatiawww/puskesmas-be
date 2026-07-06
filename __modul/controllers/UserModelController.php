@@ -690,8 +690,8 @@ class UserModelController extends BaseController
                 \Yii::$app->session->setFlash('error', 'Parameter tidak lengkap');
                 return $this->redirect(['user-model/ubah-password']);
             }
-            if (strlen($new) < 6) {
-                \Yii::$app->session->setFlash('error', 'Password baru minimal 6 karakter');
+            if (!$this->isStrongPassword($new)) {
+                \Yii::$app->session->setFlash('error', $this->getStrongPasswordMessage());
                 return $this->redirect(['user-model/ubah-password']);
             }
             if ($new !== $confirm) {
@@ -984,4 +984,5 @@ class UserModelController extends BaseController
             return ['success' => false, 'message' => 'Error: ' . $e->getMessage()];
         }
     }
+
 }

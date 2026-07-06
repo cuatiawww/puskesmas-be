@@ -54,6 +54,14 @@ $this->params['active_menu'] = 'data-user';
             <td><?= Html::encode($model->email) ?></td>
           </tr>
           <tr>
+            <th>Jenis Kelamin</th>
+            <td><?= Html::encode($model->jenis_kelamin ?: '-') ?></td>
+          </tr>
+          <tr>
+            <th>Alamat</th>
+            <td><?= Html::encode($model->alamat ?: '-') ?></td>
+          </tr>
+          <tr>
             <th>Master Wilayah</th>
             <td><?= Html::encode($model->masterWilayah->nama_wilayah ?? '-') ?></td>
           </tr>

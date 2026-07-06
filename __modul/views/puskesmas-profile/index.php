@@ -83,7 +83,17 @@ JS;
               'header' => 'Nama Puskesmas',
               'format' => 'raw',
               'value' => function($model) {
-                return '<strong>' . Html::encode($model->nama_puskesmas) . '</strong>';
+                $photo = $model->foto_puskesmas;
+                $photoUrl = !empty($photo) && file_exists(Yii::getAlias('@app/../') . $photo)
+                    ? Url::base() . '/' . ltrim($photo, '/')
+                    : null;
+                
+                $imgHtml = '';
+                if ($photoUrl) {
+                    $imgHtml = '<img src="' . htmlspecialchars($photoUrl) . '" class="rounded border me-2" style="width: 40px; height: 40px; object-fit: cover; vertical-align: middle;">';
+                }
+                
+                return '<div class="d-flex align-items-center">' . $imgHtml . '<span><strong>' . Html::encode($model->nama_puskesmas) . '</strong></span></div>';
               }
             ],
             [

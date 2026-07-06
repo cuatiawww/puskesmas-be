@@ -64,9 +64,9 @@ $user_role = $user_level['nama_level'];
         <i class="ph-duotone ph-diamonds-four"></i>
       </a>
       <div class="dropdown-menu dropdown-menu-end pc-h-dropdown">
-        <a href="#" class="dropdown-item">
+        <a href="<?= \yii\helpers\Url::to(['/profil/index']) ?>" class="dropdown-item">
           <i class="ph-duotone ph-user"></i>
-          <span>Akun Petugas</span>
+          <span>Akun Saya</span>
         </a>
         <a href="#" class="dropdown-item">
           <i class="ph-duotone ph-gear"></i>
@@ -76,7 +76,7 @@ $user_role = $user_level['nama_level'];
           <i class="ph-duotone ph-lifebuoy"></i>
           <span>Bantuan</span>
         </a>
-        <a href="#" class="dropdown-item">
+        <a href="<?= \yii\helpers\Url::to(['/profil/ubah-password']) ?>" class="dropdown-item">
           <i class="ph-duotone ph-lock-key"></i>
           <span>Ubah Password</span>
         </a>
@@ -237,7 +237,7 @@ $user_role = $user_level['nama_level'];
                 </div>
               </li>
               <li class="list-group-item">
-                <a href="#" class="dropdown-item">
+                <a href="<?= \yii\helpers\Url::to(['/profil/ubah-password']) ?>" class="dropdown-item">
                   <span class="d-flex align-items-center">
                     <i class="ph-duotone ph-key"></i>
                     <span>Ganti password</span>
@@ -249,10 +249,10 @@ $user_role = $user_level['nama_level'];
                     <span>Download</span>
                   </span>
                 </a>
-                <a href="#" class="dropdown-item">
+                <a href="<?= \yii\helpers\Url::to(['/profil/index']) ?>" class="dropdown-item">
                   <span class="d-flex align-items-center">
                     <i class="ph-duotone ph-user-circle"></i>
-                    <span>Edit Profil</span>
+                    <span>Akun Saya</span>
                   </span>
                 </a>
                 <a href="<?= Yii::$app->params['base_url'] ?>/site/logout" class="dropdown-item">

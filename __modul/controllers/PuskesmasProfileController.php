@@ -61,7 +61,25 @@ class PuskesmasProfileController extends BaseController
         $wilayahService = new WilayahService();
 
         if (Yii::$app->request->isPost) {
-            if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            $model->load(Yii::$app->request->post());
+            $file = UploadedFile::getInstance($model, 'foto_puskesmas');
+            if ($file) {
+                if ($file->size <= 2 * 1024 * 1024 && in_array(strtolower($file->extension), ['jpg', 'jpeg', 'png'], true)) {
+                    $dir = Yii::getAlias('@app/../uploads/puskesmas/');
+                    if (!is_dir($dir)) {
+                        mkdir($dir, 0777, true);
+                    }
+                    $fileName = uniqid() . '.' . $file->extension;
+                    $filePath = $dir . $fileName;
+                    if ($file->saveAs($filePath)) {
+                        $model->foto_puskesmas = 'uploads/puskesmas/' . $fileName;
+                    }
+                } else {
+                    $model->addError('foto_puskesmas', 'File foto harus berupa JPG, JPEG, atau PNG dan ukuran maksimal 2MB.');
+                }
+            }
+
+            if (!$model->hasErrors() && $model->save()) {
                 Yii::$app->session->setFlash('swal', [
                     'icon' => 'success',
                     'title' => 'Berhasil',
@@ -86,9 +104,36 @@ class PuskesmasProfileController extends BaseController
     {
         $model = $this->findModel($id);
         $wilayahService = new WilayahService();
+        $oldPhoto = $model->foto_puskesmas;
 
         if (Yii::$app->request->isPost) {
-            if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            $model->load(Yii::$app->request->post());
+            $file = UploadedFile::getInstance($model, 'foto_puskesmas');
+            if ($file) {
+                if ($file->size <= 2 * 1024 * 1024 && in_array(strtolower($file->extension), ['jpg', 'jpeg', 'png'], true)) {
+                    $dir = Yii::getAlias('@app/../uploads/puskesmas/');
+                    if (!is_dir($dir)) {
+                        mkdir($dir, 0777, true);
+                    }
+                    $fileName = uniqid() . '.' . $file->extension;
+                    $filePath = $dir . $fileName;
+                    if ($file->saveAs($filePath)) {
+                        if (!empty($oldPhoto)) {
+                            $oldPath = Yii::getAlias('@app/../') . ltrim($oldPhoto, '/');
+                            if (file_exists($oldPath) && is_file($oldPath)) {
+                                @unlink($oldPath);
+                            }
+                        }
+                        $model->foto_puskesmas = 'uploads/puskesmas/' . $fileName;
+                    }
+                } else {
+                    $model->addError('foto_puskesmas', 'File foto harus berupa JPG, JPEG, atau PNG dan ukuran maksimal 2MB.');
+                }
+            } else {
+                $model->foto_puskesmas = $oldPhoto;
+            }
+
+            if (!$model->hasErrors() && $model->save()) {
                 Yii::$app->session->setFlash('swal', [
                     'icon' => 'success',
                     'title' => 'Berhasil',

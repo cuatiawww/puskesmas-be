@@ -31,7 +31,7 @@ if (!empty($model->kecamatan_id)) {
 
 <div class="puskesmas-profile-form">
 
-    <?php $form = ActiveForm::begin(); ?>
+    <?php $form = ActiveForm::begin(['options' => ['enctype' => 'multipart/form-data']]); ?>
 
     <div class="row">
         <div class="col-12 mb-4">
@@ -57,7 +57,7 @@ if (!empty($model->kecamatan_id)) {
                                 'Tidak Terpencil' => 'Tidak Terpencil',
                                 'Terpencil' => 'Terpencil',
                                 'Sangat Terpencil' => 'Sangat Terpencil',
-                            ]) ?>
+                             ]) ?>
                         </div>
                         <div class="col-md-6">
                             <?= $form->field($model, 'kategori_jenis')->dropDownList([
@@ -79,6 +79,14 @@ if (!empty($model->kecamatan_id)) {
                         'Utama' => 'Utama',
                         'Paripurna' => 'Paripurna',
                     ]) ?>
+
+                    <?= $form->field($model, 'foto_puskesmas')->fileInput(['accept' => 'image/*']) ?>
+                    <?php if (!$model->isNewRecord && !empty($model->foto_puskesmas)): ?>
+                        <div class="mb-3">
+                            <label class="form-label d-block">Foto Saat Ini</label>
+                            <img src="<?= Url::base() . '/' . ltrim($model->foto_puskesmas, '/') ?>" class="img-thumbnail" style="max-height: 150px;">
+                        </div>
+                    <?php endif; ?>
 
                     <hr>
                     <h6 class="fw-bold text-teal mb-3">Persyaratan Bangunan & Lab</h6>

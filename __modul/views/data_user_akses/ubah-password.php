@@ -66,7 +66,21 @@ $this->params['active_menu'] = 'ubah-password';
                     <i class="ph-duotone ph-eye"></i>
                   </button>
                 </div>
-                <small class="text-muted">Minimal 6 karakter</small>
+                <!-- Password Strength Checklist -->
+                <ul class="list-unstyled mt-2" id="password-rules-list" style="font-size: 0.825rem; line-height: 1.6;">
+                  <li id="rule-length" class="text-danger fw-semibold">
+                    <i class="ti ti-x me-1"></i> Minimal 8 Karakter
+                  </li>
+                  <li id="rule-upper" class="text-danger fw-semibold">
+                    <i class="ti ti-x me-1"></i> Mengandung Huruf Besar (A-Z)
+                  </li>
+                  <li id="rule-number" class="text-danger fw-semibold">
+                    <i class="ti ti-x me-1"></i> Mengandung Angka (0-9)
+                  </li>
+                  <li id="rule-special" class="text-danger fw-semibold">
+                    <i class="ti ti-x me-1"></i> Mengandung Karakter Khusus (@$!%*?&)
+                  </li>
+                </ul>
               </div>
 
               <div class="mb-3">
@@ -99,16 +113,94 @@ $(document).ready(function() {
   $('#toggleNewPassword').on('click', function() { togglePasswordVisibility('new_password', $(this)); });
   $('#toggleConfirmPassword').on('click', function() { togglePasswordVisibility('confirm_password', $(this)); });
 
+  var passwordInput = $('#new_password');
+  var submitBtn = $('#btnUbahPassword');
+  
+  var ruleLength = $('#rule-length');
+  var ruleUpper = $('#rule-upper');
+  var ruleNumber = $('#rule-number');
+  var ruleSpecial = $('#rule-special');
+  
+  // Disable button on load
+  submitBtn.prop('disabled', true);
+  
+  passwordInput.on('input', function() {
+      var val = $(this).val();
+      
+      var hasLength = val.length >= 8;
+      var hasUpper = /[A-Z]/.test(val);
+      var hasNumber = /\d/.test(val);
+      var hasSpecial = /[@$!%*?&]/.test(val);
+      
+      // Rule Length
+      if (hasLength) {
+          ruleLength.removeClass('text-danger').addClass('text-success')
+                    .find('i').removeClass('ti-x').addClass('ti-check');
+      } else {
+          ruleLength.removeClass('text-success').addClass('text-danger')
+                    .find('i').removeClass('ti-check').addClass('ti-x');
+      }
+      
+      // Rule Upper
+      if (hasUpper) {
+          ruleUpper.removeClass('text-danger').addClass('text-success')
+                   .find('i').removeClass('ti-x').addClass('ti-check');
+      } else {
+          ruleUpper.removeClass('text-success').addClass('text-danger')
+                   .find('i').removeClass('ti-check').addClass('ti-x');
+      }
+      
+      // Rule Number
+      if (hasNumber) {
+          ruleNumber.removeClass('text-danger').addClass('text-success')
+                    .find('i').removeClass('ti-x').addClass('ti-check');
+      } else {
+          ruleNumber.removeClass('text-success').addClass('text-danger')
+                    .find('i').removeClass('ti-check').addClass('ti-x');
+      }
+      
+      // Rule Special
+      if (hasSpecial) {
+          ruleSpecial.removeClass('text-danger').addClass('text-success')
+                     .find('i').removeClass('ti-x').addClass('ti-check');
+      } else {
+          ruleSpecial.removeClass('text-success').addClass('text-danger')
+                     .find('i').removeClass('ti-check').addClass('ti-x');
+      }
+      
+      // Enable/Disable submit button
+      if (hasLength && hasUpper && hasNumber && hasSpecial) {
+          submitBtn.prop('disabled', false);
+      } else {
+          submitBtn.prop('disabled', true);
+      }
+  });
+
   $('#formUbahPassword').on('submit', function(e) {
-    // client-side validation; allow normal POST submission when valid
     var oldPassword = $('#old_password').val();
     var newPassword = $('#new_password').val();
     var confirmPassword = $('#confirm_password').val();
 
-    if (newPassword.length < 6) { showAlert('Password baru minimal 6 karakter', 'danger'); e.preventDefault(); return false; }
-    if (newPassword !== confirmPassword) { showAlert('Konfirmasi password tidak cocok', 'danger'); e.preventDefault(); return false; }
-    if (oldPassword === newPassword) { showAlert('Password baru harus berbeda dengan password lama', 'danger'); e.preventDefault(); return false; }
-    // allow form to submit to server
+    var hasLength = newPassword.length >= 8;
+    var hasUpper = /[A-Z]/.test(newPassword);
+    var hasNumber = /\d/.test(newPassword);
+    var hasSpecial = /[@$!%*?&]/.test(newPassword);
+
+    if (!hasLength || !hasUpper || !hasNumber || !hasSpecial) {
+      showAlert('Password belum memenuhi syarat kriteria password kuat', 'danger');
+      e.preventDefault();
+      return false;
+    }
+    if (newPassword !== confirmPassword) {
+      showAlert('Konfirmasi password tidak cocok', 'danger');
+      e.preventDefault();
+      return false;
+    }
+    if (oldPassword === newPassword) {
+      showAlert('Password baru harus berbeda dengan password lama', 'danger');
+      e.preventDefault();
+      return false;
+    }
   });
 });
 

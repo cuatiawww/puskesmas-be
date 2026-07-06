@@ -236,6 +236,8 @@ class ApiController extends BaseController
                 'email' => $userEmail,
                 'nama_lengkap' => $userFullName,
                 'no_telpon' => (string) $this->getUserAttribute($user, 'no_telpon', ''),
+                'alamat' => (string) $this->getUserAttribute($user, 'alamat', ''),
+                'jenis_kelamin' => (string) $this->getUserAttribute($user, 'jenis_kelamin', ''),
                 'level_user_id' => $levelUserId,
                 'level_name' => $levelName,
                 'wilayah_scope' => $wilayahScope,
@@ -318,6 +320,8 @@ class ApiController extends BaseController
         $namaLengkap = $req->post('nama_lengkap') ?? ($bodyParams['nama_lengkap'] ?? ($rawJson['nama_lengkap'] ?? null));
         $email = $req->post('email') ?? ($bodyParams['email'] ?? ($rawJson['email'] ?? null));
         $noTelpon = $req->post('no_telpon') ?? ($bodyParams['no_telpon'] ?? ($rawJson['no_telpon'] ?? null));
+        $alamat = $req->post('alamat') ?? ($bodyParams['alamat'] ?? ($rawJson['alamat'] ?? null));
+        $jenisKelamin = $req->post('jenis_kelamin') ?? ($bodyParams['jenis_kelamin'] ?? ($rawJson['jenis_kelamin'] ?? null));
 
         if (empty($username) || empty($namaLengkap) || empty($email)) {
             return ['success' => false, 'message' => 'Username, Nama Lengkap, dan Email wajib diisi.'];
@@ -339,6 +343,8 @@ class ApiController extends BaseController
         $user->nama_lengkap = $namaLengkap;
         $user->email = $email;
         $user->no_telpon = $noTelpon;
+        $user->alamat = $alamat;
+        $user->jenis_kelamin = $jenisKelamin;
 
         if ($user->save(false)) {
             // Re-generate token with updated user information
@@ -393,6 +399,8 @@ class ApiController extends BaseController
                     'email' => $user->email,
                     'nama_lengkap' => $user->nama_lengkap,
                     'no_telpon' => $user->no_telpon,
+                    'alamat' => $user->alamat,
+                    'jenis_kelamin' => $user->jenis_kelamin,
                     'level_user_id' => $levelUserId,
                     'level_name' => $levelName,
                     'wilayah_scope' => $wilayahScope,

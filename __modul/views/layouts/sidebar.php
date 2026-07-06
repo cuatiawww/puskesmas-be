@@ -111,9 +111,6 @@ function getMenuUrl($route) {
   if (preg_match('~^(https?:)?//~i', $r)) {
     return $r;
   }
-  if (strpos($r, '/') === 0) {
-    return $r;
-  }
   $cleanRoute = '/' . ltrim($r, '/');
   return Url::to([$cleanRoute]);
 }
@@ -142,9 +139,9 @@ function getMenuUrl($route) {
           <span><?php echo htmlspecialchars($user_role); ?></span>
           <ul>
             <li
-              ><a href="<?=Yii::$app->params['base_url']?>/user-model/update" class="pc-user-links">
+              ><a href="<?= Url::to(['/profil/index']) ?>" class="pc-user-links">
                 <i class="ph-duotone ph-user"></i>
-                <span>AKUN PETUGAS</span>
+                <span>AKUN SAYA</span>
               </a></li
             >
             <li
@@ -154,7 +151,7 @@ function getMenuUrl($route) {
               </a></li
             > 
             <li
-              ><a href="#" class="pc-user-links">
+              ><a href="<?= Url::to(['/profil/ubah-password']) ?>" class="pc-user-links">
                 <i class="ph-duotone ph-lock-key"></i>
                 <span>UBAH PASSWORD</span>
               </a></li

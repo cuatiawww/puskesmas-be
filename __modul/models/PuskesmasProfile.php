@@ -46,7 +46,7 @@ class PuskesmasProfile extends \yii\db\ActiveRecord
             [['izin_berlaku_sampai', 'tanggal_registrasi', 'created_at', 'updated_at'], 'safe'],
             [['status_aktif', 'bangunan_permanen', 'bangunan_terpisah', 'lab_tingkat1'], 'boolean'],
             [['kode_faskes', 'kategori_wilayah', 'kategori_jenis', 'status_pelayanan', 'status_akreditasi', 'level_wilayah'], 'string', 'max' => 50],
-            [['nama_puskesmas', 'nomor_izin'], 'string', 'max' => 255],
+            [['nama_puskesmas', 'nomor_izin', 'foto_puskesmas'], 'string', 'max' => 255],
             [['kode_faskes'], 'unique'],
         ];
     }
@@ -80,6 +80,7 @@ class PuskesmasProfile extends \yii\db\ActiveRecord
             'jumlah_nakes_medis' => 'Jumlah Tenaga Medis (Dokter/Gigi dll)',
             'jumlah_nakes_paramedis' => 'Jumlah Tenaga Kesehatan (Perawat/Bidan dll)',
             'jumlah_nakes_penunjang' => 'Jumlah Tenaga Pendukung/Penunjang',
+            'foto_puskesmas' => 'Foto Puskesmas',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];

@@ -105,6 +105,30 @@ if ($selectedLevel) {
             ->label('Email <span class="text-danger">*</span>', ['encode' => false]) ?>
         </div>
 
+        <!-- Jenis Kelamin -->
+        <div class="mb-3">
+          <?= $form->field($model, 'jenis_kelamin')
+            ->dropDownList([
+              'Laki-laki' => 'Laki-laki',
+              'Perempuan' => 'Perempuan',
+            ], [
+              'class'  => 'form-control',
+              'prompt' => '-- Pilih Jenis Kelamin --',
+            ])
+            ->label('Jenis Kelamin') ?>
+        </div>
+
+        <!-- Alamat -->
+        <div class="mb-3">
+          <?= $form->field($model, 'alamat')
+            ->textarea([
+              'class'       => 'form-control',
+              'placeholder' => 'Masukkan alamat lengkap',
+              'rows'        => 2,
+            ])
+            ->label('Alamat') ?>
+        </div>
+
         <!-- Password -->
         <div class="row">
           <div class="col-md-6">
