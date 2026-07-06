@@ -21,6 +21,8 @@ class RegistrationEmailService
 
         $systemName  = SystemSettingHelper::get('email_system_name',  'Asistensi Kinerja Puskesmas');
         $senderLabel = SystemSettingHelper::get('email_sender_label', $systemName . ' (KEMKES RI)');
+        $globalGreeting = SystemSettingHelper::get('email_greeting_prefix', 'Yth.');
+        $globalColor = SystemSettingHelper::get('email_header_color', '#0f766e');
 
         $cache = [
             // Nama sistem yang muncul di dalam isi email
@@ -28,7 +30,7 @@ class RegistrationEmailService
             // Label pengirim di baris tanda tangan bawah isi email
             'sender_label'       => $senderLabel,
             // Sapaan awal sebelum nama user (misal "Yth.", "Kepada Yth.", "Dear")
-            'greeting_prefix'    => SystemSettingHelper::get('email_greeting_prefix',    'Yth.'),
+            'greeting_prefix'    => $globalGreeting,
             // Teks nama organisasi di footer berwarna
             'footer_org'         => SystemSettingHelper::get('email_footer_org',         'Kementerian Kesehatan Republik Indonesia'),
             // Teks link di footer kanan
@@ -36,7 +38,23 @@ class RegistrationEmailService
             // URL link di footer kanan
             'footer_link_url'    => SystemSettingHelper::get('email_footer_link_url',    ''),
             // Warna aksen (strip atas card + warna footer) — gunakan hex
-            'header_color'       => SystemSettingHelper::get('email_header_color',       '#0f766e'),
+            'header_color'       => $globalColor,
+
+            // Specific OTP config
+            'otp_greeting'       => SystemSettingHelper::get('email_otp_greeting',       $globalGreeting),
+            'otp_color'          => SystemSettingHelper::get('email_otp_color',          '#0284c7'),
+
+            // Specific Approved config
+            'approved_greeting'  => SystemSettingHelper::get('email_approved_greeting',  $globalGreeting),
+            'approved_color'     => SystemSettingHelper::get('email_approved_color',     $globalColor),
+
+            // Specific Rejected config
+            'rejected_greeting'  => SystemSettingHelper::get('email_rejected_greeting',  $globalGreeting),
+            'rejected_color'     => SystemSettingHelper::get('email_rejected_color',     '#e11d48'),
+
+            // Specific Created config
+            'created_greeting'   => SystemSettingHelper::get('email_created_greeting',   $globalGreeting),
+            'created_color'      => SystemSettingHelper::get('email_created_color',      $globalColor),
         ];
         return $cache;
     }
@@ -119,12 +137,13 @@ class RegistrationEmailService
         $c    = self::cfg();
         $name = strtoupper(htmlspecialchars($registration->nama_lengkap, ENT_QUOTES, 'UTF-8'));
         $sysName = htmlspecialchars($c['system_name'], ENT_QUOTES, 'UTF-8');
-        $greeting = htmlspecialchars($c['greeting_prefix'], ENT_QUOTES, 'UTF-8');
+        $greeting = htmlspecialchars($c['otp_greeting'], ENT_QUOTES, 'UTF-8');
+        $accent = $c['otp_color'];
 
         $subject = 'Kode OTP Verifikasi Email - ' . $c['system_name'];
 
         $content = '
-            <div style="color:#0284c7;font-size:18px;font-weight:bold;margin-bottom:15px;">KODE VERIFIKASI EMAIL</div>
+            <div style="color:' . htmlspecialchars($accent, ENT_QUOTES, 'UTF-8') . ';font-size:18px;font-weight:bold;margin-bottom:15px;">KODE VERIFIKASI EMAIL</div>
             <p>' . $greeting . ' <strong>' . $name . '</strong>,</p>
             <p>Terima kasih telah melakukan pendaftaran akun pada aplikasi <strong>' . $sysName . '</strong>.
                Gunakan kode OTP berikut untuk memverifikasi alamat email Anda:</p>
@@ -139,7 +158,7 @@ class RegistrationEmailService
                Demi keamanan, mohon tidak membagikan kode OTP ini kepada siapa pun.</p>'
             . self::signatureBlock();
 
-        $body = self::wrapHtml($content, '#0284c7');
+        $body = self::wrapHtml($content, $accent);
         return self::send($registration->email, $subject, $body);
     }
 
@@ -149,10 +168,10 @@ class RegistrationEmailService
     public static function sendApproved(UserRegistration $registration, ?string $plainPassword = null): bool
     {
         $c       = self::cfg();
-        $accent  = $c['header_color'];
+        $accent  = $c['approved_color'];
         $name    = strtoupper(htmlspecialchars($registration->nama_lengkap, ENT_QUOTES, 'UTF-8'));
         $sysName = htmlspecialchars($c['system_name'], ENT_QUOTES, 'UTF-8');
-        $greeting = htmlspecialchars($c['greeting_prefix'], ENT_QUOTES, 'UTF-8');
+        $greeting = htmlspecialchars($c['approved_greeting'], ENT_QUOTES, 'UTF-8');
 
         $user     = $registration->user;
         $username = $user
@@ -181,22 +200,23 @@ class RegistrationEmailService
     public static function sendRejected(UserRegistration $registration): bool
     {
         $c       = self::cfg();
+        $accent  = $c['rejected_color'];
         $name    = strtoupper(htmlspecialchars($registration->nama_lengkap, ENT_QUOTES, 'UTF-8'));
         $sysName = htmlspecialchars($c['system_name'], ENT_QUOTES, 'UTF-8');
-        $greeting = htmlspecialchars($c['greeting_prefix'], ENT_QUOTES, 'UTF-8');
+        $greeting = htmlspecialchars($c['rejected_greeting'], ENT_QUOTES, 'UTF-8');
 
         $reason     = trim((string) $registration->rejection_reason);
         $reasonHtml = $reason !== ''
-            ? '<div style="background:#fff1f2;padding:15px 20px;border-radius:6px;margin:20px 0;border-left:4px solid #e11d48;font-size:14px;">'
+            ? '<div style="background:#fff1f2;padding:15px 20px;border-radius:6px;margin:20px 0;border-left:4px solid ' . htmlspecialchars($accent, ENT_QUOTES, 'UTF-8') . ';font-size:14px;">'
               . '<strong style="color:#9f1239;">Alasan Penolakan:</strong><br>'
-              . '<span style="color:#e11d48;font-style:italic;">"' . htmlspecialchars($reason, ENT_QUOTES, 'UTF-8') . '"</span>'
+              . '<span style="color:' . htmlspecialchars($accent, ENT_QUOTES, 'UTF-8') . ';font-style:italic;">"' . htmlspecialchars($reason, ENT_QUOTES, 'UTF-8') . '"</span>'
               . '</div>'
             : '';
 
         $subject = 'Pendaftaran Akun Ditolak - ' . $c['system_name'];
 
         $content = '
-            <div style="color:#e11d48;font-size:18px;font-weight:bold;margin-bottom:15px;">PENDAFTARAN AKUN DITOLAK</div>
+            <div style="color:' . htmlspecialchars($accent, ENT_QUOTES, 'UTF-8') . ';font-size:18px;font-weight:bold;margin-bottom:15px;">PENDAFTARAN AKUN DITOLAK</div>
             <p>' . $greeting . ' <strong>' . $name . '</strong>,</p>
             <p>Terima kasih telah melakukan pengajuan pendaftaran akun pada aplikasi <strong>' . $sysName . '</strong>.</p>
             <p>Mohon maaf, pengajuan pendaftaran Anda belum dapat kami setujui saat ini.</p>'
@@ -205,7 +225,7 @@ class RegistrationEmailService
                atau hubungi Administrator untuk informasi lebih lanjut.</p>'
             . self::signatureBlock();
 
-        $body = self::wrapHtml($content, '#e11d48');
+        $body = self::wrapHtml($content, $accent);
         return self::send($registration->email, $subject, $body);
     }
 
@@ -215,9 +235,9 @@ class RegistrationEmailService
     public static function sendAdminCreatedAccount(User $user, string $plainPassword): bool
     {
         $c       = self::cfg();
-        $accent  = $c['header_color'];
+        $accent  = $c['created_color'];
         $sysName = htmlspecialchars($c['system_name'], ENT_QUOTES, 'UTF-8');
-        $greeting = htmlspecialchars($c['greeting_prefix'], ENT_QUOTES, 'UTF-8');
+        $greeting = htmlspecialchars($c['created_greeting'], ENT_QUOTES, 'UTF-8');
 
         $displayName = trim((string) ($user->nama_lengkap ?? '')) !== ''
             ? (string) $user->nama_lengkap
@@ -278,15 +298,9 @@ class RegistrationEmailService
         // Logo: email_logo → login_logo → default
         $logoUrl = SystemSettingHelper::getAssetUrl(
             'email_logo',
-            SystemSettingHelper::getAssetUrl('login_logo', '/app_asset/images/logo-kemenkes-warna.png')
+            SystemSettingHelper::getAssetUrl('login_logo', '/app_asset/images/logo-kemenkes-warna.png', true),
+            true
         );
-
-        // Warna aksen dari setting (override parameter jika bukan merah/biru — untuk OTP & Tolak tetap custom)
-        // Warna header_color hanya dipakai jika themeColor sama dengan default teal
-        // Untuk OTP (biru) & Ditolak (merah) tetap pakai warna spesifik
-        $footerColor = in_array($themeColor, ['#0f766e', '#0284c7', '#e11d48'], true)
-            ? $themeColor
-            : htmlspecialchars($c['header_color'], ENT_QUOTES, 'UTF-8');
 
         $frontendUrl   = !empty($c['footer_link_url'])
             ? $c['footer_link_url']
@@ -315,7 +329,7 @@ class RegistrationEmailService
                 </div>
 
                 <!-- Footer berwarna -->
-                <div style="background-color:' . $footerColor . ';padding:15px 30px;
+                <div style="background-color:' . $safeTheme . ';padding:15px 30px;
                             border-bottom-left-radius:8px;border-bottom-right-radius:8px;">
                     <table width="100%" border="0" cellspacing="0" cellpadding="0">
                         <tr>

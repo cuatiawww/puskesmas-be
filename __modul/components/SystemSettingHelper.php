@@ -34,9 +34,10 @@ class SystemSettingHelper
      *
      * @param string $key
      * @param string $defaultPath
+     * @param bool $absolute Whether to return absolute URL (needed for emails)
      * @return string
      */
-    public static function getAssetUrl($key, $defaultPath = '')
+    public static function getAssetUrl($key, $defaultPath = '', $absolute = false)
     {
         $value = self::get($key);
         if (empty($value)) {
@@ -44,8 +45,20 @@ class SystemSettingHelper
         }
 
         $baseUrl = rtrim(Yii::$app->params['base_url'] ?? '', '/');
-        if (empty($baseUrl) && Yii::$app->has('request')) {
+        if (empty($baseUrl) && Yii::$app->has('request') && Yii::$app->request instanceof \yii\web\Request) {
             $baseUrl = rtrim(Yii::$app->request->baseUrl, '/');
+        }
+
+        if ($absolute) {
+            if (!preg_match('~^(https?:)?//~i', $baseUrl)) {
+                $hostInfo = '';
+                if (Yii::$app->has('request') && Yii::$app->request instanceof \yii\web\Request) {
+                    $hostInfo = rtrim(Yii::$app->request->hostInfo, '/');
+                } else {
+                    $hostInfo = 'http://localhost';
+                }
+                $baseUrl = $hostInfo . $baseUrl;
+            }
         }
 
         // If it starts with http, https, or //, return as is
@@ -68,7 +81,14 @@ class SystemSettingHelper
         // Default: path statis (app_asset, dll)
         $value = '/' . ltrim($value, '/');
         if (!empty($baseUrl) && str_starts_with($value, $baseUrl . '/')) {
-            return $value;
+            // Jika value sudah mengandung baseUrl, tapi kita butuh absolute url
+            if ($absolute && !str_starts_with($value, 'http')) {
+                // Remove baseUrl dari awal value sebelum digabungkan dengan baseUrl absolute
+                $value = substr($value, strlen($baseUrl));
+                $value = '/' . ltrim($value, '/');
+            } else {
+                return $value;
+            }
         }
         return $baseUrl . $value;
     }

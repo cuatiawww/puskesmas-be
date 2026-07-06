@@ -65,5 +65,26 @@ INSERT INTO system_setting ("key", "value", "type", "label", created_at, updated
   ('email_footer_org',        'Kementerian Kesehatan Republik Indonesia', 'text', 'Teks Organisasi Footer Email', NOW(), NOW()),
   ('email_footer_link_label', 'Kunjungi Website', 'text', 'Label Link Footer Email', NOW(), NOW()),
   ('email_footer_link_url',   '', 'text', 'URL Link Footer Email', NOW(), NOW()),
-  ('email_header_color',      '#0f766e', 'text', 'Warna Aksen Email', NOW(), NOW())
+  ('email_header_color',      '#0f766e', 'text', 'Warna Aksen Email', NOW(), NOW()),
+  ('email_otp_greeting',       'Yth.', 'text', 'Sapaan OTP', NOW(), NOW()),
+  ('email_otp_color',          '#0284c7', 'text', 'Warna OTP', NOW(), NOW()),
+  ('email_approved_greeting',  'Yth.', 'text', 'Sapaan Akun Disetujui', NOW(), NOW()),
+  ('email_approved_color',     '#0f766e', 'text', 'Warna Akun Disetujui', NOW(), NOW()),
+  ('email_rejected_greeting',  'Yth.', 'text', 'Sapaan Akun Ditolak', NOW(), NOW()),
+  ('email_rejected_color',     '#e11d48', 'text', 'Warna Akun Ditolak', NOW(), NOW()),
+  ('email_created_greeting',   'Yth.', 'text', 'Sapaan Akun Dibuat Admin', NOW(), NOW()),
+  ('email_created_color',      '#0f766e', 'text', 'Warna Akun Dibuat Admin', NOW(), NOW())
 ON CONFLICT ("key") DO NOTHING;
+
+-- 5. TAMBAH TABEL FILE ASSET JIKA BELUM ADA
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.file_asset (
+    id SERIAL PRIMARY KEY,
+    file_path TEXT,
+    hash TEXT,
+    tipe_file VARCHAR(255),
+    ukuran VARCHAR(50),
+    id_user INTEGER,
+    update_date TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    file_name VARCHAR(255)
+);

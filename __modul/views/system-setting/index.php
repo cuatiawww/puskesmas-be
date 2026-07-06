@@ -51,31 +51,46 @@ $this->registerJs(<<<JS
     ]
 });
 
-// Sinkronisasi color picker ↔ hex input untuk warna aksen email
-(function() {
-    var colorPicker = document.querySelector('input[name="Setting[email_header_color]"]');
-    var hexInput    = document.getElementById('emailColorHex');
-    if (!colorPicker || !hexInput) return;
+// Handle selector dropdown untuk template email notifikasi
+$('#emailTemplateSelector').on('change', function() {
+    var val = $(this).val();
+    $('.email-greeting-group').addClass('d-none');
+    $('.email-greeting-group[data-template="' + val + '"]').removeClass('d-none');
 
-    colorPicker.addEventListener('input', function() {
-        hexInput.value = this.value;
-    });
-    hexInput.addEventListener('input', function() {
-        var val = this.value.trim();
-        if (/^#[0-9a-fA-F]{6}$/.test(val)) {
-            colorPicker.value = val;
-            // juga update name agar ikut di-POST
-            colorPicker.dispatchEvent(new Event('change'));
-        }
-    });
-    // Pastikan hex input ikut di-POST (nama Setting[email_header_color] ada di colorPicker)
-    hexInput.addEventListener('change', function() {
-        var val = this.value.trim();
-        if (/^#[0-9a-fA-F]{6}$/.test(val)) {
-            colorPicker.value = val;
-        }
-    });
-})();
+    $('.email-color-group').addClass('d-none');
+    $('.email-color-group[data-template="' + val + '"]').removeClass('d-none');
+});
+
+// Sinkronisasi color picker ↔ hex input untuk semua email color pickers
+$('.email-color-group').each(function() {
+    var container = $(this);
+    var colorPicker = container.find('input[type="color"]');
+    var hexInput    = container.find('input.email-color-hex');
+    
+    if (colorPicker.length && hexInput.length) {
+        var pickerEl = colorPicker[0];
+        var hexEl    = hexInput[0];
+
+        pickerEl.addEventListener('input', function() {
+            hexEl.value = this.value;
+        });
+
+        hexEl.addEventListener('input', function() {
+            var val = this.value.trim();
+            if (/^#[0-9a-fA-F]{6}$/.test(val)) {
+                pickerEl.value = val;
+                pickerEl.dispatchEvent(new Event('change'));
+            }
+        });
+
+        hexEl.addEventListener('change', function() {
+            var val = this.value.trim();
+            if (/^#[0-9a-fA-F]{6}$/.test(val)) {
+                pickerEl.value = val;
+            }
+        });
+    }
+});
 JS
 );
 ?>
@@ -367,6 +382,19 @@ JS
           </div>
         </div>
 
+        <!-- Selector Tipe Email -->
+        <div class="form-group mb-4">
+          <label class="form-label font-weight-bold text-primary">Pilih Tipe Email yang Ingin Dikonfigurasi:</label>
+          <select id="emailTemplateSelector" class="form-select border-primary font-weight-bold" style="max-width: 450px;">
+            <option value="all">Semua Tipe Email (Pengaturan Umum)</option>
+            <option value="otp">1. Kode OTP Verifikasi Email</option>
+            <option value="approved">2. Pendaftaran Akun Disetujui</option>
+            <option value="rejected">3. Pendaftaran Akun Ditolak</option>
+            <option value="created">4. Akun Dibuat oleh Admin</option>
+          </select>
+          <small class="form-text text-muted">Secara default, semua email menggunakan pengaturan umum. Pilih tipe khusus jika ingin membedakan sapaan/warna aksen per tipe email.</small>
+        </div>
+
         <div class="row g-3">
 
           <!-- 1. Logo Email -->
@@ -395,10 +423,33 @@ JS
             <div class="card border shadow-none h-100">
               <div class="card-body">
                 <label class="form-label font-weight-bold">2. Sapaan Pembuka</label>
-                <input type="text" name="Setting[email_greeting_prefix]" class="form-control"
-                       value="<?= Html::encode(SystemSettingHelper::get('email_greeting_prefix', 'Yth.')) ?>"
-                       placeholder="Contoh: Yth. / Kepada Yth. / Dear">
-                <small class="text-muted">Muncul sebelum nama pengguna. Contoh: <em>"Yth. BUDI SANTOSO,"</em></small>
+                
+                <!-- Input Sapaan Dinamis -->
+                <div class="email-greeting-group" data-template="all">
+                  <input type="text" name="Setting[email_greeting_prefix]" class="form-control"
+                         value="<?= Html::encode(SystemSettingHelper::get('email_greeting_prefix', 'Yth.')) ?>" placeholder="Contoh: Yth. / Kepada Yth.">
+                  <small class="text-muted">Sapaan umum untuk semua email. Contoh: <em>"Yth. BUDI SANTOSO"</em></small>
+                </div>
+                <div class="email-greeting-group d-none" data-template="otp">
+                  <input type="text" name="Setting[email_otp_greeting]" class="form-control"
+                         value="<?= Html::encode(SystemSettingHelper::get('email_otp_greeting', 'Yth.')) ?>" placeholder="Contoh: Yth.">
+                  <small class="text-muted">Khusus email Kode OTP Verifikasi.</small>
+                </div>
+                <div class="email-greeting-group d-none" data-template="approved">
+                  <input type="text" name="Setting[email_approved_greeting]" class="form-control"
+                         value="<?= Html::encode(SystemSettingHelper::get('email_approved_greeting', 'Yth.')) ?>" placeholder="Contoh: Yth.">
+                  <small class="text-muted">Khusus email Akun Disetujui.</small>
+                </div>
+                <div class="email-greeting-group d-none" data-template="rejected">
+                  <input type="text" name="Setting[email_rejected_greeting]" class="form-control"
+                         value="<?= Html::encode(SystemSettingHelper::get('email_rejected_greeting', 'Yth.')) ?>" placeholder="Contoh: Yth.">
+                  <small class="text-muted">Khusus email Akun Ditolak.</small>
+                </div>
+                <div class="email-greeting-group d-none" data-template="created">
+                  <input type="text" name="Setting[email_created_greeting]" class="form-control"
+                         value="<?= Html::encode(SystemSettingHelper::get('email_created_greeting', 'Yth.')) ?>" placeholder="Contoh: Yth.">
+                  <small class="text-muted">Khusus email Akun Dibuat Admin.</small>
+                </div>
               </div>
             </div>
           </div>
@@ -428,7 +479,7 @@ JS
             </div>
           </div>
 
-          <!-- 4. Footer Org + 5. Label Link + URL Link + Warna -->
+          <!-- 4. Teks Organisasi + 5. Label Link + URL Link + Warna Aksen Dinamis -->
           <div class="col-md-4">
             <div class="card border shadow-none h-100">
               <div class="card-body">
@@ -469,15 +520,58 @@ JS
             <div class="card border shadow-none h-100">
               <div class="card-body">
                 <label class="form-label font-weight-bold">Warna Aksen</label>
-                <?php $emailColor = SystemSettingHelper::get('email_header_color', '#0f766e'); ?>
-                <div class="d-flex align-items-center gap-1">
-                  <input type="color" name="Setting[email_header_color]" class="form-control form-control-color flex-shrink-0"
-                         value="<?= Html::encode($emailColor) ?>" style="width:40px;height:38px;padding:2px;">
-                  <input type="text" id="emailColorHex" class="form-control px-2"
-                         value="<?= Html::encode($emailColor) ?>"
-                         placeholder="#0f766e" pattern="^#[0-9a-fA-F]{6}$" style="font-size:12px;">
+                
+                <!-- Input Warna Dinamis -->
+                <div class="email-color-group" data-template="all">
+                  <?php $emailColor = SystemSettingHelper::get('email_header_color', '#0f766e'); ?>
+                  <div class="d-flex align-items-center gap-1">
+                    <input type="color" name="Setting[email_header_color]" class="form-control form-control-color flex-shrink-0"
+                           value="<?= Html::encode($emailColor) ?>" style="width:40px;height:38px;padding:2px;">
+                    <input type="text" class="form-control px-2 email-color-hex" value="<?= Html::encode($emailColor) ?>" placeholder="#0f766e" pattern="^#[0-9a-fA-F]{6}$" style="font-size:12px;">
+                  </div>
+                  <small class="text-muted">Warna umum.</small>
                 </div>
-                <small class="text-muted">Warna atas & footer.</small>
+
+                <div class="email-color-group d-none" data-template="otp">
+                  <?php $otpColor = SystemSettingHelper::get('email_otp_color', '#0284c7'); ?>
+                  <div class="d-flex align-items-center gap-1">
+                    <input type="color" name="Setting[email_otp_color]" class="form-control form-control-color flex-shrink-0"
+                           value="<?= Html::encode($otpColor) ?>" style="width:40px;height:38px;padding:2px;">
+                    <input type="text" class="form-control px-2 email-color-hex" value="<?= Html::encode($otpColor) ?>" placeholder="#0284c7" pattern="^#[0-9a-fA-F]{6}$" style="font-size:12px;">
+                  </div>
+                  <small class="text-muted">Warna OTP.</small>
+                </div>
+
+                <div class="email-color-group d-none" data-template="approved">
+                  <?php $appColor = SystemSettingHelper::get('email_approved_color', '#0f766e'); ?>
+                  <div class="d-flex align-items-center gap-1">
+                    <input type="color" name="Setting[email_approved_color]" class="form-control form-control-color flex-shrink-0"
+                           value="<?= Html::encode($appColor) ?>" style="width:40px;height:38px;padding:2px;">
+                    <input type="text" class="form-control px-2 email-color-hex" value="<?= Html::encode($appColor) ?>" placeholder="#0f766e" pattern="^#[0-9a-fA-F]{6}$" style="font-size:12px;">
+                  </div>
+                  <small class="text-muted">Warna disetujui.</small>
+                </div>
+
+                <div class="email-color-group d-none" data-template="rejected">
+                  <?php $rejColor = SystemSettingHelper::get('email_rejected_color', '#e11d48'); ?>
+                  <div class="d-flex align-items-center gap-1">
+                    <input type="color" name="Setting[email_rejected_color]" class="form-control form-control-color flex-shrink-0"
+                           value="<?= Html::encode($rejColor) ?>" style="width:40px;height:38px;padding:2px;">
+                    <input type="text" class="form-control px-2 email-color-hex" value="<?= Html::encode($rejColor) ?>" placeholder="#e11d48" pattern="^#[0-9a-fA-F]{6}$" style="font-size:12px;">
+                  </div>
+                  <small class="text-muted">Warna ditolak.</small>
+                </div>
+
+                <div class="email-color-group d-none" data-template="created">
+                  <?php $creColor = SystemSettingHelper::get('email_created_color', '#0f766e'); ?>
+                  <div class="d-flex align-items-center gap-1">
+                    <input type="color" name="Setting[email_created_color]" class="form-control form-control-color flex-shrink-0"
+                           value="<?= Html::encode($creColor) ?>" style="width:40px;height:38px;padding:2px;">
+                    <input type="text" class="form-control px-2 email-color-hex" value="<?= Html::encode($creColor) ?>" placeholder="#0f766e" pattern="^#[0-9a-fA-F]{6}$" style="font-size:12px;">
+                  </div>
+                  <small class="text-muted">Warna dibuat admin.</small>
+                </div>
+
               </div>
             </div>
           </div>
