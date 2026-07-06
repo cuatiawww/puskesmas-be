@@ -401,4 +401,68 @@ class SiteController extends BaseController
             return $model;
         }
 
+    public function isActionPublic(string $actionId): bool
+    {
+        if ($actionId === 'sso-login') {
+            return true;
+        }
+        return parent::isActionPublic($actionId);
+    }
+
+    /**
+     * SSO Login dari Frontend (Next.js) ke Backend (Yii2).
+     */
+    public function actionSsoLogin($token = null)
+    {
+        if (empty($token)) {
+            Yii::$app->session['error'] = 1;
+            Yii::$app->session['error_message'] = 'Token SSO tidak ditemukan.';
+            return $this->redirect(['site/login']);
+        }
+
+        // Decode JWT
+        $secret = $_ENV['JWT_SECRET'] ?? 'kemkes_puskesmas_jwt_secret_key_2026';
+        $payload = $this->decodeJwt($token, $secret);
+
+        if (!$payload) {
+            $fallbackSecret = Yii::$app->request->cookieValidationKey ?: "kemkes!@#$%^&*()_api";
+            $payload = $this->decodeJwt($token, $fallbackSecret);
+        }
+        if (!$payload) {
+            $payload = $this->decodeJwt($token, "kemkes!@#$%^&*()");
+        }
+
+        if ($payload && isset($payload['sub'])) {
+            $user = \app\models\User::findOne((int)$payload['sub']);
+            if ($user) {
+                // Log user in
+                if (Yii::$app->user->login($user, 3600 * 24)) {
+                    return $this->redirect(['/beranda/index']);
+                }
+            }
+        }
+
+        Yii::$app->session['error'] = 1;
+        Yii::$app->session['error_message'] = 'Sesi SSO tidak valid atau pengguna tidak ditemukan.';
+        return $this->redirect(['site/login']);
+    }
+
+    private function decodeJwt(string $token, string $secret): ?array
+    {
+        $parts = explode('.', $token);
+        if (count($parts) !== 3) {
+            return null;
+        }
+
+        list($headerB64, $payloadB64, $signatureB64) = $parts;
+
+        $expectedSignature = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode(hash_hmac('sha256', $headerB64 . "." . $payloadB64, $secret, true)));
+        if ($signatureB64 !== $expectedSignature) {
+            return null;
+        }
+
+        $payloadJson = base64_decode(str_replace(['-', '_'], ['+', '/'], $payloadB64));
+        return json_decode($payloadJson, true);
+    }
+
 } 

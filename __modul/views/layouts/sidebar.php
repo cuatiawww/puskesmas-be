@@ -167,6 +167,20 @@ function getMenuUrl($route) {
       </div>
     </div>
     <div class="navbar-content">
+      <ul class="pc-navbar">
+        <li class="pc-item pc-caption">
+          <label style="color: #000000">Dashboard Utama</label>
+          <span>Kembali ke dashboard utama</span>
+        </li>
+        <li class="pc-item">
+          <a href="<?= Url::to(['/auth/sso']) ?>" class="pc-link">
+            <span class="pc-micon">
+              <i class="ph-duotone ph-layout"></i>
+            </span>
+            <span class="pc-mtext">DASHBOARD UTAMA</span>
+          </a>
+        </li>
+      </ul>
       <?php foreach ($menu as $modul): ?>
       <ul class="pc-navbar">
         <li class="pc-item pc-caption">

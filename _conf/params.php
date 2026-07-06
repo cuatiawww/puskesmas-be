@@ -1,8 +1,7 @@
 <?php
 
 // URL dashboard Next.js (frontend).
-// Hardcoded untuk sekarang — ganti dengan env variable saat production siap.
-define('DASHBOARD_URL', 'https://dashboard-eoc.vercel.app');
+define('DASHBOARD_URL', $_ENV['PUSKESMAS_FRONTEND_URL'] ?? 'http://localhost:3000');
 
 return [
     'adminEmail'   => 'admin@example.com',
