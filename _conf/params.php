@@ -1,7 +1,7 @@
 <?php
 
 // URL dashboard Next.js (frontend).
-define('DASHBOARD_URL', $_ENV['PUSKESMAS_FRONTEND_URL'] ?? 'http://localhost:3000');
+define('DASHBOARD_URL', $_ENV['PUSKESMAS_FRONTEND_URL'] ?? 'https://puskes-kappa.vercel.app');
 
 return [
     'adminEmail'   => 'admin@example.com',
