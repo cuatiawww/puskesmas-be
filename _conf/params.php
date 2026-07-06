@@ -1,7 +1,9 @@
 <?php
 
-// URL dashboard Next.js (frontend).
-define('DASHBOARD_URL', $_ENV['PUSKESMAS_FRONTEND_URL'] ?? 'https://puskes-kappa.vercel.app');
+// URL dashboard Next.js (frontend) secara otomatis berdasarkan host aktif.
+$host = $_SERVER['HTTP_HOST'] ?? '';
+$isLocal = ($host === 'localhost' || strpos($host, '127.0.0.1') !== false || strpos($host, '192.168.') !== false);
+define('DASHBOARD_URL', $isLocal ? 'http://localhost:3000' : 'https://puskes-kappa.vercel.app');
 
 return [
     'adminEmail'   => 'admin@example.com',
