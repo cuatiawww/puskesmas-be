@@ -5,111 +5,261 @@ namespace app\services;
 use Yii;
 use app\models\User;
 use app\models\UserRegistration;
+use app\components\SystemSettingHelper;
 
 class RegistrationEmailService
 {
-    public static function sendOtp(UserRegistration $registration, string $otp): bool
+    // ─────────────────────────────────────────────────────────────────────────
+    // Helper: baca semua konfigurasi email dari system_setting sekali saja
+    // ─────────────────────────────────────────────────────────────────────────
+    protected static function cfg(): array
     {
-        $subject = 'Kode OTP Verifikasi Email - Asistensi Kinerja Puskesmas';
-        $body = self::wrapHtml(
-            'Verifikasi Email',
-            '<p>Halo <strong>' . htmlspecialchars($registration->nama_lengkap, ENT_QUOTES, 'UTF-8') . '</strong>,</p>' .
-            '<p>Terima kasih telah melakukan pendaftaran akun masyarakat pada aplikasi <strong>Asistensi Kinerja Puskesmas</strong>. Gunakan kode OTP berikut untuk memverifikasi alamat email Anda:</p>' .
-            '<div style="font-size:28px;font-weight:700;letter-spacing:6px;margin:18px 0;background:#f8fafc;padding:12px;border-radius:6px;border:1px solid #e2e8f0;display:inline-block;color:#0f766e;">' . htmlspecialchars($otp, ENT_QUOTES, 'UTF-8') . '</div>' .
-            '<p>Kode OTP berlaku selama <strong>10 menit</strong>. Demi keamanan, mohon tidak membagikan kode OTP ini kepada siapa pun.</p>'
-        );
+        static $cache = null;
+        if ($cache !== null) {
+            return $cache;
+        }
 
-        return self::send($registration->email, $subject, $body);
+        $systemName  = SystemSettingHelper::get('email_system_name',  'Asistensi Kinerja Puskesmas');
+        $senderLabel = SystemSettingHelper::get('email_sender_label', $systemName . ' (KEMKES RI)');
+
+        $cache = [
+            // Nama sistem yang muncul di dalam isi email
+            'system_name'        => $systemName,
+            // Label pengirim di baris tanda tangan bawah isi email
+            'sender_label'       => $senderLabel,
+            // Sapaan awal sebelum nama user (misal "Yth.", "Kepada Yth.", "Dear")
+            'greeting_prefix'    => SystemSettingHelper::get('email_greeting_prefix',    'Yth.'),
+            // Teks nama organisasi di footer berwarna
+            'footer_org'         => SystemSettingHelper::get('email_footer_org',         'Kementerian Kesehatan Republik Indonesia'),
+            // Teks link di footer kanan
+            'footer_link_label'  => SystemSettingHelper::get('email_footer_link_label',  'Kunjungi Website'),
+            // URL link di footer kanan
+            'footer_link_url'    => SystemSettingHelper::get('email_footer_link_url',    ''),
+            // Warna aksen (strip atas card + warna footer) — gunakan hex
+            'header_color'       => SystemSettingHelper::get('email_header_color',       '#0f766e'),
+        ];
+        return $cache;
     }
 
-    public static function sendApproved(UserRegistration $registration): bool
+    // ─────────────────────────────────────────────────────────────────────────
+    // Blok tanda tangan bawah isi email (konsisten di semua email)
+    // ─────────────────────────────────────────────────────────────────────────
+    protected static function signatureBlock(): string
+    {
+        $c = self::cfg();
+        return '
+            <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 25px 0;">
+            <p style="margin: 0; font-size: 13px; color: #475569;">
+                Dikirim oleh,<br>
+                <strong>' . htmlspecialchars($c['sender_label'], ENT_QUOTES, 'UTF-8') . '</strong>
+            </p>
+        ';
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Baris tombol CTA "Masuk ke Aplikasi"
+    // ─────────────────────────────────────────────────────────────────────────
+    protected static function loginButton(string $accentColor): string
     {
         $loginUrl = \yii\helpers\Url::to(['/site/login'], true);
-        $loginLinkHtml = $loginUrl !== ''
-            ? '<p style="margin:20px 0;"><a href="' . htmlspecialchars($loginUrl, ENT_QUOTES, 'UTF-8') . '" style="display:inline-block;padding:10px 18px;background:#0f766e;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:bold;">Masuk ke Aplikasi</a></p>'
-            : '';
+        if (empty($loginUrl)) {
+            return '';
+        }
+        return '<div style="margin:25px 0;">'
+            . '<a href="' . htmlspecialchars($loginUrl, ENT_QUOTES, 'UTF-8') . '" '
+            . 'style="display:inline-block;padding:12px 24px;background:' . htmlspecialchars($accentColor, ENT_QUOTES, 'UTF-8') . ';color:#ffffff;'
+            . 'text-decoration:none;border-radius:6px;font-weight:bold;box-shadow:0 2px 4px rgba(0,0,0,0.15);">'
+            . 'Masuk ke Aplikasi &rarr;'
+            . '</a></div>';
+    }
 
-        $subject = 'Pendaftaran Akun Disetujui - Asistensi Kinerja Puskesmas';
-        $body = self::wrapHtml(
-            'Pendaftaran Disetujui',
-            '<p>Halo <strong>' . htmlspecialchars($registration->nama_lengkap, ENT_QUOTES, 'UTF-8') . '</strong>,</p>' .
-            '<p>Selamat! Pengajuan akses akun masyarakat Anda untuk aplikasi <strong>Asistensi Kinerja Puskesmas</strong> telah disetujui.</p>' .
-            '<p>Anda kini dapat masuk ke dalam sistem menggunakan username dan password yang telah Anda daftarkan.</p>' .
-            $loginLinkHtml
-        );
+    // ─────────────────────────────────────────────────────────────────────────
+    // Blok tabel kredensial (username + password)
+    // ─────────────────────────────────────────────────────────────────────────
+    protected static function credentialBlock(string $username, ?string $plainPassword, string $accentColor): string
+    {
+        $rows = '
+            <tr>
+                <td width="30%" valign="top" style="color:#64748b;font-weight:bold;">Username/Email:</td>
+                <td width="70%" valign="top" style="color:#334155;font-family:monospace;font-size:15px;">'
+                    . htmlspecialchars($username, ENT_QUOTES, 'UTF-8') . '
+                </td>
+            </tr>';
 
+        if ($plainPassword !== null) {
+            $rows .= '
+            <tr>
+                <td valign="top" style="color:#64748b;font-weight:bold;">Kata Sandi:</td>
+                <td valign="top" style="color:#334155;font-family:monospace;font-size:15px;">'
+                    . htmlspecialchars($plainPassword, ENT_QUOTES, 'UTF-8') . '
+                </td>
+            </tr>';
+        }
+
+        $safeAccent = htmlspecialchars($accentColor, ENT_QUOTES, 'UTF-8');
+        $block = '
+            <div style="background:#f8fafc;padding:20px;border-radius:6px;margin:20px 0;border:1px solid #e2e8f0;border-left:4px solid ' . $safeAccent . ';font-size:14px;">
+                <table width="100%" border="0" cellspacing="0" cellpadding="5" style="font-family:Arial,sans-serif;">'
+                    . $rows . '
+                </table>
+            </div>';
+
+        if ($plainPassword !== null) {
+            $block .= '<p style="font-size:13px;color:#64748b;">Demi keamanan akun Anda, mohon segera mengubah kata sandi setelah pertama kali masuk ke aplikasi.</p>';
+        }
+
+        return $block;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // 1. OTP Verifikasi Email
+    // ─────────────────────────────────────────────────────────────────────────
+    public static function sendOtp(UserRegistration $registration, string $otp): bool
+    {
+        $c    = self::cfg();
+        $name = strtoupper(htmlspecialchars($registration->nama_lengkap, ENT_QUOTES, 'UTF-8'));
+        $sysName = htmlspecialchars($c['system_name'], ENT_QUOTES, 'UTF-8');
+        $greeting = htmlspecialchars($c['greeting_prefix'], ENT_QUOTES, 'UTF-8');
+
+        $subject = 'Kode OTP Verifikasi Email - ' . $c['system_name'];
+
+        $content = '
+            <div style="color:#0284c7;font-size:18px;font-weight:bold;margin-bottom:15px;">KODE VERIFIKASI EMAIL</div>
+            <p>' . $greeting . ' <strong>' . $name . '</strong>,</p>
+            <p>Terima kasih telah melakukan pendaftaran akun pada aplikasi <strong>' . $sysName . '</strong>.
+               Gunakan kode OTP berikut untuk memverifikasi alamat email Anda:</p>
+            <div style="text-align:center;margin:25px 0;">
+                <div style="font-size:32px;font-weight:700;letter-spacing:8px;background:#f0f9ff;
+                            padding:15px 25px;border-radius:6px;border:1px solid #bae6fd;
+                            display:inline-block;color:#0369a1;">'
+                    . htmlspecialchars($otp, ENT_QUOTES, 'UTF-8') . '
+                </div>
+            </div>
+            <p style="font-size:13px;color:#64748b;">Kode OTP ini berlaku selama <strong>10 menit</strong>.
+               Demi keamanan, mohon tidak membagikan kode OTP ini kepada siapa pun.</p>'
+            . self::signatureBlock();
+
+        $body = self::wrapHtml($content, '#0284c7');
         return self::send($registration->email, $subject, $body);
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // 2. Pendaftaran Akun Disetujui
+    // ─────────────────────────────────────────────────────────────────────────
+    public static function sendApproved(UserRegistration $registration, ?string $plainPassword = null): bool
+    {
+        $c       = self::cfg();
+        $accent  = $c['header_color'];
+        $name    = strtoupper(htmlspecialchars($registration->nama_lengkap, ENT_QUOTES, 'UTF-8'));
+        $sysName = htmlspecialchars($c['system_name'], ENT_QUOTES, 'UTF-8');
+        $greeting = htmlspecialchars($c['greeting_prefix'], ENT_QUOTES, 'UTF-8');
+
+        $user     = $registration->user;
+        $username = $user
+            ? ($user->username ?? $registration->email)
+            : $registration->email;
+
+        $subject = 'Pendaftaran Akun Disetujui - ' . $c['system_name'];
+
+        $content = '
+            <div style="color:' . htmlspecialchars($accent, ENT_QUOTES, 'UTF-8') . ';font-size:18px;font-weight:bold;margin-bottom:15px;">PENDAFTARAN AKUN DISETUJUI</div>
+            <p>' . $greeting . ' <strong>' . $name . '</strong>,</p>
+            <p>Terima kasih, pendaftaran Anda telah kami verifikasi. Pengajuan akses akun Anda
+               untuk aplikasi <strong>' . $sysName . '</strong> telah <strong>disetujui</strong>.</p>
+            <p>Silakan gunakan informasi berikut untuk masuk ke dalam sistem:</p>'
+            . self::credentialBlock($username, $plainPassword, $accent)
+            . self::loginButton($accent)
+            . self::signatureBlock();
+
+        $body = self::wrapHtml($content, $accent);
+        return self::send($registration->email, $subject, $body);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // 3. Pendaftaran Akun Ditolak
+    // ─────────────────────────────────────────────────────────────────────────
     public static function sendRejected(UserRegistration $registration): bool
     {
-        $reason = trim((string) $registration->rejection_reason);
+        $c       = self::cfg();
+        $name    = strtoupper(htmlspecialchars($registration->nama_lengkap, ENT_QUOTES, 'UTF-8'));
+        $sysName = htmlspecialchars($c['system_name'], ENT_QUOTES, 'UTF-8');
+        $greeting = htmlspecialchars($c['greeting_prefix'], ENT_QUOTES, 'UTF-8');
+
+        $reason     = trim((string) $registration->rejection_reason);
         $reasonHtml = $reason !== ''
-            ? '<p><strong>Alasan Penolakan:</strong><br><span style="color:#d32f2f;font-style:italic;">"' . htmlspecialchars($reason, ENT_QUOTES, 'UTF-8') . '"</span></p>'
+            ? '<div style="background:#fff1f2;padding:15px 20px;border-radius:6px;margin:20px 0;border-left:4px solid #e11d48;font-size:14px;">'
+              . '<strong style="color:#9f1239;">Alasan Penolakan:</strong><br>'
+              . '<span style="color:#e11d48;font-style:italic;">"' . htmlspecialchars($reason, ENT_QUOTES, 'UTF-8') . '"</span>'
+              . '</div>'
             : '';
 
-        $subject = 'Pendaftaran Akun Ditolak - Asistensi Kinerja Puskesmas';
-        $body = self::wrapHtml(
-            'Pendaftaran Ditolak',
-            '<p>Halo <strong>' . htmlspecialchars($registration->nama_lengkap, ENT_QUOTES, 'UTF-8') . '</strong>,</p>' .
-            '<p>Terima kasih telah mengajukan pendaftaran akun masyarakat pada aplikasi <strong>Asistensi Kinerja Puskesmas</strong>.</p>' .
-            '<p>Mohon maaf, pengajuan akses Anda belum dapat disetujui saat ini.</p>' .
-            $reasonHtml .
-            '<p>Silakan melakukan pendaftaran ulang dengan data yang sesuai atau hubungi Administrator untuk informasi lebih lanjut.</p>'
-        );
+        $subject = 'Pendaftaran Akun Ditolak - ' . $c['system_name'];
 
+        $content = '
+            <div style="color:#e11d48;font-size:18px;font-weight:bold;margin-bottom:15px;">PENDAFTARAN AKUN DITOLAK</div>
+            <p>' . $greeting . ' <strong>' . $name . '</strong>,</p>
+            <p>Terima kasih telah melakukan pengajuan pendaftaran akun pada aplikasi <strong>' . $sysName . '</strong>.</p>
+            <p>Mohon maaf, pengajuan pendaftaran Anda belum dapat kami setujui saat ini.</p>'
+            . $reasonHtml . '
+            <p>Silakan melakukan pendaftaran ulang dengan data yang sesuai dan valid,
+               atau hubungi Administrator untuk informasi lebih lanjut.</p>'
+            . self::signatureBlock();
+
+        $body = self::wrapHtml($content, '#e11d48');
         return self::send($registration->email, $subject, $body);
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // 4. Akun Dibuat oleh Admin
+    // ─────────────────────────────────────────────────────────────────────────
     public static function sendAdminCreatedAccount(User $user, string $plainPassword): bool
     {
+        $c       = self::cfg();
+        $accent  = $c['header_color'];
+        $sysName = htmlspecialchars($c['system_name'], ENT_QUOTES, 'UTF-8');
+        $greeting = htmlspecialchars($c['greeting_prefix'], ENT_QUOTES, 'UTF-8');
+
         $displayName = trim((string) ($user->nama_lengkap ?? '')) !== ''
             ? (string) $user->nama_lengkap
             : (string) $user->username;
+        $name = strtoupper(htmlspecialchars($displayName, ENT_QUOTES, 'UTF-8'));
 
-        $loginUrl = \yii\helpers\Url::to(['/site/login'], true);
-        $loginLinkHtml = $loginUrl !== ''
-            ? '<p style="margin:20px 0;"><a href="' . htmlspecialchars($loginUrl, ENT_QUOTES, 'UTF-8') . '" style="display:inline-block;padding:10px 18px;background:#0f766e;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:bold;">Masuk ke Aplikasi</a></p>'
-            : '';
-        $loginTextHtml = $loginUrl !== ''
-            ? '<p>Silakan kunjungi halaman login aplikasi melalui tautan berikut:<br><a href="' . htmlspecialchars($loginUrl, ENT_QUOTES, 'UTF-8') . '">' . htmlspecialchars($loginUrl, ENT_QUOTES, 'UTF-8') . '</a></p>'
-            : '';
+        $subject = 'Akun ' . $c['system_name'] . ' Telah Dibuat';
 
-        $subject = 'Akun Asistensi Kinerja Puskesmas Telah Dibuat';
-        $body = self::wrapHtml(
-            'Akun Berhasil Dibuat',
-            '<p>Halo <strong>' . htmlspecialchars($displayName, ENT_QUOTES, 'UTF-8') . '</strong>,</p>' .
-            '<p>Akun masyarakat Anda telah berhasil dibuat oleh Administrator pada aplikasi <strong>Asistensi Kinerja Puskesmas</strong> dengan rincian login sebagai berikut:</p>' .
-            '<div style="background:#f1f5f9;padding:15px;border-radius:6px;margin:15px 0;border:1px solid #e2e8f0;font-family:monospace;">' .
-            '<strong>Username/Email:</strong> ' . htmlspecialchars($user->username, ENT_QUOTES, 'UTF-8') . '<br>' .
-            '<strong>Password:</strong> ' . htmlspecialchars($plainPassword, ENT_QUOTES, 'UTF-8') .
-            '</div>' .
-            '<p>Demi keamanan akun Anda, kami sangat menyarankan untuk segera mengubah password setelah masuk pertama kali.</p>' .
-            $loginLinkHtml .
-            $loginTextHtml
-        );
+        $content = '
+            <div style="color:' . htmlspecialchars($accent, ENT_QUOTES, 'UTF-8') . ';font-size:18px;font-weight:bold;margin-bottom:15px;">AKUN BERHASIL DIBUAT</div>
+            <p>' . $greeting . ' <strong>' . $name . '</strong>,</p>
+            <p>Akun Anda telah berhasil dibuat oleh Administrator pada aplikasi <strong>' . $sysName . '</strong>.
+               Silakan gunakan rincian login berikut untuk mengakses akun Anda:</p>'
+            . self::credentialBlock((string) $user->username, $plainPassword, $accent)
+            . self::loginButton($accent)
+            . self::signatureBlock();
 
+        $body = self::wrapHtml($content, $accent);
         return self::send((string) $user->email, $subject, $body);
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // Internal: kirim email via Yii mailer
+    // ─────────────────────────────────────────────────────────────────────────
     protected static function send(string $to, string $subject, string $html): bool
     {
         try {
             Yii::info('Attempting to send email to: ' . $to . ', subject: ' . $subject, __METHOD__);
-            
+
             $result = Yii::$app->mailer->compose()
                 ->setFrom([Yii::$app->params['senderEmail'] => Yii::$app->params['senderName']])
                 ->setTo($to)
                 ->setSubject($subject)
                 ->setHtmlBody($html)
                 ->send();
-                
+
             if ($result) {
                 Yii::info('Email sent successfully to: ' . $to, __METHOD__);
             } else {
                 Yii::warning('Email send returned false for: ' . $to, __METHOD__);
             }
-            
+
             return $result;
         } catch (\Throwable $e) {
             Yii::error('Gagal mengirim email ke ' . $to . ': ' . $e->getMessage(), __METHOD__);
@@ -118,12 +268,72 @@ class RegistrationEmailService
         }
     }
 
-    protected static function wrapHtml(string $title, string $content): string
+    // ─────────────────────────────────────────────────────────────────────────
+    // Internal: HTML wrapper (card email dengan header logo + footer berwarna)
+    // ─────────────────────────────────────────────────────────────────────────
+    protected static function wrapHtml(string $content, string $themeColor = '#0f766e'): string
     {
-        return '<div style="font-family:Arial,sans-serif;line-height:1.6;color:#243b53;">' .
-            '<h2 style="color:#0f766e;">' . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . '</h2>' .
-            $content .
-            '<p style="margin-top:24px;color:#829ab1;font-size:12px;">Email ini dikirim otomatis oleh sistem Asistensi Kinerja Puskesmas.</p>' .
-            '</div>';
+        $c = self::cfg();
+
+        // Logo: email_logo → login_logo → default
+        $logoUrl = SystemSettingHelper::getAssetUrl(
+            'email_logo',
+            SystemSettingHelper::getAssetUrl('login_logo', '/app_asset/images/logo-kemenkes-warna.png')
+        );
+
+        // Warna aksen dari setting (override parameter jika bukan merah/biru — untuk OTP & Tolak tetap custom)
+        // Warna header_color hanya dipakai jika themeColor sama dengan default teal
+        // Untuk OTP (biru) & Ditolak (merah) tetap pakai warna spesifik
+        $footerColor = in_array($themeColor, ['#0f766e', '#0284c7', '#e11d48'], true)
+            ? $themeColor
+            : htmlspecialchars($c['header_color'], ENT_QUOTES, 'UTF-8');
+
+        $frontendUrl   = !empty($c['footer_link_url'])
+            ? $c['footer_link_url']
+            : (Yii::$app->params['frontend_url'] ?? 'https://puskes-kappa.vercel.app');
+        $footerOrg     = htmlspecialchars($c['footer_org'],        ENT_QUOTES, 'UTF-8');
+        $footerLink    = htmlspecialchars($c['footer_link_label'], ENT_QUOTES, 'UTF-8');
+        $safeLogoUrl   = htmlspecialchars($logoUrl,                ENT_QUOTES, 'UTF-8');
+        $safeFrontend  = htmlspecialchars($frontendUrl,            ENT_QUOTES, 'UTF-8');
+        $safeTheme     = htmlspecialchars($themeColor,             ENT_QUOTES, 'UTF-8');
+
+        return '
+        <div style="background-color:#f4f6f8;padding:30px 15px;font-family:Arial,sans-serif;min-height:100%;">
+            <div style="max-width:600px;margin:0 auto;background-color:#ffffff;border-radius:8px;
+                        overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.05);
+                        border-top:6px solid ' . $safeTheme . ';">
+
+                <!-- Header: Logo -->
+                <div style="padding:25px 30px;text-align:center;border-bottom:1px solid #f1f5f9;">
+                    <img src="' . $safeLogoUrl . '" alt="Logo Instansi"
+                         style="height:50px;width:auto;max-width:100%;display:inline-block;">
+                </div>
+
+                <!-- Body Content -->
+                <div style="padding:30px 45px;color:#334155;font-size:15px;line-height:1.7;">
+                    ' . $content . '
+                </div>
+
+                <!-- Footer berwarna -->
+                <div style="background-color:' . $footerColor . ';padding:15px 30px;
+                            border-bottom-left-radius:8px;border-bottom-right-radius:8px;">
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                        <tr>
+                            <td align="left" style="color:#ffffff;font-size:12px;font-weight:bold;font-family:Arial,sans-serif;">
+                                ' . $footerOrg . '
+                            </td>
+                            <td align="right" style="font-size:12px;font-family:Arial,sans-serif;">
+                                <a href="' . $safeFrontend . '"
+                                   style="color:#ffffff;text-decoration:none;font-weight:bold;display:inline-block;">
+                                    ' . $footerLink . ' &rarr;
+                                </a>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+        ';
     }
 }

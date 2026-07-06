@@ -43,6 +43,11 @@ class SystemSettingHelper
             $value = $defaultPath;
         }
 
+        $baseUrl = rtrim(Yii::$app->params['base_url'] ?? '', '/');
+        if (empty($baseUrl) && Yii::$app->has('request')) {
+            $baseUrl = rtrim(Yii::$app->request->baseUrl, '/');
+        }
+
         // If it starts with http, https, or //, return as is
         if (preg_match('~^(https?:)?//~i', $value)) {
             return $value;
@@ -51,20 +56,20 @@ class SystemSettingHelper
         // Jika value adalah hash (dari FileUploadController dengan db=true)
         // Hash format: panjang > 30 karakter dan tidak mengandung slash
         if (!str_contains($value, '/') && strlen($value) > 20) {
-            $baseUrl = rtrim(Yii::$app->params['base_url'] ?? '', '/');
             return $baseUrl . '/file-upload/render?inline=1&uxid=' . urlencode($value);
         }
 
         // Jika value adalah path file lokal (uploads/system-setting/xxx.jpg)
         // Serve via system-setting/serve-image untuk bypass Nginx routing
         if (str_starts_with($value, 'uploads/system-setting/')) {
-            $baseUrl = rtrim(Yii::$app->params['base_url'] ?? '', '/');
             return $baseUrl . '/system-setting/serve-image?file=' . urlencode($value);
         }
 
         // Default: path statis (app_asset, dll)
-        $baseUrl = rtrim(Yii::$app->params['base_url'] ?? '', '/');
         $value = '/' . ltrim($value, '/');
+        if (!empty($baseUrl) && str_starts_with($value, $baseUrl . '/')) {
+            return $value;
+        }
         return $baseUrl . $value;
     }
 }

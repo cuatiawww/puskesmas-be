@@ -36,7 +36,7 @@ CSS
 
 // Initialize Summernote WYSIWYG editor
 $this->registerJs(<<<JS
-$('.wysiwyg-editor').summernote({
+\$('.wysiwyg-editor').summernote({
     placeholder: 'Tulis konten HTML disini...',
     height: 300,
     tabsize: 2,
@@ -50,6 +50,32 @@ $('.wysiwyg-editor').summernote({
         ['view', ['fullscreen', 'codeview', 'help']]
     ]
 });
+
+// Sinkronisasi color picker ↔ hex input untuk warna aksen email
+(function() {
+    var colorPicker = document.querySelector('input[name="Setting[email_header_color]"]');
+    var hexInput    = document.getElementById('emailColorHex');
+    if (!colorPicker || !hexInput) return;
+
+    colorPicker.addEventListener('input', function() {
+        hexInput.value = this.value;
+    });
+    hexInput.addEventListener('input', function() {
+        var val = this.value.trim();
+        if (/^#[0-9a-fA-F]{6}$/.test(val)) {
+            colorPicker.value = val;
+            // juga update name agar ikut di-POST
+            colorPicker.dispatchEvent(new Event('change'));
+        }
+    });
+    // Pastikan hex input ikut di-POST (nama Setting[email_header_color] ada di colorPicker)
+    hexInput.addEventListener('change', function() {
+        var val = this.value.trim();
+        if (/^#[0-9a-fA-F]{6}$/.test(val)) {
+            colorPicker.value = val;
+        }
+    });
+})();
 JS
 );
 ?>
@@ -310,6 +336,163 @@ JS
           <label class="form-label font-weight-bold">Syarat & Ketentuan Pengguna (Dashboard)</label>
           <textarea name="Setting[frontend_terms_conditions]" class="form-control wysiwyg-editor" rows="6"><?= Html::encode(SystemSettingHelper::get('frontend_terms_conditions')) ?></textarea>
           <small class="form-text text-muted">Syarat dan ketentuan pendaftaran akun yang akan ditampilkan saat pengguna mengklik Syarat & Ketentuan di halaman register.</small>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <!-- Accordion Item 4: Email Notifikasi -->
+  <div class="accordion-item card mb-2">
+    <h2 class="accordion-header" id="headingEmail">
+      <button class="accordion-button collapsed font-weight-600" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEmail" aria-expanded="false" aria-controls="collapseEmail">
+        <i class="ph-duotone ph-envelope me-2 fs-5"></i>
+        <span>Pengaturan Email Notifikasi</span>
+        <i class="ti ti-chevron-down ms-auto accordion-arrow fs-5"></i>
+      </button>
+    </h2>
+    <div id="collapseEmail" class="accordion-collapse collapse" aria-labelledby="headingEmail" data-bs-parent="#systemSettingAccordion">
+      <div class="accordion-body card-body">
+
+        <!-- Diagram email anatomy -->
+        <div class="alert mb-4 p-0" style="border:1px dashed #94a3b8;border-radius:10px;overflow:hidden;background:#f8fafc;">
+          <div style="background:#0f766e;color:#fff;font-size:11px;font-weight:bold;text-align:center;padding:7px;letter-spacing:1px;">1. HEADER — Logo Email</div>
+          <div style="background:#fff;padding:12px 18px;font-size:12px;color:#475569;border-bottom:1px solid #e2e8f0;">
+            <span style="color:#0f766e;font-weight:bold;">2. Sapaan:</span> "Yth. / Kepada Yth." + NAMA USER,<br>
+            <span style="color:#0f766e;font-weight:bold;">Isi konten email</span> (otomatis dari sistem)<br>
+            <span style="color:#64748b;font-size:11px;font-style:italic;">Dikirim oleh, <strong>3. Label Pengirim</strong></span>
+          </div>
+          <div style="background:#0f766e;color:#fff;font-size:11px;padding:7px 14px;display:flex;justify-content:space-between;">
+            <span><strong>4. Teks Organisasi Footer</strong></span>
+            <span><strong>5. Label Link → </strong></span>
+          </div>
+        </div>
+
+        <div class="row g-3">
+
+          <!-- 1. Logo Email -->
+          <div class="col-12">
+            <div class="card border shadow-none">
+              <div class="card-body">
+                <label class="form-label font-weight-bold mb-2">1. Logo Email Notifikasi</label>
+                <div class="row g-3 align-items-center">
+                  <div class="col-auto">
+                    <div class="p-2 border rounded bg-white text-center" style="min-width:100px;">
+                      <img src="<?= SystemSettingHelper::getAssetUrl('email_logo', SystemSettingHelper::getAssetUrl('login_logo', '/app_asset/images/logo-kemenkes-warna.png')) ?>"
+                           style="max-height:50px;max-width:120px;object-fit:contain;" alt="Email Logo Preview">
+                    </div>
+                  </div>
+                  <div class="col">
+                    <input type="file" name="SettingFile[email_logo]" class="form-control" accept="image/*">
+                    <small class="text-muted d-block mt-1">Muncul di bagian atas semua email. Fallback ke Logo Login jika kosong.</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Sapaan + Nama Sistem -->
+          <div class="col-md-6">
+            <div class="card border shadow-none h-100">
+              <div class="card-body">
+                <label class="form-label font-weight-bold">2. Sapaan Pembuka</label>
+                <input type="text" name="Setting[email_greeting_prefix]" class="form-control"
+                       value="<?= Html::encode(SystemSettingHelper::get('email_greeting_prefix', 'Yth.')) ?>"
+                       placeholder="Contoh: Yth. / Kepada Yth. / Dear">
+                <small class="text-muted">Muncul sebelum nama pengguna. Contoh: <em>"Yth. BUDI SANTOSO,"</em></small>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="card border shadow-none h-100">
+              <div class="card-body">
+                <label class="form-label font-weight-bold">Nama Sistem (dalam email)</label>
+                <input type="text" name="Setting[email_system_name]" class="form-control"
+                       value="<?= Html::encode(SystemSettingHelper::get('email_system_name', 'Asistensi Kinerja Puskesmas')) ?>"
+                       placeholder="Contoh: Asistensi Kinerja Puskesmas">
+                <small class="text-muted">Nama aplikasi yang muncul di isi email. Contoh: <em>"...pada aplikasi <strong>Asistensi Kinerja Puskesmas</strong>..."</em></small>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Label Pengirim -->
+          <div class="col-12">
+            <div class="card border shadow-none">
+              <div class="card-body">
+                <label class="form-label font-weight-bold">3. Label Pengirim (tanda tangan bawah isi email)</label>
+                <input type="text" name="Setting[email_sender_label]" class="form-control"
+                       value="<?= Html::encode(SystemSettingHelper::get('email_sender_label', 'Asistensi Kinerja Puskesmas (KEMKES RI)')) ?>"
+                       placeholder="Contoh: Puskesmas Kota Bandung (Dinkes Jabar)">
+                <small class="text-muted">Teks yang muncul di bagian <em>"Dikirim oleh,"</em> di bawah konten email.</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. Footer Org + 5. Label Link + URL Link + Warna -->
+          <div class="col-md-4">
+            <div class="card border shadow-none h-100">
+              <div class="card-body">
+                <label class="form-label font-weight-bold">4. Teks Organisasi Footer</label>
+                <input type="text" name="Setting[email_footer_org]" class="form-control"
+                       value="<?= Html::encode(SystemSettingHelper::get('email_footer_org', 'Kementerian Kesehatan Republik Indonesia')) ?>"
+                       placeholder="Contoh: Dinas Kesehatan Kota Bandung">
+                <small class="text-muted">Nama instansi di kiri footer email.</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-3">
+            <div class="card border shadow-none h-100">
+              <div class="card-body">
+                <label class="form-label font-weight-bold">5. Label Link Footer</label>
+                <input type="text" name="Setting[email_footer_link_label]" class="form-control"
+                       value="<?= Html::encode(SystemSettingHelper::get('email_footer_link_label', 'Kunjungi Website')) ?>"
+                       placeholder="Contoh: Buka Aplikasi">
+                <small class="text-muted">Teks tombol link di kanan footer.</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-3">
+            <div class="card border shadow-none h-100">
+              <div class="card-body">
+                <label class="form-label font-weight-bold">URL Link Footer</label>
+                <input type="text" name="Setting[email_footer_link_url]" class="form-control"
+                       value="<?= Html::encode(SystemSettingHelper::get('email_footer_link_url')) ?>"
+                       placeholder="Contoh: https://puskesmas.go.id">
+                <small class="text-muted">Target link tombol footer. Kosongkan untuk default URL web.</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-2">
+            <div class="card border shadow-none h-100">
+              <div class="card-body">
+                <label class="form-label font-weight-bold">Warna Aksen</label>
+                <?php $emailColor = SystemSettingHelper::get('email_header_color', '#0f766e'); ?>
+                <div class="d-flex align-items-center gap-1">
+                  <input type="color" name="Setting[email_header_color]" class="form-control form-control-color flex-shrink-0"
+                         value="<?= Html::encode($emailColor) ?>" style="width:40px;height:38px;padding:2px;">
+                  <input type="text" id="emailColorHex" class="form-control px-2"
+                         value="<?= Html::encode($emailColor) ?>"
+                         placeholder="#0f766e" pattern="^#[0-9a-fA-F]{6}$" style="font-size:12px;">
+                </div>
+                <small class="text-muted">Warna atas & footer.</small>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- end .row -->
+
+        <!-- Info box -->
+        <div class="alert alert-light border rounded p-3 mt-3 mb-0">
+          <p class="mb-2 font-weight-bold"><i class="ph-duotone ph-info me-1 text-primary"></i> Jenis email yang dikirimkan sistem:</p>
+          <ul class="mb-0 ps-3" style="font-size: 13px; color: #475569;">
+            <li><span class="badge" style="background:#e0f2fe;color:#0284c7;">Biru</span> <strong>Kode OTP Verifikasi Email</strong> — dikirim saat pendaftaran akun baru.</li>
+            <li><span class="badge" style="background:#ccfbf1;color:#0f766e;">Teal</span> <strong>Pendaftaran Akun Disetujui</strong> — dikirim beserta username &amp; kata sandi baru.</li>
+            <li><span class="badge" style="background:#ffe4e6;color:#e11d48;">Merah</span> <strong>Pendaftaran Akun Ditolak</strong> — dikirim beserta alasan penolakan.</li>
+            <li><span class="badge" style="background:#ccfbf1;color:#0f766e;">Teal</span> <strong>Akun Dibuat oleh Admin</strong> — dikirim beserta username &amp; kata sandi awal.</li>
+          </ul>
         </div>
 
       </div>

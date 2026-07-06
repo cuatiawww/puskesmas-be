@@ -394,6 +394,12 @@ class UserRegistrationController extends BaseController
                 $user->updated_at = date('Y-m-d H:i:s');
             }
 
+            // Hasilkan password sementara (8 karakter alfanumerik) dan kirimkan via email
+            $plainPassword = strtoupper(substr(base_convert(bin2hex(random_bytes(6)), 16, 36), 0, 8));
+            if ($user->hasAttribute('password_hash')) {
+                $user->password_hash = Yii::$app->security->generatePasswordHash($plainPassword);
+            }
+
             if (!$user->save(false)) {
                 throw new \RuntimeException('Gagal mengaktifkan user.');
             }
@@ -403,8 +409,8 @@ class UserRegistrationController extends BaseController
             }
 
             $transaction->commit();
-            RegistrationEmailService::sendApproved($model);
-            Yii::$app->session->setFlash('success', 'Pengajuan berhasil di-approve.');
+            RegistrationEmailService::sendApproved($model, $plainPassword);
+            Yii::$app->session->setFlash('success', 'Pengajuan berhasil di-approve. Email dengan kredensial telah dikirimkan.');
         } catch (\Throwable $e) {
             $transaction->rollBack();
             Yii::error('Approve registrasi gagal: ' . $e->getMessage(), __METHOD__);

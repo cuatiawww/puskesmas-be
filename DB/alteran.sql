@@ -53,3 +53,17 @@ DO UPDATE SET
 -- ============================================================
 ALTER TABLE "user" ADD COLUMN IF NOT EXISTS alamat TEXT;
 ALTER TABLE "user" ADD COLUMN IF NOT EXISTS jenis_kelamin VARCHAR(20);
+
+-- 4. SETTING EMAIL NOTIFIKASI
+-- ============================================================
+-- Konfigurasi template email notifikasi — bisa diubah dari UI Konfigurasi Sistem.
+INSERT INTO system_setting ("key", "value", "type", "label", created_at, updated_at) VALUES
+  ('email_logo',              '', 'image', 'Logo Email Notifikasi', NOW(), NOW()),
+  ('email_system_name',       'Asistensi Kinerja Puskesmas', 'text', 'Nama Sistem (Email)', NOW(), NOW()),
+  ('email_greeting_prefix',   'Yth.', 'text', 'Sapaan Pembuka Email', NOW(), NOW()),
+  ('email_sender_label',      'Asistensi Kinerja Puskesmas (KEMKES RI)', 'text', 'Label Pengirim Email', NOW(), NOW()),
+  ('email_footer_org',        'Kementerian Kesehatan Republik Indonesia', 'text', 'Teks Organisasi Footer Email', NOW(), NOW()),
+  ('email_footer_link_label', 'Kunjungi Website', 'text', 'Label Link Footer Email', NOW(), NOW()),
+  ('email_footer_link_url',   '', 'text', 'URL Link Footer Email', NOW(), NOW()),
+  ('email_header_color',      '#0f766e', 'text', 'Warna Aksen Email', NOW(), NOW())
+ON CONFLICT ("key") DO NOTHING;
