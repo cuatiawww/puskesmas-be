@@ -67,7 +67,7 @@ class ForgotPasswordForm extends Model
         $user->password_reset_requested_at = date('Y-m-d H:i:s');
 
         if (!$user->save()) {
-            Yii::error('Gagal menyimpan password reset OTP untuk user: ' . $user->id_user, __METHOD__);
+            Yii::error('Gagal menyimpan password reset OTP untuk user: ' . $user->id, __METHOD__);
             return false;
         }
 

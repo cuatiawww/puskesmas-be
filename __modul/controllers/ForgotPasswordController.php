@@ -22,8 +22,25 @@ class ForgotPasswordController extends BaseController
      */
     public function actionRequest()
     {
-        $frontendUrl = Yii::$app->params['frontend_url'] ?? 'http://localhost:3000';
-        return $this->redirect(rtrim($frontendUrl, '/') . '/forgot-password');
+        // Jika sudah login, redirect ke dashboard
+        if (!Yii::$app->user->isGuest) {
+            return $this->redirect(['/site/index']);
+        }
+
+        $model = new ForgotPasswordForm();
+
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            if ($model->sendPasswordResetOtp()) {
+                Yii::$app->session->setFlash('success', 'Kode OTP telah dikirim ke email Anda.');
+                return $this->redirect(['verify', 'email' => $model->email]);
+            } else {
+                Yii::$app->session->setFlash('error', 'Gagal mengirim kode OTP. Silakan coba lagi.');
+            }
+        }
+
+        return $this->render('request', [
+            'model' => $model,
+        ]);
     }
 
     /**
@@ -49,14 +66,17 @@ class ForgotPasswordController extends BaseController
         $model = new ResetPasswordForm();
         $model->email = $email;
 
-        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-            if ($model->resetPassword()) {
-                Yii::$app->session->setFlash('success', 
-                    'Password berhasil diubah! Silakan login dengan password baru Anda.');
-                return $this->redirect(['/site/login']);
-            } else {
-                Yii::$app->session->setFlash('error', 
-                    'Gagal mengubah password. Silakan coba lagi.');
+        if ($model->load(Yii::$app->request->post())) {
+            $model->email = $email; // Pastikan email dari GET parameter tetap tersimpan
+            if ($model->validate()) {
+                if ($model->resetPassword()) {
+                    Yii::$app->session->setFlash('success', 
+                        'Password berhasil diubah! Silakan login dengan password baru Anda.');
+                    return $this->redirect(['/site/login']);
+                } else {
+                    Yii::$app->session->setFlash('error', 
+                        'Gagal mengubah password. Silakan coba lagi.');
+                }
             }
         }
 

@@ -91,7 +91,7 @@ class ResetPasswordForm extends Model
         $user->password_reset_requested_at = null;
 
         if (!$user->save()) {
-            Yii::error('Gagal menyimpan password baru untuk user: ' . $user->id_user, __METHOD__);
+            Yii::error('Gagal menyimpan password baru untuk user: ' . $user->id, __METHOD__);
             return false;
         }
 

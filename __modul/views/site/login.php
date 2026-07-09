@@ -204,6 +204,9 @@ $error_message = \Yii::$app->session['error_login_message'];
 									{label}
 									{error}
 									</div>
+									<div>
+										<a href="' . Url::to(['/forgot-password/request']) . '" class="text-primary text-decoration-underline small font-weight-bold">Lupa Password?</a>
+									</div>
 								</div>',
 					])->checkbox([
 						'class' => 'form-check-input input-primary',

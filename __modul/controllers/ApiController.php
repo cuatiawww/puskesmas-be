@@ -100,14 +100,7 @@ class ApiController extends BaseController
         foreach ($settings as $setting) {
             $value = $setting->value;
             if ($setting->type === 'image' && !empty($value)) {
-                if (!preg_match('~^(https?:)?//~i', $value)) {
-                    $baseUrl = rtrim(Yii::$app->params['base_url'] ?? '', '/');
-                    $value = $baseUrl . '/' . ltrim($value, '/');
-                }
-                if (strpos($value, '//') === 0) {
-                    $protocol = Yii::$app->request->isSecureConnection ? 'https:' : 'http:';
-                    $value = $protocol . $value;
-                }
+                $value = \app\components\SystemSettingHelper::getAssetUrl($setting->key, '', true);
             }
             $data[$setting->key] = $value;
         }
