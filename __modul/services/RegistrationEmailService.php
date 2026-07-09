@@ -12,7 +12,7 @@ class RegistrationEmailService
     // ─────────────────────────────────────────────────────────────────────────
     // Helper: baca semua konfigurasi email dari system_setting sekali saja
     // ─────────────────────────────────────────────────────────────────────────
-    protected static function cfg(): array
+    public static function cfg(): array
     {
         static $cache = null;
         if ($cache !== null) {
@@ -62,7 +62,7 @@ class RegistrationEmailService
     // ─────────────────────────────────────────────────────────────────────────
     // Blok tanda tangan bawah isi email (konsisten di semua email)
     // ─────────────────────────────────────────────────────────────────────────
-    protected static function signatureBlock(): string
+    public static function signatureBlock(): string
     {
         $c = self::cfg();
         return '
@@ -77,7 +77,7 @@ class RegistrationEmailService
     // ─────────────────────────────────────────────────────────────────────────
     // Baris tombol CTA "Masuk ke Aplikasi"
     // ─────────────────────────────────────────────────────────────────────────
-    protected static function loginButton(string $accentColor): string
+    public static function loginButton(string $accentColor): string
     {
         $loginUrl = \yii\helpers\Url::to(['/site/login'], true);
         if (empty($loginUrl)) {
@@ -132,7 +132,7 @@ class RegistrationEmailService
     // ─────────────────────────────────────────────────────────────────────────
     // Blok Kode OTP Verifikasi
     // ─────────────────────────────────────────────────────────────────────────
-    protected static function otpBlock(string $otp, string $accentColor): string
+    public static function otpBlock(string $otp, string $accentColor, string $additionalNotes = ''): string
     {
         $safeAccent = htmlspecialchars($accentColor, ENT_QUOTES, 'UTF-8');
         return '
@@ -143,7 +143,7 @@ class RegistrationEmailService
                             display:inline-block;color:' . $safeAccent . ';box-shadow:inset 0 1px 2px rgba(0,0,0,0.05);">'
                     . htmlspecialchars($otp, ENT_QUOTES, 'UTF-8') . '
                 </div>
-                <p style="margin:15px 0 0 0;font-size:13px;color:#64748b;">Kode OTP ini berlaku selama <strong>10 menit</strong>.<br>Demi keamanan, mohon tidak membagikan kode OTP ini kepada siapa pun.</p>
+                <p style="margin:15px 0 0 0;font-size:13px;color:#64748b;">Kode OTP ini berlaku selama <strong>10 menit</strong>.<br>Demi keamanan, mohon tidak membagikan kode OTP ini kepada siapa pun.' . $additionalNotes . '</p>
             </div>';
     }
 
@@ -302,7 +302,7 @@ class RegistrationEmailService
     // ─────────────────────────────────────────────────────────────────────────
     // Internal: HTML wrapper (card email dengan header logo + footer berwarna)
     // ─────────────────────────────────────────────────────────────────────────
-    protected static function wrapHtml(string $content, string $themeColor = '#0f766e'): string
+    public static function wrapHtml(string $content, string $themeColor = '#0f766e'): string
     {
         $c = self::cfg();
 

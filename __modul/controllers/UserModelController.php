@@ -297,6 +297,18 @@ class UserModelController extends BaseController
             if (!$levelUserId) {
                 return ['success' => false, 'message' => 'Level user wajib dipilih'];
             }
+            if ($this->isKabKotaLevel($levelUserId)) {
+                if (empty($kdProp)) {
+                    return ['success' => false, 'message' => 'Provinsi wajib dipilih'];
+                }
+                if (empty($kdKab)) {
+                    return ['success' => false, 'message' => 'Kabupaten/Kota wajib dipilih'];
+                }
+            } elseif ($this->isProvinsiLevel($levelUserId)) {
+                if (empty($kdProp)) {
+                    return ['success' => false, 'message' => 'Provinsi wajib dipilih'];
+                }
+            }
             if (!$this->isWilayahOptionalForLevel($levelUserId) && !$masterWilayahId) {
                 return ['success' => false, 'message' => 'Wilayah wajib dipilih untuk level user ini'];
             }
@@ -463,10 +475,25 @@ class UserModelController extends BaseController
                 $model->addError('id_user_level', 'Level user wajib dipilih');
             }
 
-            if (!$this->isWilayahOptionalForLevel($levelUserId) && !$masterWilayahId) {
-                $model->addError('master_wilayah_id', 'Wilayah wajib dipilih untuk level user ini');
-            } elseif (!$this->isValidWilayahSelection($masterWilayahId, $levelUserId)) {
-                $model->addError('master_wilayah_id', 'Wilayah tidak sesuai dengan level user yang dipilih');
+            if ($this->isKabKotaLevel($levelUserId)) {
+                if (!$model->getAttribute('kd_prop')) {
+                    $model->addError('master_wilayah_id', 'Provinsi wajib dipilih');
+                }
+                if (!$model->getAttribute('kd_kab')) {
+                    $model->addError('master_wilayah_id', 'Kabupaten/Kota wajib dipilih');
+                }
+            } elseif ($this->isProvinsiLevel($levelUserId)) {
+                if (!$model->getAttribute('kd_prop')) {
+                    $model->addError('master_wilayah_id', 'Provinsi wajib dipilih');
+                }
+            }
+
+            if (!$model->hasErrors()) {
+                if (!$this->isWilayahOptionalForLevel($levelUserId) && !$masterWilayahId) {
+                    $model->addError('master_wilayah_id', 'Wilayah wajib dipilih untuk level user ini');
+                } elseif (!$this->isValidWilayahSelection($masterWilayahId, $levelUserId)) {
+                    $model->addError('master_wilayah_id', 'Wilayah tidak sesuai dengan level user yang dipilih');
+                }
             }
 
             $this->syncUserLegacyFields($model, $levelUserId, $masterWilayahId);
@@ -593,10 +620,25 @@ class UserModelController extends BaseController
             $model->addError('id_user_level', 'Level user wajib dipilih');
         }
 
-        if (!$this->isWilayahOptionalForLevel($levelUserId) && !$masterWilayahId) {
-            $model->addError('master_wilayah_id', 'Wilayah wajib dipilih untuk level user ini');
-        } elseif (!$this->isValidWilayahSelection($masterWilayahId, $levelUserId)) {
-            $model->addError('master_wilayah_id', 'Wilayah tidak sesuai dengan level user yang dipilih');
+        if ($this->isKabKotaLevel($levelUserId)) {
+            if (!$model->getAttribute('kd_prop')) {
+                $model->addError('master_wilayah_id', 'Provinsi wajib dipilih');
+            }
+            if (!$model->getAttribute('kd_kab')) {
+                $model->addError('master_wilayah_id', 'Kabupaten/Kota wajib dipilih');
+            }
+        } elseif ($this->isProvinsiLevel($levelUserId)) {
+            if (!$model->getAttribute('kd_prop')) {
+                $model->addError('master_wilayah_id', 'Provinsi wajib dipilih');
+            }
+        }
+
+        if (!$model->hasErrors()) {
+            if (!$this->isWilayahOptionalForLevel($levelUserId) && !$masterWilayahId) {
+                $model->addError('master_wilayah_id', 'Wilayah wajib dipilih untuk level user ini');
+            } elseif (!$this->isValidWilayahSelection($masterWilayahId, $levelUserId)) {
+                $model->addError('master_wilayah_id', 'Wilayah tidak sesuai dengan level user yang dipilih');
+            }
         }
 
         $this->syncUserLegacyFields($model, $levelUserId, $masterWilayahId);

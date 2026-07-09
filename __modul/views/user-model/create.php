@@ -224,6 +224,7 @@ if ($selectedLevel) {
         <div class="mb-3" id="kabupaten-group" style="display: <?= ($isKabKota || $isMasyarakat) ? 'block' : 'none' ?>;">
           <label for="user-kabupaten" class="form-label">
             Kabupaten/Kota
+            <?= ($isKabKota && !$isMasyarakat) ? '<span class="text-danger">*</span>' : '' ?>
           </label>
           <select class="form-control" id="user-kabupaten" name="kd_kab">
             <option value="">Pilih Kabupaten/Kota...</option>
@@ -293,6 +294,8 @@ $this->registerJs(<<<JS
   var masterWilayahInput  = document.getElementById('user-master-wilayah-id');
   var provinsiGroup       = document.getElementById('provinsi-group');
   var kabupatenGroup      = document.getElementById('kabupaten-group');
+  var provinsiLabel       = document.querySelector('label[for="user-provinsi"]');
+  var kabupatenLabel      = document.querySelector('label[for="user-kabupaten"]');
   var passwordInput       = document.getElementById('password');
   var passwordStrength    = document.getElementById('password-strength');
   var passwordStrengthBar = document.getElementById('password-strength-bar');
@@ -479,18 +482,52 @@ $this->registerJs(<<<JS
       kabupatenGroup.style.display = 'none';
       provinsiSelect.value  = '';
       kabupatenSelect.value = '';
+      if (provinsiLabel) {
+        provinsiLabel.innerHTML = 'Provinsi';
+      }
+      if (kabupatenLabel) {
+        kabupatenLabel.innerHTML = 'Kabupaten/Kota';
+      }
       syncMasterWilayah();
       return;
     }
 
-    provinsiGroup.style.display  = 'block';
-    kabupatenGroup.style.display = 'block';
+    if (isProvinsiLevel()) {
+      provinsiGroup.style.display  = 'block';
+      kabupatenGroup.style.display = 'none';
+      kabupatenSelect.value = '';
+      if (provinsiLabel) {
+        provinsiLabel.innerHTML = 'Provinsi <span class="text-danger">*</span>';
+      }
+      if (kabupatenLabel) {
+        kabupatenLabel.innerHTML = 'Kabupaten/Kota';
+      }
+    } else if (isKabKotaLevel()) {
+      provinsiGroup.style.display  = 'block';
+      kabupatenGroup.style.display = 'block';
+      if (provinsiLabel) {
+        provinsiLabel.innerHTML = 'Provinsi <span class="text-danger">*</span>';
+      }
+      if (kabupatenLabel) {
+        kabupatenLabel.innerHTML = 'Kabupaten/Kota <span class="text-danger">*</span>';
+      }
+    } else {
+      // Masyarakat
+      provinsiGroup.style.display  = 'block';
+      kabupatenGroup.style.display = 'block';
+      if (provinsiLabel) {
+        provinsiLabel.innerHTML = 'Provinsi';
+      }
+      if (kabupatenLabel) {
+        kabupatenLabel.innerHTML = 'Kabupaten/Kota';
+      }
+    }
 
     if (provinsiSelect.options.length <= 1) {
       loadProvinsiList(provinsiSelect.value);
     }
 
-    if (provinsiSelect.value) {
+    if (!isProvinsiLevel() && provinsiSelect.value) {
       loadKabupaten(kabupatenSelect.value);
     }
 
