@@ -88,3 +88,10 @@ CREATE TABLE IF NOT EXISTS public.file_asset (
     update_date TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     file_name VARCHAR(255)
 );
+
+-- 6. KONFIGURASI TAMPILAN SISTEM - LINK KE DASHBOARD WEB
+-- ============================================================
+INSERT INTO system_setting ("key", "value", "type", "label", category, created_at, updated_at) VALUES
+  ('login_dashboard_link', 'https://puskes-kappa.vercel.app/login', 'text', 'Link ke Dashboard Web', 'general', NOW(), NOW())
+ON CONFLICT ("key") DO NOTHING;
+

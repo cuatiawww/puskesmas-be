@@ -180,6 +180,14 @@ JS
           <textarea name="Setting[frontend_technical_guidelines]" class="form-control wysiwyg-editor" rows="6"><?= Html::encode(SystemSettingHelper::get('frontend_technical_guidelines')) ?></textarea>
           <small class="form-text text-muted">Petunjuk teknis masuk sistem yang akan ditampilkan dalam modal di halaman login admin.</small>
         </div>
+
+        <!-- Link ke Dashboard Web -->
+        <div class="form-group mb-3">
+          <label class="form-label font-weight-bold">Link ke Dashboard Web</label>
+          <input type="text" name="Setting[login_dashboard_link]" class="form-control" 
+                 value="<?= Html::encode(SystemSettingHelper::get('login_dashboard_link', 'https://puskes-kappa.vercel.app/login')) ?>">
+          <small class="form-text text-muted">Tautan teks link menuju dashboard Next.js (ditampilkan di samping Panduan Teknis Penggunaan pada halaman login admin).</small>
+        </div>
         
       </div>
     </div>

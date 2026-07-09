@@ -270,6 +270,15 @@ $error_message = \Yii::$app->session['error_login_message'];
 						<a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#modal_panduan_teknis" class="text-primary font-weight-bold text-decoration-underline" style="font-size: 0.85rem;">
 							<i class="ti ti-book me-1"></i>Panduan Teknis Penggunaan
 						</a>
+						<?php 
+						$dashboardLink = \app\components\SystemSettingHelper::get('login_dashboard_link');
+						if (!empty($dashboardLink)): 
+						?>
+							<span class="text-muted mx-2">|</span>
+							<a href="<?= \yii\helpers\Html::encode($dashboardLink) ?>" class="text-primary font-weight-bold text-decoration-underline" style="font-size: 0.85rem;">
+								<i class="ti ti-external-link me-1"></i>Buka Dashboard Web
+							</a>
+						<?php endif; ?>
 					</div>
 
 					<?php ActiveForm::end(); ?>
