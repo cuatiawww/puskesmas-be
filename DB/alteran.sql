@@ -183,3 +183,9 @@ INSERT INTO public.system_setting (key, value, label, type, category, created_at
 ('quick_access_level_7', '[]', 'Quick Access Level 7', 'text', 'dashboard', NOW(), NOW())
 ON CONFLICT (key) DO NOTHING;
 
+-- 11. UNIFY ROUTING FOR NAVIGASI, MODUL, AND SUB-MODUL MANAGEMENT
+-- ============================================================
+DELETE FROM public.hak_akses WHERE sub_modul_id IN (2, 39);
+DELETE FROM public.sub_modul WHERE id IN (2, 39);
+UPDATE public.sub_modul SET label = 'MANAJEMEN MODUL & NAVIGASI', route = '/navigasi/index' WHERE id = 1;
+
