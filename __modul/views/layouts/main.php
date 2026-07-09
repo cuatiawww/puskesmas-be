@@ -146,6 +146,16 @@ ul.pagination > li.next > a{
     .pc-header {
         left: 285px !important;
     }
+    .pc-sidebar.pc-sidebar-hide {
+        width: 0 !important;
+        overflow: hidden;
+    }
+    .pc-sidebar.pc-sidebar-hide ~ .pc-container {
+        margin-left: 0 !important;
+    }
+    .pc-sidebar.pc-sidebar-hide ~ .pc-header {
+        left: 0 !important;
+    }
 }
 </style>
 	

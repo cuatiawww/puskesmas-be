@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\components\TimeHelper;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\filters\VerbFilter;
@@ -152,7 +153,7 @@ class UserRegistrationController extends BaseController
                 $registration->kabupaten_id = (int) $model->kabupaten_id;
                 $registration->tujuan_akses = $model->tujuan_akses;
                 $registration->tujuan_akses_lainnya = trim((string) $model->tujuan_akses_lainnya);
-                $registration->updated_at = date('Y-m-d H:i:s');
+                $registration->updated_at = TimeHelper::now();
 
                 if ($registration->save()) {
                     // Update user data juga
@@ -391,7 +392,7 @@ class UserRegistrationController extends BaseController
                 $user->status = 1;
             }
             if ($user->hasAttribute('updated_at')) {
-                $user->updated_at = date('Y-m-d H:i:s');
+                $user->updated_at = TimeHelper::now();
             }
 
             // Hasilkan password sementara (8 karakter alfanumerik) dan kirimkan via email
@@ -441,7 +442,7 @@ class UserRegistrationController extends BaseController
                     $user->status = 0;
                 }
                 if ($user->hasAttribute('updated_at')) {
-                    $user->updated_at = date('Y-m-d H:i:s');
+                    $user->updated_at = TimeHelper::now();
                 }
                 $user->save(false);
             }

@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\components\TimeHelper;
 use app\models\MasterWilayah;
 use app\models\User;
 use app\models\level_user\LevelUser;
@@ -345,7 +346,7 @@ class UserModelController extends BaseController
                 $model->password     = \Yii::$app->security->generatePasswordHash($password);
                 $model->id_user_level= $levelUserId;
                 $model->is_active    = (bool) $isActive;
-                $model->join_date    = date('Y-m-d H:i:s');
+                $model->join_date    = TimeHelper::now();
 
             } else {
                 // ── UPDATE ──────────────────────────────────────────────

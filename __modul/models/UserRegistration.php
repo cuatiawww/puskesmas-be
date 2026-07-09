@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\components\TimeHelper;
 use Yii;
 
 class UserRegistration extends \yii\db\ActiveRecord
@@ -41,7 +42,7 @@ class UserRegistration extends \yii\db\ActiveRecord
             return false;
         }
 
-        $now = date('Y-m-d H:i:s');
+        $now = TimeHelper::now();
         if ($insert && $this->hasAttribute('created_at') && empty($this->created_at)) {
             $this->created_at = $now;
         }
@@ -77,8 +78,8 @@ class UserRegistration extends \yii\db\ActiveRecord
     {
         $otp = (string) random_int(1000, 9999);
         $this->otp_hash = Yii::$app->security->generatePasswordHash($otp);
-        $this->otp_expires_at = date('Y-m-d H:i:s', time() + 600);
-        $this->otp_sent_at = date('Y-m-d H:i:s');
+        $this->otp_expires_at = TimeHelper::addMinutes(10);
+        $this->otp_sent_at = TimeHelper::now();
         return $otp;
     }
 
@@ -107,7 +108,7 @@ class UserRegistration extends \yii\db\ActiveRecord
 
     public function markEmailVerified(): bool
     {
-        $this->email_verified_at = date('Y-m-d H:i:s');
+        $this->email_verified_at = TimeHelper::now();
         $this->status = self::STATUS_PENDING_APPROVAL;
         $this->otp_hash = null;
         $this->otp_expires_at = null;
@@ -118,7 +119,7 @@ class UserRegistration extends \yii\db\ActiveRecord
     {
         $this->status = self::STATUS_APPROVED;
         $this->approved_by = $adminId;
-        $this->approved_at = date('Y-m-d H:i:s');
+        $this->approved_at = TimeHelper::now();
         $this->rejected_by = null;
         $this->rejected_at = null;
         $this->rejection_reason = null;
@@ -129,7 +130,7 @@ class UserRegistration extends \yii\db\ActiveRecord
     {
         $this->status = self::STATUS_REJECTED;
         $this->rejected_by = $adminId;
-        $this->rejected_at = date('Y-m-d H:i:s');
+        $this->rejected_at = TimeHelper::now();
         $this->rejection_reason = $reason;
         return $this->save(false);
     }

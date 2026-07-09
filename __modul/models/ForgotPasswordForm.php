@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\components\TimeHelper;
 use Yii;
 use yii\base\Model;
 
@@ -63,8 +64,8 @@ class ForgotPasswordForm extends Model
 
         // Simpan OTP ke database dengan masa berlaku 10 menit
         $user->password_reset_otp = $otp;
-        $user->password_reset_otp_expires_at = date('Y-m-d H:i:s', strtotime('+10 minutes'));
-        $user->password_reset_requested_at = date('Y-m-d H:i:s');
+        $user->password_reset_otp_expires_at = TimeHelper::addMinutes(10);
+        $user->password_reset_requested_at = TimeHelper::now();
 
         if (!$user->save()) {
             Yii::error('Gagal menyimpan password reset OTP untuk user: ' . $user->id, __METHOD__);

@@ -208,7 +208,9 @@ class MenuService
      * Examples:
      *  - "data-icd-x.php" => "/data-icd-x"
      *  - "data-jamaah" => "/data-jamaah"
-     *  - "http://..." or "/profil" => unchanged
+     *  - "http://..." unchanged
+     *  - "/profil" => "/profil"
+     *  - "/puskesmas/profil" on localhost project folder => "/profil"
      */
     private static function normalizeRoute(string $route): string
     {
@@ -227,12 +229,14 @@ class MenuService
         // Ensure leading slash for internal routes
         $r = (strpos($r, '/') === 0) ? $r : '/' . ltrim($r, '/');
 
-        // If we have base_url configured, prefix it so links include subfolder (e.g. /siskohatkes)
+        // Keep only the Yii route here. Url::to() will add baseUrl once when the menu is rendered.
+        // This also fixes links such as /puskesmas/puskesmas/user-registration/index.
         $base = Yii::$app->params['base_url'] ?? '';
         if (!empty($base)) {
-            // If base is absolute (http(s) or protocol-relative //), just join without duplicating slashes
             $base = rtrim($base, '/');
-            return $base . $r;
+            if ($base !== '' && strpos($r, $base . '/') === 0) {
+                $r = substr($r, strlen($base));
+            }
         }
 
         return $r;

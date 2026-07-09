@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\components\TimeHelper;
 use Yii;
 
 /**
@@ -49,7 +50,7 @@ class SystemSetting extends \yii\db\ActiveRecord
     {
         if (parent::beforeSave($insert)) {
             if ($this->hasAttribute('updated_at')) {
-                $this->updated_at = date('Y-m-d H:i:s');
+                $this->updated_at = TimeHelper::now();
             }
             return true;
         }

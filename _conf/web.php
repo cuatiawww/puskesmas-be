@@ -1,6 +1,7 @@
 <?php
 
 error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
+date_default_timezone_set('Asia/Jakarta');
 
 $params = require __DIR__ . '/params.php';
 $db = require __DIR__ . '/db.php';
@@ -79,9 +80,10 @@ $config = [
         ],
 
         
-        // 'formatter' => [
-        //     'timeZone' => 'Asia/Jakarta',
-        // ],
+        'formatter' => [
+            'defaultTimeZone' => 'Asia/Jakarta',
+            'timeZone' => 'Asia/Jakarta',
+        ],
         
         // 'reCaptcha' => [
 		// 	'class' => 'himiklab\yii2\recaptcha\ReCaptchaConfig',

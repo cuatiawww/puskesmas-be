@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\components\TimeHelper;
 use Yii;
 use app\models\PuskesmasProfile;
 use app\models\PuskesmasKinerja;
@@ -207,9 +208,9 @@ class PuskesmasProfileController extends BaseController
                 }
             }
         } else {
-            $model->tahun = date('Y');
+            $model->tahun = TimeHelper::year();
             $model->periode_tipe = 'Tahunan';
-            $model->periode_nilai = date('Y');
+            $model->periode_nilai = TimeHelper::year();
         }
 
         return $this->render('kinerja-create', [
@@ -585,8 +586,8 @@ class PuskesmasProfileController extends BaseController
                 }
             }
         } else {
-            $model->tahun = (int)date('Y');
-            $model->bulan = (int)date('m');
+            $model->tahun = (int) TimeHelper::year();
+            $model->bulan = (int) TimeHelper::month();
             $model->ranking = 1;
         }
 

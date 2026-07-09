@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\components\TimeHelper;
 use Yii;
 use app\components\Helper;
 use app\models\DataDukung;
@@ -116,8 +117,8 @@ class DataDukungController extends BaseController
         if ($model->load(Yii::$app->request->post())) {
 
             // Auto generate ID
-            $model->id_dukung ??= 'DOK-' . date('YmdHis');
-            $model->id_jemaah ??= 'JMH-' . date('YmdHis');
+            $model->id_dukung ??= 'DOK-' . TimeHelper::compactTimestamp();
+            $model->id_jemaah ??= 'JMH-' . TimeHelper::compactTimestamp();
             $model->status_verifikasi ??= 'menunggu';
 
             // Upload file
@@ -125,7 +126,7 @@ class DataDukungController extends BaseController
             if ($file) {
                 $dir = Yii::getAlias('@app/../uploads/data-dukung/');
                 if (!is_dir($dir)) mkdir($dir, 0755, true);
-                $name = time() . '-' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $file->name);
+                $name = TimeHelper::compactTimestamp() . '-' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $file->name);
                 $file->saveAs($dir . $name);
                 $model->file_path = 'uploads/data-dukung/' . $name;
             }
@@ -163,7 +164,7 @@ class DataDukungController extends BaseController
             if ($file) {
                 $dir = Yii::getAlias('@app/../uploads/data-dukung/');
                 if (!is_dir($dir)) mkdir($dir, 0755, true);
-                $name = time() . '-' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $file->name);
+                $name = TimeHelper::compactTimestamp() . '-' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $file->name);
                 $file->saveAs($dir . $name);
                 $model->file_path = 'uploads/data-dukung/' . $name;
             }

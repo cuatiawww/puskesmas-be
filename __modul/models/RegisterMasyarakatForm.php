@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\components\TimeHelper;
 use Yii;
 use yii\base\Model;
 use app\models\level_user\LevelUser;
@@ -254,7 +255,7 @@ class RegisterMasyarakatForm extends Model
         $this->assignIfExists($user, 'is_active', false);
         $this->assignIfExists($user, 'status', 0);
 
-        $now = date('Y-m-d H:i:s');
+        $now = TimeHelper::now();
         $this->assignIfExists($user, 'created_at', $now);
         $this->assignIfExists($user, 'updated_at', $now);
         $this->assignIfExists($user, 'join_date', $now);
@@ -353,11 +354,11 @@ class RegisterMasyarakatForm extends Model
         $level->is_active = true;
 
         if ($level->hasAttribute('created_at')) {
-            $level->created_at = date('Y-m-d H:i:s');
+            $level->created_at = TimeHelper::now();
         }
 
         if ($level->hasAttribute('updated_at')) {
-            $level->updated_at = date('Y-m-d H:i:s');
+            $level->updated_at = TimeHelper::now();
         }
 
         try {

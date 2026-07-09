@@ -2,6 +2,10 @@
 -- DDL & SEED DATA ALTERATION LOG
 -- ============================================================
 
+-- Pastikan semua NOW()/CURRENT_TIMESTAMP di script ini memakai WIB.
+-- Aplikasi juga sudah menjalankan SET TIME ZONE di _conf/db.php dan _conf/db_user.php.
+SET TIME ZONE 'Asia/Jakarta';
+
 -- 1. ALTER TABLE UNTUK MENAMBAH KOLOM FOTO PUSKESMAS
 -- ============================================================
 ALTER TABLE puskesmas_profile ADD COLUMN IF NOT EXISTS foto_puskesmas VARCHAR(255);
@@ -89,6 +93,9 @@ CREATE TABLE IF NOT EXISTS public.file_asset (
     file_name VARCHAR(255)
 );
 
+ALTER TABLE public.file_asset
+    ALTER COLUMN update_date SET DEFAULT (timezone('Asia/Jakarta', now()));
+
 -- 6. KONFIGURASI TAMPILAN SISTEM - LINK KE DASHBOARD WEB
 -- ============================================================
 INSERT INTO system_setting ("key", "value", "type", "label", category, created_at, updated_at) VALUES
@@ -116,6 +123,9 @@ CREATE TABLE IF NOT EXISTS public.user_activity_log (
     platform VARCHAR(50),
     created_at TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+ALTER TABLE public.user_activity_log
+    ALTER COLUMN created_at SET DEFAULT (timezone('Asia/Jakarta', now()));
 
 CREATE INDEX IF NOT EXISTS idx_user_activity_log_action ON public.user_activity_log (action);
 CREATE INDEX IF NOT EXISTS idx_user_activity_log_created_at ON public.user_activity_log (created_at);
@@ -188,4 +198,3 @@ ON CONFLICT (key) DO NOTHING;
 DELETE FROM public.hak_akses WHERE sub_modul_id IN (2, 39);
 DELETE FROM public.sub_modul WHERE id IN (2, 39);
 UPDATE public.sub_modul SET label = 'MANAJEMEN MODUL & NAVIGASI', route = '/navigasi/index' WHERE id = 1;
-

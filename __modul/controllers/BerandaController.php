@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\components\TimeHelper;
 use Yii;
 use app\models\Beranda;
 use yii\web\Response;
@@ -17,8 +18,8 @@ class BerandaController extends BaseController
                 'stats'        => Beranda::getStats(),
                 'totalCheckin' => 0,
                 'lastCheckin'  => null,
-                'currentDate'  => date('Y-m-d'),
-                'currentTime'  => date('H:i'),
+                'currentDate'  => TimeHelper::date(),
+                'currentTime'  => TimeHelper::hourMinute(),
             ]);
         } catch (\Exception $e) {
             Yii::error('Beranda Controller Error: ' . $e->getMessage());
@@ -26,8 +27,8 @@ class BerandaController extends BaseController
                 'stats'        => Beranda::getStats(),
                 'totalCheckin' => 0,
                 'lastCheckin'  => null,
-                'currentDate'  => date('Y-m-d'),
-                'currentTime'  => date('H:i'),
+                'currentDate'  => TimeHelper::date(),
+                'currentTime'  => TimeHelper::hourMinute(),
             ]);
         }
     }

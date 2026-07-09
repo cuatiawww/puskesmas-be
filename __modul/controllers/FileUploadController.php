@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\components\Helper;
+use app\components\TimeHelper;
 use app\models\file_upload\FileAsset;
 use Yii;
 use yii\helpers\FileHelper;
@@ -540,7 +541,7 @@ class FileUploadController extends BaseController
                 if ( !Yii::$app->user->getIsGuest() ){
                     $model_upload->id_user = Yii::$app->user->identity->id;
                 }
-                $model_upload->update_date = date('Y-m-d H:i:s');
+                $model_upload->update_date = TimeHelper::now();
                 $model_upload->save(false);
 
                 if ($useObjectStorage) {
@@ -602,7 +603,7 @@ class FileUploadController extends BaseController
                 if ( !Yii::$app->user->getIsGuest() ){
                     $model_upload->id_user = Yii::$app->user->identity->id;
                 }
-                $model_upload->update_date = date('Y-m-d H:i:s');
+                $model_upload->update_date = TimeHelper::now();
                 $model_upload->save(false);
 
                 return Json::encode([

@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\components\TimeHelper;
 use Yii;
 use yii\db\ActiveRecord;
 
@@ -51,7 +52,11 @@ class Beranda extends ActiveRecord
 
             // Total User Activities Logged Today
             $stats['total_activities_today'] = (int) Yii::$app->db->createCommand(
-                "SELECT COUNT(*) FROM public.user_activity_log WHERE created_at::date = CURRENT_DATE"
+                "SELECT COUNT(*) FROM public.user_activity_log WHERE created_at >= :start AND created_at < :end",
+                [
+                    ':start' => TimeHelper::todayStart(),
+                    ':end' => TimeHelper::tomorrowStart(),
+                ]
             )->queryScalar();
 
             return $stats;

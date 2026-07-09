@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\components\TimeHelper;
 use Yii;
 
 /**
@@ -83,5 +84,18 @@ class UserActivityLog extends \yii\db\ActiveRecord
             'platform' => 'Sistem Operasi',
             'created_at' => 'Waktu Aktivitas',
         ];
+    }
+
+    public function beforeSave($insert)
+    {
+        if (!parent::beforeSave($insert)) {
+            return false;
+        }
+
+        if ($insert && empty($this->created_at)) {
+            $this->created_at = TimeHelper::now();
+        }
+
+        return true;
     }
 }

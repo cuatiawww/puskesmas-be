@@ -9,6 +9,7 @@ use yii\helpers\FileHelper;
 use yii\web\UploadedFile;
 use app\models\file_upload\FileAsset;
 use app\components\Helper;
+use app\components\TimeHelper;
 
 class SystemSettingController extends BaseController
 {
@@ -155,7 +156,7 @@ class SystemSettingController extends BaseController
                                 if (!Yii::$app->user->getIsGuest()) {
                                     $model_upload->id_user = Yii::$app->user->identity->id;
                                 }
-                                $model_upload->update_date = date('Y-m-d H:i:s');
+                                $model_upload->update_date = TimeHelper::now();
                                 if ($model_upload->save(false)) {
                                     $setting->value = $hash;
                                     $hasChange = true;
@@ -208,7 +209,7 @@ class SystemSettingController extends BaseController
                 try {
                     $attributes = ['value'];
                     if ($setting->hasAttribute('updated_at')) {
-                        $setting->updated_at = date('Y-m-d H:i:s');
+                        $setting->updated_at = TimeHelper::now();
                         $attributes[] = 'updated_at';
                     }
                     $saved = $setting->save(false, $attributes);

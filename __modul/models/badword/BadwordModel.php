@@ -2,6 +2,7 @@
 
 namespace app\models\badword;
 
+use app\components\TimeHelper;
 use Yii;
 
 /**
@@ -40,8 +41,8 @@ class BadwordModel extends \yii\db\ActiveRecord
 		$browser = new \Browser();        
 		$nama_browser = $browser->getBrowser()." ".$browser->getVersion()." (".$browser->getPlatform().")";
 		$ip = Yii::$app->request->remoteIP;
-		$tanggal = date('Y-m-d');
-		$jam = date('H:i:s');
+		$tanggal = TimeHelper::date();
+		$jam = TimeHelper::time();
 		
 		//$params = [1 => $id];
 		//$connection = Yii::$app->db->createCommand('delete from member_modul_kat where id_modul_kat=?')->bindValues($params)->query();

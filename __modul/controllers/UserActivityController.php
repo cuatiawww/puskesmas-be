@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\components\TimeHelper;
 use Yii;
 use app\models\UserActivityLog;
 use yii\data\ActiveDataProvider;
@@ -40,7 +41,8 @@ class UserActivityController extends BaseController
             'total_logs' => (int) UserActivityLog::find()->count(),
             'active_today' => (int) UserActivityLog::find()
                 ->select('username')
-                ->where(['>=', 'created_at', date('Y-m-d 00:00:00')])
+                ->where(['>=', 'created_at', TimeHelper::todayStart()])
+                ->andWhere(['<', 'created_at', TimeHelper::tomorrowStart()])
                 ->distinct()
                 ->count(),
             'create_actions' => (int) UserActivityLog::find()->where(['action' => 'create'])->count(),

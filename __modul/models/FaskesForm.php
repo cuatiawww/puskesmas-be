@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\components\TimeHelper;
 use app\services\WilayahService;
 use Yii;
 use yii\base\Model;
@@ -148,7 +149,7 @@ class FaskesForm extends Model
             'email' => $this->email,
             'kode_kecamatan' => $this->kode_kecamatan,
             'nama_kecamatan' => $namaKec,
-            'update_date' => date('Y-m-d H:i:s'),
+            'update_date' => TimeHelper::now(),
         ];
 
         if (in_array($jenis, ['rs', 'puskesmas', 'klinik'], true)) {

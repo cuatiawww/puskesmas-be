@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\components\TimeHelper;
 use Yii;
 use yii\filters\AccessControl;
 use yii\web\Controller;
@@ -342,8 +343,8 @@ class SiteController extends BaseController
             $model->satuan_waktu = Yii::$app->request->post('satuan_waktu');
 
             // Set real time
-            $model->tgl_real_masehi = date('Y-m-d');
-            $model->waktu_real_masehi = date('H:i:s');
+            $model->tgl_real_masehi = TimeHelper::date();
+            $model->waktu_real_masehi = TimeHelper::time();
 
             if ($model->save()) {
                 return [
