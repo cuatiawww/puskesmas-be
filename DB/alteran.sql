@@ -131,3 +131,38 @@ WHERE NOT EXISTS (SELECT 1 FROM sub_modul WHERE route = '/user-activity/index' O
 -- ============================================================
 SELECT setval('sub_modul_id_seq', COALESCE((SELECT MAX(id)+1 FROM sub_modul), 1), false);
 
+-- 9. SEED DATA MODUL BANTUAN (TUTORIAL, KONTAK WA, DOWNLOAD, VERSI SISTEM)
+-- ============================================================
+TRUNCATE TABLE public.tutorial RESTART IDENTITY CASCADE;
+TRUNCATE TABLE public.kontak RESTART IDENTITY CASCADE;
+TRUNCATE TABLE public.download RESTART IDENTITY CASCADE;
+TRUNCATE TABLE public.versi_sistem RESTART IDENTITY CASCADE;
+
+-- SEED DATA TUTORIAL
+INSERT INTO public.tutorial (nama_tutorial, keterangan, link_tutorial, link_video, created_at, updated_at) VALUES
+('Panduan Penggunaan Sistem Asistensi Kinerja Puskesmas', 'Tatakelola penggunaan aplikasi Asistensi Kinerja Puskesmas mulai dari login, sinkronisasi data, hingga pembacaan laporan.', 'https://puskesmas-be.mediaciptainformasi.co.id/file/tutorial/panduan-sistem.pdf', 'https://www.youtube.com/watch?v=tutorial-puskesmas', NOW(), NOW()),
+('Manajemen Data User dan Hak Akses', 'Panduan untuk administrator puskesmas dalam melakukan pengelolaan user, aktivasi akun, dan pembagian level hak akses.', 'https://puskesmas-be.mediaciptainformasi.co.id/file/tutorial/manajemen-user.pdf', 'https://www.youtube.com/watch?v=manajemen-user', NOW(), NOW()),
+('Sinkronisasi Modul dan Integrasi Data Kesehatan', 'Tatakelola sinkronisasi modul aplikasi dan panduan integrasi data kesehatan puskesmas secara terpadu.', 'https://puskesmas-be.mediaciptainformasi.co.id/file/tutorial/integrasi-data.pdf', 'https://www.youtube.com/watch?v=integrasi-data', NOW(), NOW());
+
+-- SEED DATA KONTAK
+INSERT INTO public.kontak (nama_kontak, jabatan, email, whatsapp, created_at, updated_at) VALUES
+('Helpdesk Asistensi Puskesmas', 'Tim Support TI Pusat', 'support.puskesmas@kemkes.go.id', '0811163119', NOW(), NOW()),
+('Direktorat Pelayanan Kesehatan Primer', 'Administrator Program', 'yankes.primer@kemkes.go.id', '081234567890', NOW(), NOW());
+
+-- SEED DATA DOWNLOAD
+INSERT INTO public.download (nama_download, kategori, link_download, created_at, updated_at) VALUES
+('Panduan Teknis Penggunaan Aplikasi (PDF)', 'Dokumen', 'https://puskesmas-be.mediaciptainformasi.co.id/file/download/panduan_teknis.pdf', NOW(), NOW()),
+('Browser Google Chrome', 'Browser', 'https://www.google.com/chrome/', NOW(), NOW()),
+('Browser Mozilla Firefox', 'Browser', 'https://www.mozilla.org/firefox/new/', NOW(), NOW());
+
+-- SEED DATA VERSI SISTEM
+INSERT INTO public.versi_sistem (versi, keterangan, tanggal, created_at, updated_at) VALUES
+('v1.0.0-beta', '- Inisialisasi Sistem Asistensi Kinerja Puskesmas
+- Fitur Manajemen Pengguna (Aktivasi, OTP, Approval)
+- Pengaturan Navigasi Menu, Modul, dan Level User Akses', '2026-07-01', NOW(), NOW()),
+('v1.1.0-release', '- Penambahan fitur Log Aktivitas Pengguna (User Activity Tracking) untuk audit trails
+- Penambahan modul Bantuan terpadu (Tutorial, Kontak WA, Daftar Download, Versi Sistem)
+- Perbaikan bug sinkronisasi status login Single Sign-On (SSO)
+- Optimasi template email verifikasi OTP dan notifikasi pembuatan akun', '2026-07-09', NOW(), NOW());
+
+

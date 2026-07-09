@@ -6,18 +6,18 @@ use yii\helpers\Url;
 $this->title = 'Versi Sistem';
 $this->params['active_menu'] = 'versi-sistem';
 
-$isAdmin = Yii::$app->user->identity && (int)(Yii::$app->user->identity->id_user_level ?? Yii::$app->user->identity->level_user_id ?? 0) === 1;
+$isAdmin = Yii::$app->user->identity && (int) (Yii::$app->user->identity->id_user_level ?? Yii::$app->user->identity->level_user_id ?? 0) === 1;
 
 $swal = Yii::$app->session->getFlash('swal', null);
 if ($swal) {
-    $swalJson = \yii\helpers\Json::encode($swal);
-    $js = <<<JS
+  $swalJson = \yii\helpers\Json::encode($swal);
+  $js = <<<JS
 (function(){
   var opt = $swalJson;
   if (typeof Swal !== 'undefined') Swal.fire(opt);
 })();
 JS;
-    $this->registerJs($js);
+  $this->registerJs($js);
 }
 ?>
 
@@ -46,7 +46,7 @@ JS;
 
 <div class="row">
   <!-- Section 1: Ringkasan Integrasi Sistem -->
-  <div class="col-md-12 mb-4">
+  <!-- <div class="col-md-12 mb-4">
     <div class="card shadow-sm border-0">
       <div class="card-body">
         <h5 class="fw-bold mb-3">Informasi Sistem Informasi</h5>
@@ -72,7 +72,7 @@ JS;
         </p>
       </div>
     </div>
-  </div>
+  </div> -->
 
   <!-- Section 2: Matriks Log Pembaruan Sistem (Changelog) -->
   <div class="col-md-12">
@@ -104,53 +104,54 @@ JS;
               </tr>
             </thead>
             <tbody>
-              <?php 
+              <?php
               $models = $dataProvider->getModels();
-              if (empty($models)): 
-              ?>
+              if (empty($models)):
+                ?>
                 <tr>
-                  <td colspan="<?= $isAdmin ? 5 : 4 ?>" class="text-center text-muted py-4">Data versi sistem belum tersedia.</td>
+                  <td colspan="<?= $isAdmin ? 5 : 4 ?>" class="text-center text-muted py-4">Data versi sistem belum
+                    tersedia.</td>
                 </tr>
-              <?php 
-              else: 
+              <?php
+              else:
                 $no = $dataProvider->pagination->offset + 1;
-                foreach ($models as $model): 
-              ?>
-                <tr>
-                  <td class="text-center"><?= $no++ ?></td>
-                  <td>
-                    <span class="badge bg-light-primary text-primary fw-bold px-3 py-2 fs-6">
-                      <?= Html::encode($model->versi) ?>
-                    </span>
-                  </td>
-                  <td class="text-center fw-medium">
-                    <?= date('d-M-Y', strtotime($model->tanggal)) ?>
-                  </td>
-                  <td class="text-dark">
-                    <?= nl2br(Html::encode($model->keterangan)) ?>
-                  </td>
-                  <?php if ($isAdmin): ?>
-                    <td class="text-center">
-                      <div class="d-flex justify-content-center gap-1">
-                        <?= Html::a('<i class="ti ti-edit"></i>', ['update', 'id' => $model->id], ['class' => 'btn btn-xs btn-warning']) ?>
-                        <?= Html::a('<i class="ti ti-trash"></i>', ['delete', 'id' => $model->id], [
-                          'class' => 'btn btn-xs btn-danger',
-                          'data' => [
-                            'confirm' => 'Apakah Anda yakin ingin menghapus log versi ini?',
-                            'method' => 'post',
-                          ]
-                        ]) ?>
-                      </div>
+                foreach ($models as $model):
+                  ?>
+                  <tr>
+                    <td class="text-center"><?= $no++ ?></td>
+                    <td>
+                      <span class="badge bg-light-primary text-primary fw-bold px-3 py-2 fs-6">
+                        <?= Html::encode($model->versi) ?>
+                      </span>
                     </td>
-                  <?php endif; ?>
-                </tr>
-              <?php 
-                endforeach; 
-              endif; 
+                    <td class="text-center fw-medium">
+                      <?= date('d-M-Y', strtotime($model->tanggal)) ?>
+                    </td>
+                    <td class="text-dark">
+                      <?= nl2br(Html::encode($model->keterangan)) ?>
+                    </td>
+                    <?php if ($isAdmin): ?>
+                      <td class="text-center">
+                        <div class="d-flex justify-content-center gap-1">
+                          <?= Html::a('<i class="ti ti-edit"></i>', ['update', 'id' => $model->id], ['class' => 'btn btn-xs btn-warning']) ?>
+                          <?= Html::a('<i class="ti ti-trash"></i>', ['delete', 'id' => $model->id], [
+                            'class' => 'btn btn-xs btn-danger',
+                            'data' => [
+                              'confirm' => 'Apakah Anda yakin ingin menghapus log versi ini?',
+                              'method' => 'post',
+                            ]
+                          ]) ?>
+                        </div>
+                      </td>
+                    <?php endif; ?>
+                  </tr>
+                <?php
+                endforeach;
+              endif;
               ?>
             </tbody>
           </table>
-          
+
           <div class="d-flex justify-content-end mt-3">
             <?= \yii\widgets\LinkPager::widget([
               'pagination' => $dataProvider->pagination,
