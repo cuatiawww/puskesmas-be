@@ -61,12 +61,21 @@ class LoginForm extends Model
                     $this->addError($attribute, 'Akun Anda belum aktif atau masih menunggu approval.');
                     return;
                 }
-            
                 if (!$user->validatePassword($this->password)) {
                     \Yii::$app->session['error_login'] = "1";
                     \Yii::$app->session['error_login_message'] = "Maaf Password Anda Salah, Hubungi Call Center 0811 163 119 atau Halo Kemkes Untuk Pertanyaan Lebih Lanjut";
                     $this->addError($attribute, 'Username Atau Password Anda Tidak Sesuai.');
-                } 
+                } else {
+                    $levelId = $user->getIdUserLevel();
+                    $levelUser = $user->levelUser;
+                    $levelName = $levelUser ? $levelUser->nama_level : '';
+
+                    if ($levelId == 7 || strtolower($levelName) === 'masyarakat') {
+                        \Yii::$app->session['error_login'] = "1";
+                        \Yii::$app->session['error_login_message'] = "Maaf, akun Anda terdaftar sebagai level Masyarakat dan hanya diperkenankan mengakses halaman dashboard.";
+                        $this->addError($attribute, 'Akun level Masyarakat tidak diizinkan masuk ke sistem admin.');
+                    }
+                }
             }
            
         }

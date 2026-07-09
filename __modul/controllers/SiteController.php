@@ -441,6 +441,15 @@ class SiteController extends BaseController
         if ($payload && isset($payload['sub'])) {
             $user = \app\models\User::findOne((int)$payload['sub']);
             if ($user) {
+                $levelId = $user->getIdUserLevel();
+                $levelUser = $user->levelUser;
+                $levelName = $levelUser ? $levelUser->nama_level : '';
+                if ($levelId == 7 || strtolower($levelName) === 'masyarakat') {
+                    Yii::$app->session['error'] = 1;
+                    Yii::$app->session['error_message'] = 'Maaf, akun Anda terdaftar sebagai level Masyarakat dan hanya diperkenankan mengakses halaman dashboard.';
+                    return $this->redirect(['site/login']);
+                }
+
                 // Log user in
                 if (Yii::$app->user->login($user, 3600 * 24)) {
                     return $this->redirect(['/beranda/index']);
