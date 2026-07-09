@@ -198,18 +198,24 @@ class SiteController extends BaseController
         }
     }
 
-    /**
-     * Logout action.
-     *
-     * @return Response
-     */
     public function actionLogout()
     {
         $model = new LoginForm();
         $model->catat_log('Logout', "");
-            Yii::$app->user->logout();
-            return $this->goHome();
+        Yii::$app->user->logout();
+        
+        $returnUrl = Yii::$app->request->get('return');
+        if (!empty($returnUrl)) {
+            return $this->redirect($returnUrl);
         }
+
+        $frontendUrl = Yii::$app->params['frontend_url'] ?? '';
+        if (!empty($frontendUrl)) {
+            return $this->redirect(rtrim($frontendUrl, '/') . '/login?logout=1');
+        }
+
+        return $this->goHome();
+    }
 
         /**
          * Menampilkan halaman akses level user
