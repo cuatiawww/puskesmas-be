@@ -24,6 +24,44 @@ $mailFromName = $_ENV['MAIL_FROM_NAME'] ?? 'Puskesmas Notification';
 // Target email penerima
 $to = $_GET['to'] ?? 'test@example.com';
 
+echo "<h1>🧪 SMTP Email Connection Test & Path Debugger</h1>";
+
+echo "<h3>Path & File Debugging:</h3>";
+echo "<ul>";
+echo "<li><strong>Script __DIR__:</strong> " . __DIR__ . "</li>";
+echo "<li><strong>Script parent dir:</strong> " . dirname(__DIR__) . "</li>";
+
+$localEnv = __DIR__ . '/.env';
+echo "<li><strong>Checking local .env ($localEnv):</strong> " . (is_file($localEnv) ? "ADA (Readable: " . (is_readable($localEnv) ? "YA" : "TIDAK") . ")" : "TIDAK ADA") . "</li>";
+
+$parentEnv = dirname(__DIR__) . '/.env';
+echo "<li><strong>Checking parent .env ($parentEnv):</strong> " . (is_file($parentEnv) ? "ADA (Readable: " . (is_readable($parentEnv) ? "YA" : "TIDAK") . ")" : "TIDAK ADA") . "</li>";
+
+// Print masked contents of local env if it exists
+if (is_file($localEnv)) {
+    $lines = file($localEnv);
+    echo "<li><strong>Local .env MAIL_PASSWORD line:</strong> ";
+    foreach ($lines as $line) {
+        if (strpos(trim($line), 'MAIL_PASSWORD') === 0) {
+            echo htmlspecialchars(trim($line));
+        }
+    }
+    echo "</li>";
+}
+
+// Print masked contents of parent env if it exists
+if (is_file($parentEnv)) {
+    $lines = file($parentEnv);
+    echo "<li><strong>Parent .env MAIL_PASSWORD line:</strong> ";
+    foreach ($lines as $line) {
+        if (strpos(trim($line), 'MAIL_PASSWORD') === 0) {
+            echo htmlspecialchars(trim($line));
+        }
+    }
+    echo "</li>";
+}
+echo "</ul>";
+
 echo "<h1>🧪 SMTP Email Connection Test</h1>";
 echo "<h3>Konfigurasi dari .env:</h3>";
 echo "<ul>";

@@ -6,13 +6,6 @@ GIT_DIR="$PROJECT_DIR/git"
 
 cd "$PROJECT_DIR"
 
-echo "=== Injecting MAIL_PASSWORD into env ==="
-if [ -f "$PROJECT_DIR/.env" ]; then
-    sed -i 's/^MAIL_PASSWORD=.*/MAIL_PASSWORD=janccsejewitbrge/' "$PROJECT_DIR/.env"
-else
-    echo ".env file not found at $PROJECT_DIR/.env, skipping password injection"
-fi
-
 echo "=== Pull latest ==="
 git -C "$GIT_DIR" pull
 
