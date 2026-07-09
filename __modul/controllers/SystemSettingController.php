@@ -177,15 +177,27 @@ class SystemSettingController extends BaseController
                             ]);
                         }
                     } else {
-                        if (isset($post[$setting->key]) && $setting->value !== $post[$setting->key]) {
-                            $setting->value = $post[$setting->key];
-                            $hasChange = true;
+                        if (isset($post[$setting->key])) {
+                            $val = $post[$setting->key];
+                            if (is_array($val)) {
+                                $val = \yii\helpers\Json::encode(array_values($val));
+                            }
+                            if ($setting->value !== $val) {
+                                $setting->value = $val;
+                                $hasChange = true;
+                            }
                         }
                     }
                 } else {
-                    if (isset($post[$setting->key]) && $setting->value !== $post[$setting->key]) {
-                        $setting->value = $post[$setting->key];
-                        $hasChange = true;
+                    if (isset($post[$setting->key])) {
+                        $val = $post[$setting->key];
+                        if (is_array($val)) {
+                            $val = \yii\helpers\Json::encode(array_values($val));
+                        }
+                        if ($setting->value !== $val) {
+                            $setting->value = $val;
+                            $hasChange = true;
+                        }
                     }
                 }
 

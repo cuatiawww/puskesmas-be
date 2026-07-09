@@ -158,11 +158,28 @@ INSERT INTO public.download (nama_download, kategori, link_download, created_at,
 -- SEED DATA VERSI SISTEM
 INSERT INTO public.versi_sistem (versi, keterangan, tanggal, created_at, updated_at) VALUES
 ('v1.0.0-beta', '- Inisialisasi Sistem Asistensi Kinerja Puskesmas
-- Fitur Manajemen Pengguna (Aktivasi, OTP, Approval)
-- Pengaturan Navigasi Menu, Modul, dan Level User Akses', '2026-07-01', NOW(), NOW()),
+- Fitur Master Data (SDM Kesehatan, Obat, Alat Kesehatan)
+- Pengaturan navigasi menu dan level user akses', '2026-07-01', NOW(), NOW()),
 ('v1.1.0-release', '- Penambahan fitur Log Aktivitas Pengguna (User Activity Tracking) untuk audit trails
 - Penambahan modul Bantuan terpadu (Tutorial, Kontak WA, Daftar Download, Versi Sistem)
 - Perbaikan bug sinkronisasi status login Single Sign-On (SSO)
 - Optimasi template email verifikasi OTP dan notifikasi pembuatan akun', '2026-07-09', NOW(), NOW());
 
+-- 10. SYSTEM SETTING CONFIGURATION FOR DASHBOARD WIDGETS
+-- ============================================================
+DROP TABLE IF EXISTS public.dashboard_setting CASCADE;
+DELETE FROM public.sub_modul WHERE route = '/dashboard-setting/index' OR nama_sub_modul = 'dashboard-setting';
+
+INSERT INTO public.system_setting (key, value, label, type, category, created_at, updated_at) VALUES
+('dashboard_setting_level_1', '["welcome_profile","user_detail","system_stats","quick_config","user_activities_stats"]', 'Dashboard Settings Level 1', 'text', 'dashboard', NOW(), NOW()),
+('dashboard_setting_level_2', '["welcome_profile","user_detail","system_stats","quick_config","user_activities_stats"]', 'Dashboard Settings Level 2', 'text', 'dashboard', NOW(), NOW()),
+('dashboard_setting_level_3', '["welcome_profile","user_detail","system_stats","quick_config","user_activities_stats"]', 'Dashboard Settings Level 3', 'text', 'dashboard', NOW(), NOW()),
+('dashboard_setting_level_4', '["welcome_profile","user_detail","system_stats","quick_config","user_activities_stats"]', 'Dashboard Settings Level 4', 'text', 'dashboard', NOW(), NOW()),
+('dashboard_setting_level_7', '["welcome_profile","user_detail","system_stats","quick_config","user_activities_stats"]', 'Dashboard Settings Level 7', 'text', 'dashboard', NOW(), NOW()),
+('quick_access_level_1', '[156,37,1,2]', 'Quick Access Level 1', 'text', 'dashboard', NOW(), NOW()),
+('quick_access_level_2', '[]', 'Quick Access Level 2', 'text', 'dashboard', NOW(), NOW()),
+('quick_access_level_3', '[]', 'Quick Access Level 3', 'text', 'dashboard', NOW(), NOW()),
+('quick_access_level_4', '[]', 'Quick Access Level 4', 'text', 'dashboard', NOW(), NOW()),
+('quick_access_level_7', '[]', 'Quick Access Level 7', 'text', 'dashboard', NOW(), NOW())
+ON CONFLICT (key) DO NOTHING;
 

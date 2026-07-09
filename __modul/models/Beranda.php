@@ -34,12 +34,36 @@ class Beranda extends ActiveRecord
                 "SELECT COUNT(*) FROM public.user_registration WHERE status = 'pending_approval'"
             )->queryScalar();
 
+            // Total Provinsi
+            $stats['total_provinsi'] = (int) Yii::$app->db->createCommand(
+                'SELECT COUNT(*) FROM public.wilayah_provinsi'
+            )->queryScalar();
+
+            // Total Kabupaten/Kota
+            $stats['total_kabupaten'] = (int) Yii::$app->db->createCommand(
+                'SELECT COUNT(*) FROM public.wilayah_kabupaten'
+            )->queryScalar();
+
+            // Total Kecamatan
+            $stats['total_kecamatan'] = (int) Yii::$app->db->createCommand(
+                'SELECT COUNT(*) FROM public.wilayah_kecamatan'
+            )->queryScalar();
+
+            // Total User Activities Logged Today
+            $stats['total_activities_today'] = (int) Yii::$app->db->createCommand(
+                "SELECT COUNT(*) FROM public.user_activity_log WHERE created_at::date = CURRENT_DATE"
+            )->queryScalar();
+
             return $stats;
         } catch (\Exception $e) {
             Yii::error('Error getting beranda stats: ' . $e->getMessage());
             return [
                 'total_users' => 0,
                 'total_pending_registrations' => 0,
+                'total_provinsi' => 0,
+                'total_kabupaten' => 0,
+                'total_kecamatan' => 0,
+                'total_activities_today' => 0,
             ];
         }
     }

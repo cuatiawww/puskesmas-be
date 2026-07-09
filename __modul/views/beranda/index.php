@@ -22,6 +22,11 @@ if ($user && method_exists($user, 'getIdUserLevel')) {
 }
 ?>
 
+<?php
+// Fetch visible sections for the current user's level
+$visibleSections = \app\models\DashboardSetting::getVisibleSections($user->level_user_id);
+?>
+
 <div class="page-header">
     <div class="page-block">
         <div class="row align-items-center justify-content-between">
@@ -42,109 +47,163 @@ if ($user && method_exists($user, 'getIdUserLevel')) {
 </div>
 
 <div class="row">
-    <!-- Selamat Datang & Profil Card -->
+    <!-- Left Column: Welcome, Details, and Performance Indicators -->
     <div class="col-lg-8 col-md-12">
-        <div class="card">
-            <div class="card-body">
-                <h4 class="mb-2 fw-bold text-dark">Selamat Datang, <?= htmlspecialchars(strtoupper($user_fullname)) ?>!</h4>
-                <p class="text-muted mb-4">
-                    Anda masuk sebagai <strong><?= htmlspecialchars($level_name) ?></strong>. Kelola hak akses, persetujuan akun pendaftar baru, dan konfigurasi navigasi sistem melalui panel kendali ini.
-                </p>
-                <div class="d-flex gap-2">
-                    <a class="btn btn-primary" href="<?= Url::to(['/user-registration/index']) ?>">
-                        <i class="ph-duotone ph-user-plus me-1"></i> Registrasi Pending
-                    </a>
-                    <a class="btn btn-light-primary ms-2" href="<?= Url::to(['/user-model/index']) ?>">
-                        <i class="ph-duotone ph-users me-1"></i> Data Pengguna
-                    </a>
+        
+        <!-- Section 1: Welcome Profile Card -->
+        <?php if (in_array('welcome_profile', $visibleSections)): ?>
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="mb-2 fw-bold text-dark">Selamat Datang, <?= htmlspecialchars(strtoupper($user_fullname)) ?>!</h4>
+                    <p class="text-muted mb-4">
+                        Anda masuk sebagai <strong><?= htmlspecialchars($level_name) ?></strong>. Kelola hak akses, persetujuan akun pendaftar baru, dan konfigurasi navigasi sistem melalui panel kendali ini.
+                    </p>
+                    <div class="d-flex gap-2">
+                        <a class="btn btn-primary" href="<?= Url::to(['/user-registration/index']) ?>">
+                            <i class="ph-duotone ph-user-plus me-1"></i> Registrasi Pending
+                        </a>
+                        <a class="btn btn-light-primary ms-2" href="<?= Url::to(['/user-model/index']) ?>">
+                            <i class="ph-duotone ph-users me-1"></i> Data Pengguna
+                        </a>
+                    </div>
                 </div>
             </div>
-        </div>
+        <?php endif; ?>
 
-        <!-- Profil Details Card -->
-        <div class="card mt-4">
-            <div class="card-header">
-                <h5><i class="ph-duotone ph-user-circle me-1 text-primary"></i> Detail Akun Pengguna</h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <small class="text-muted d-block">Username</small>
-                        <span class="fw-semibold text-dark"><?= htmlspecialchars($user_name) ?></span>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <small class="text-muted d-block">Nama Lengkap</small>
-                        <span class="fw-semibold text-dark"><?= htmlspecialchars($user_fullname) ?></span>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <small class="text-muted d-block">Email</small>
-                        <span class="fw-semibold text-dark"><?= htmlspecialchars($user_email) ?></span>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <small class="text-muted d-block">Level Akses</small>
-                        <span class="badge bg-light-primary text-primary fw-semibold"><?= htmlspecialchars($level_name) ?></span>
+        <!-- Section 2: Profil Details Card -->
+        <?php if (in_array('user_detail', $visibleSections)): ?>
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5><i class="ph-duotone ph-user-circle me-1 text-primary"></i> Detail Akun Pengguna</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted d-block">Username</small>
+                            <span class="fw-semibold text-dark"><?= htmlspecialchars($user_name) ?></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted d-block">Nama Lengkap</small>
+                            <span class="fw-semibold text-dark"><?= htmlspecialchars($user_fullname) ?></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted d-block">Email</small>
+                            <span class="fw-semibold text-dark"><?= htmlspecialchars($user_email) ?></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted d-block">Level Akses</small>
+                            <span class="badge bg-light-primary text-primary fw-semibold"><?= htmlspecialchars($level_name) ?></span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        <?php endif; ?>
+
+        <!-- Section 5: Statistik Wilayah & Aktivitas Pengguna -->
+        <?php if (in_array('user_activities_stats', $visibleSections)): ?>
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5><i class="ph-duotone ph-chart-bar me-1 text-primary"></i> Statistik Wilayah & Aktivitas Pengguna</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3 col-6 mb-3">
+                            <h3 class="fw-bold text-primary mb-1"><?= isset($stats['total_provinsi']) ? number_format($stats['total_provinsi']) : 0 ?></h3>
+                            <span class="text-muted small">Total Provinsi</span>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <h3 class="fw-bold text-info mb-1"><?= isset($stats['total_kabupaten']) ? number_format($stats['total_kabupaten']) : 0 ?></h3>
+                            <span class="text-muted small">Total Kabupaten/Kota</span>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <h3 class="fw-bold text-warning mb-1"><?= isset($stats['total_kecamatan']) ? number_format($stats['total_kecamatan']) : 0 ?></h3>
+                            <span class="text-muted small">Total Kecamatan</span>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <h3 class="fw-bold text-success mb-1"><?= isset($stats['total_activities_today']) ? number_format($stats['total_activities_today']) : 0 ?></h3>
+                            <span class="text-muted small">Aktivitas Hari Ini</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
     </div>
 
-    <!-- Statistik Ringkas & Quick Links -->
+    <!-- Right Column: System Stats and Quick Config -->
     <div class="col-lg-4 col-md-12">
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5><i class="ph-duotone ph-chart-pie-slice me-1 text-primary"></i> Statistik Sistem</h5>
-            </div>
-            <div class="card-body">
-                <!-- Stat Item 1 -->
-                <div class="d-flex align-items-center mb-4">
-                    <span class="badge bg-light-primary text-primary p-2 me-3">
-                        <i class="ph-duotone ph-users-three" style="font-size: 1.5rem;"></i>
-                    </span>
-                    <div>
-                        <h4 class="mb-0 fw-bold text-dark"><?= isset($stats['total_users']) ? $stats['total_users'] : 0 ?></h4>
-                        <span class="text-muted small">Pengguna Aktif</span>
+        
+        <!-- Section 3: Statistik Sistem -->
+        <?php if (in_array('system_stats', $visibleSections)): ?>
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="ph-duotone ph-chart-pie-slice me-1 text-primary"></i> Statistik Sistem</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-4">
+                        <span class="badge bg-light-primary text-primary p-2 me-3">
+                            <i class="ph-duotone ph-users-three" style="font-size: 1.5rem;"></i>
+                        </span>
+                        <div>
+                            <h4 class="mb-0 fw-bold text-dark"><?= isset($stats['total_users']) ? $stats['total_users'] : 0 ?></h4>
+                            <span class="text-muted small">Pengguna Aktif</span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center">
+                        <span class="badge bg-light-warning text-warning p-2 me-3">
+                            <i class="ph-duotone ph-user-plus" style="font-size: 1.5rem;"></i>
+                        </span>
+                        <div>
+                            <h4 class="mb-0 fw-bold text-dark"><?= isset($stats['total_pending_registrations']) ? $stats['total_pending_registrations'] : 0 ?></h4>
+                            <span class="text-muted small">Persetujuan Akun Pending</span>
+                        </div>
                     </div>
                 </div>
+            </div>
+        <?php endif; ?>
 
-                <!-- Stat Item 2 -->
-                <div class="d-flex align-items-center">
-                    <span class="badge bg-light-warning text-warning p-2 me-3">
-                        <i class="ph-duotone ph-user-plus" style="font-size: 1.5rem;"></i>
-                    </span>
-                    <div>
-                        <h4 class="mb-0 fw-bold text-dark"><?= isset($stats['total_pending_registrations']) ? $stats['total_pending_registrations'] : 0 ?></h4>
-                        <span class="text-muted small">Persetujuan Akun Pending</span>
-                    </div>
+        <!-- Section 4: Akses Cepat Links -->
+        <?php if (in_array('quick_config', $visibleSections)): ?>
+            <?php
+            $quickAccessIds = \app\models\DashboardSetting::getQuickAccessModules($user->level_user_id);
+            $quickModules = [];
+            if (!empty($quickAccessIds)) {
+                $quickModules = \app\models\SubModul::find()
+                    ->where(['id' => $quickAccessIds, 'is_active' => true])
+                    ->all();
+                
+                // Sort matching the order of configuration ids
+                usort($quickModules, function($a, $b) use ($quickAccessIds) {
+                    $posA = array_search($a->id, $quickAccessIds);
+                    $posB = array_search($b->id, $quickAccessIds);
+                    return $posA - $posB;
+                });
+            }
+            ?>
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="ph-duotone ph-gear me-1 text-primary"></i> Akses Cepat</h5>
+                </div>
+                <div class="card-body p-0">
+                    <?php if (empty($quickModules)): ?>
+                        <div class="p-4 text-center text-muted small">
+                            Belum ada menu akses cepat yang dikonfigurasi.
+                        </div>
+                    <?php else: ?>
+                        <div class="list-group list-group-flush">
+                            <?php foreach ($quickModules as $mod): ?>
+                                <?php
+                                $icon = !empty($mod->icon) ? $mod->icon : 'ph-duotone ph-link';
+                                ?>
+                                <a href="<?= Url::to([$mod->route]) ?>" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center border-0 px-4 py-3">
+                                    <span class="text-dark"><i class="<?= Html::encode($icon) ?> me-2 text-primary"></i> <?= Html::encode($mod->label) ?></span>
+                                    <i class="ph-duotone ph-caret-right text-muted"></i>
+                                </a>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
-        </div>
-
-        <!-- Quick Links Panel -->
-        <div class="card">
-            <div class="card-header">
-                <h5><i class="ph-duotone ph-gear me-1 text-primary"></i> Konfigurasi Cepat</h5>
-            </div>
-            <div class="card-body p-0">
-                <div class="list-group list-group-flush">
-                    <a href="<?= Url::to(['/user-registration/index']) ?>" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center border-0 px-4 py-3">
-                        <span class="text-dark"><i class="ph-duotone ph-identification-card me-2 text-primary"></i> Persetujuan Akun</span>
-                        <i class="ph-duotone ph-caret-right text-muted"></i>
-                    </a>
-                    <a href="<?= Url::to(['/level-user/index']) ?>" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center border-0 px-4 py-3">
-                        <span class="text-dark"><i class="ph-duotone ph-shield-check me-2 text-primary"></i> Atur Level / Peran</span>
-                        <i class="ph-duotone ph-caret-right text-muted"></i>
-                    </a>
-                    <a href="<?= Url::to(['/navigasi/index']) ?>" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center border-0 px-4 py-3">
-                        <span class="text-dark"><i class="ph-duotone ph-navigation-arrow me-2 text-primary"></i> Konfigurasi Navigasi</span>
-                        <i class="ph-duotone ph-caret-right text-muted"></i>
-                    </a>
-                    <a href="<?= Url::to(['/modul/index']) ?>" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center border-0 px-4 py-3">
-                        <span class="text-dark"><i class="ph-duotone ph-squares-four me-2 text-primary"></i> Pengaturan Modul</span>
-                        <i class="ph-duotone ph-caret-right text-muted"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
+        <?php endif; ?>
     </div>
 </div>
