@@ -13,24 +13,6 @@ use yii\widgets\Pjax;
 $this->title = 'Riwayat Aktivitas: ' . Html::encode($username);
 $this->params['breadcrumbs'][] = ['label' => 'Log Aktivitas Pengguna', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $username;
-
-$this->registerCss("
-    .table thead th a {
-        color: #fff !important;
-    }
-    .table thead th a:hover {
-        color: #fff !important;
-        text-decoration: underline;
-    }
-    /* Style filter inputs inside table head */
-    .grid-view .filters input, .grid-view .filters select {
-        padding: 0.375rem 0.75rem;
-        border: 1px solid #dee2e6;
-        border-radius: 0.25rem;
-        font-size: 0.875rem;
-        width: 100%;
-    }
-");
 ?>
 
 <!-- Page Header (Flat Able style) -->
@@ -79,7 +61,7 @@ $this->registerCss("
                     <?= GridView::widget([
                         'dataProvider' => $dataProvider,
                         'filterModel' => $searchModel,
-                        'tableOptions' => ['class' => 'table table-hover table-striped mb-0 align-middle'],
+                        'tableOptions' => ['class' => 'table table-striped table-hover'],
                         'layout' => "{items}\n<div class='py-3 px-4 d-flex justify-content-between align-items-center'>{summary}<div class='d-flex justify-content-end'>{pager}</div></div>",
                         'pager' => [
                             'options' => ['class' => 'pagination mb-0'],
@@ -93,12 +75,12 @@ $this->registerCss("
                         'columns' => [
                             [
                                 'class' => 'yii\grid\SerialColumn',
-                                'header' => 'No',
+                                'header' => 'NO',
                                 'contentOptions' => ['style' => 'width: 60px;', 'class' => 'text-center'],
                             ],
                             [
                                 'attribute' => 'created_at',
-                                'label' => 'Tanggal & Waktu',
+                                'label' => 'TANGGAL & WAKTU',
                                 'filter' => false,
                                 'value' => function ($model) {
                                     return Yii::$app->formatter->asDatetime($model->created_at, 'medium');
@@ -107,7 +89,7 @@ $this->registerCss("
                             ],
                             [
                                 'attribute' => 'action',
-                                'label' => 'Tindakan',
+                                'label' => 'TINDAKAN',
                                 'filter' => [
                                     'view' => 'VIEW',
                                     'create' => 'CREATE',
@@ -133,7 +115,7 @@ $this->registerCss("
                             ],
                             [
                                 'attribute' => 'route',
-                                'label' => 'Rute / Modul',
+                                'label' => 'RUTE / MODUL',
                                 'value' => function ($model) {
                                     $route = Html::encode($model->route);
                                     $module = $model->module ? '<span class="badge bg-secondary mr-1">' . Html::encode($model->module) . '</span>' : '';
@@ -143,16 +125,18 @@ $this->registerCss("
                             ],
                             [
                                 'attribute' => 'url',
-                                'label' => 'Detail URL',
+                                'label' => 'DETAIL URL',
                                 'filter' => false,
+                                'contentOptions' => ['style' => 'max-width: 250px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;'],
                                 'value' => function ($model) {
-                                    return '<div style="max-width: 250px; overflow-wrap: break-word;" class="small text-muted">' . Html::encode($model->url) . '</div>';
+                                    $truncated = \yii\helpers\StringHelper::truncate($model->url, 50);
+                                    return Html::tag('span', Html::encode($truncated), ['title' => $model->url, 'style' => 'cursor: help;', 'class' => 'small text-muted']);
                                 },
                                 'format' => 'raw',
                             ],
                             [
                                 'attribute' => 'ip_address',
-                                'label' => 'IP Address',
+                                'label' => 'IP ADDRESS',
                                 'filter' => false,
                                 'value' => function ($model) {
                                     return '<strong class="text-primary">' . Html::encode($model->ip_address) . '</strong>';
@@ -161,7 +145,7 @@ $this->registerCss("
                                 'contentOptions' => ['style' => 'width: 130px;'],
                             ],
                             [
-                                'label' => 'Browser / OS',
+                                'label' => 'BROWSER / OS',
                                 'filter' => false,
                                 'value' => function ($model) {
                                     return '<span class="small">' . Html::encode($model->browser) . ' (' . Html::encode($model->platform) . ')</span>';
@@ -170,7 +154,7 @@ $this->registerCss("
                             ],
                             [
                                 'class' => 'yii\grid\ActionColumn',
-                                'header' => 'Aksi',
+                                'header' => 'AKSI',
                                 'template' => '{detail}',
                                 'contentOptions' => ['class' => 'text-center', 'style' => 'width: 150px;'],
                                 'buttons' => [

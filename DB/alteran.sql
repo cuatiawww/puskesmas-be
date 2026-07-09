@@ -127,3 +127,7 @@ INSERT INTO sub_modul (modul_id, nama_sub_modul, label, route, icon, urutan, is_
 SELECT 3, 'user-activity-log', 'LOG AKTIVITAS USER', '/user-activity/index', 'ph-duotone ph-clock-counter-clockwise', 3, true, 36, NOW(), NOW()
 WHERE NOT EXISTS (SELECT 1 FROM sub_modul WHERE route = '/user-activity/index' OR nama_sub_modul = 'user-activity-log');
 
+-- 8. SINKRONISASI SEQUENCE UNTUK MENGHINDARI ERROR DUPLICATE KEY
+-- ============================================================
+SELECT setval('sub_modul_id_seq', COALESCE((SELECT MAX(id)+1 FROM sub_modul), 1), false);
+

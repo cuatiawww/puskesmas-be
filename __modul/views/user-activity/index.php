@@ -13,23 +13,6 @@ use yii\widgets\Pjax;
 $this->title = 'Log Aktivitas Pengguna';
 $this->params['breadcrumbs'][] = ['label' => 'Akses', 'url' => ['#']];
 $this->params['breadcrumbs'][] = $this->title;
-
-$this->registerCss("
-    .table thead th a {
-        color: #fff !important;
-    }
-    .table thead th a:hover {
-        color: #fff !important;
-        text-decoration: underline;
-    }
-    /* Style filter input inside the table head */
-    .grid-view .filters input {
-        padding: 0.375rem 0.75rem;
-        border: 1px solid #dee2e6;
-        border-radius: 0.25rem;
-        font-size: 0.875rem;
-    }
-");
 ?>
 
 <!-- Page Header (Flat Able style) -->
@@ -136,7 +119,7 @@ $this->registerCss("
                     <?= GridView::widget([
                         'dataProvider' => $dataProvider,
                         'filterModel' => $searchModel,
-                        'tableOptions' => ['class' => 'table table-hover table-striped mb-0 align-middle'],
+                        'tableOptions' => ['class' => 'table table-striped table-hover'],
                         'layout' => "{items}\n<div class='py-3 px-4 d-flex justify-content-between align-items-center'>{summary}<div class='d-flex justify-content-end'>{pager}</div></div>",
                         'pager' => [
                             'options' => ['class' => 'pagination mb-0'],
@@ -150,19 +133,19 @@ $this->registerCss("
                         'columns' => [
                             [
                                 'class' => 'yii\grid\SerialColumn',
-                                'header' => 'No',
+                                'header' => 'NO',
                                 'contentOptions' => ['style' => 'width: 60px;', 'class' => 'text-center'],
                             ],
                             [
                                 'attribute' => 'username',
-                                'label' => 'Username',
+                                'label' => 'USERNAME',
                                 'value' => function ($model) {
                                     return '<strong>' . Html::encode($model['username']) . '</strong>';
                                 },
                                 'format' => 'raw',
                             ],
                             [
-                                'label' => 'View (Akses)',
+                                'label' => 'VIEW (AKSES)',
                                 'filter' => false,
                                 'headerOptions' => ['class' => 'text-center'],
                                 'contentOptions' => ['class' => 'text-center'],
@@ -174,7 +157,7 @@ $this->registerCss("
                                 'format' => 'raw',
                             ],
                             [
-                                'label' => 'Create (Tambah)',
+                                'label' => 'CREATE (TAMBAH)',
                                 'filter' => false,
                                 'headerOptions' => ['class' => 'text-center'],
                                 'contentOptions' => ['class' => 'text-center'],
@@ -186,7 +169,7 @@ $this->registerCss("
                                 'format' => 'raw',
                             ],
                             [
-                                'label' => 'Update (Ubah)',
+                                'label' => 'UPDATE (UBAH)',
                                 'filter' => false,
                                 'headerOptions' => ['class' => 'text-center'],
                                 'contentOptions' => ['class' => 'text-center'],
@@ -198,7 +181,7 @@ $this->registerCss("
                                 'format' => 'raw',
                             ],
                             [
-                                'label' => 'Delete (Hapus)',
+                                'label' => 'DELETE (HAPUS)',
                                 'filter' => false,
                                 'headerOptions' => ['class' => 'text-center'],
                                 'contentOptions' => ['class' => 'text-center'],
@@ -211,7 +194,7 @@ $this->registerCss("
                             ],
                             [
                                 'attribute' => 'total_count',
-                                'label' => 'Total Aktivitas',
+                                'label' => 'TOTAL AKTIVITAS',
                                 'filter' => false,
                                 'headerOptions' => ['class' => 'text-center'],
                                 'contentOptions' => ['class' => 'text-center'],
@@ -222,14 +205,14 @@ $this->registerCss("
                             ],
                             [
                                 'attribute' => 'last_active',
-                                'label' => 'Aktivitas Terakhir',
+                                'label' => 'AKTIVITAS TERAKHIR',
                                 'filter' => false,
                                 'value' => function ($model) {
                                     return Yii::$app->formatter->asDatetime($model['last_active'], 'medium');
                                 },
                             ],
                             [
-                                'label' => 'IP & Browser Terakhir',
+                                'label' => 'IP & BROWSER TERAKHIR',
                                 'filter' => false,
                                 'value' => function ($model) {
                                     $ip = Html::encode($model['last_ip']);
@@ -242,15 +225,15 @@ $this->registerCss("
                             ],
                             [
                                 'class' => 'yii\grid\ActionColumn',
-                                'header' => 'Aksi',
+                                'header' => 'AKSI',
                                 'template' => '{view}',
                                 'contentOptions' => ['class' => 'text-center', 'style' => 'width: 100px;'],
                                 'buttons' => [
                                     'view' => function ($url, $model) {
-                                        return Html::a('<i class="ti ti-eye me-1"></i> Detail', 
+                                        return Html::a('<i class="ti ti-eye"></i>', 
                                             Url::to(['view', 'username' => $model['username']]), 
                                             [
-                                                'class' => 'btn btn-sm btn-outline-primary rounded-pill px-3',
+                                                'class' => 'btn btn-sm btn-primary',
                                                 'title' => 'Lihat Riwayat Aktivitas',
                                                 'data-pjax' => 0
                                             ]
