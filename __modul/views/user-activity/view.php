@@ -13,6 +13,16 @@ use yii\widgets\Pjax;
 $this->title = 'Riwayat Aktivitas: ' . Html::encode($username);
 $this->params['breadcrumbs'][] = ['label' => 'Log Aktivitas Pengguna', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $username;
+
+$this->registerCss("
+    .table thead th a {
+        color: #fff !important;
+    }
+    .table thead th a:hover {
+        color: #fff !important;
+        text-decoration: underline;
+    }
+");
 ?>
 
 <!-- Page Header (Flat Able style) -->
@@ -55,7 +65,7 @@ $this->params['breadcrumbs'][] = $username;
                     <p class="mb-0 text-muted">Daftar detail jejak log akses halaman dan modifikasi data oleh pengguna ini.</p>
                 </div>
             </div>
-            <div class="card-body p-0">
+            <div class="card-body table-border-style">
                 <div class="table-responsive">
                     <?php Pjax::begin(['id' => 'pjax-user-activity-detail']); ?>
                     <?= GridView::widget([
