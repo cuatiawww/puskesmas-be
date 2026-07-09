@@ -130,6 +130,24 @@ class RegistrationEmailService
     }
 
     // ─────────────────────────────────────────────────────────────────────────
+    // Blok Kode OTP Verifikasi
+    // ─────────────────────────────────────────────────────────────────────────
+    protected static function otpBlock(string $otp, string $accentColor): string
+    {
+        $safeAccent = htmlspecialchars($accentColor, ENT_QUOTES, 'UTF-8');
+        return '
+            <div style="background:#f8fafc;padding:25px;border-radius:6px;margin:20px 0;border:1px solid #e2e8f0;border-left:4px solid ' . $safeAccent . ';text-align:center;">
+                <p style="margin:0 0 12px 0;color:#64748b;font-weight:bold;font-size:12px;letter-spacing:1px;text-transform:uppercase;">Kode OTP Verifikasi</p>
+                <div style="font-size:32px;font-weight:700;letter-spacing:8px;background:#ffffff;
+                            padding:12px 25px;border-radius:6px;border:1px solid #cbd5e1;
+                            display:inline-block;color:' . $safeAccent . ';box-shadow:inset 0 1px 2px rgba(0,0,0,0.05);">'
+                    . htmlspecialchars($otp, ENT_QUOTES, 'UTF-8') . '
+                </div>
+                <p style="margin:15px 0 0 0;font-size:13px;color:#64748b;">Kode OTP ini berlaku selama <strong>10 menit</strong>.<br>Demi keamanan, mohon tidak membagikan kode OTP ini kepada siapa pun.</p>
+            </div>';
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
     // 1. OTP Verifikasi Email
     // ─────────────────────────────────────────────────────────────────────────
     public static function sendOtp(UserRegistration $registration, string $otp): bool
@@ -146,16 +164,9 @@ class RegistrationEmailService
             <div style="color:' . htmlspecialchars($accent, ENT_QUOTES, 'UTF-8') . ';font-size:18px;font-weight:bold;margin-bottom:15px;">KODE VERIFIKASI EMAIL</div>
             <p>' . $greeting . ' <strong>' . $name . '</strong>,</p>
             <p>Terima kasih telah melakukan pendaftaran akun pada aplikasi <strong>' . $sysName . '</strong>.
-               Gunakan kode OTP berikut untuk memverifikasi alamat email Anda:</p>
-            <div style="text-align:center;margin:25px 0;">
-                <div style="font-size:32px;font-weight:700;letter-spacing:8px;background:#f0f9ff;
-                            padding:15px 25px;border-radius:6px;border:1px solid #bae6fd;
-                            display:inline-block;color:#0369a1;">'
-                    . htmlspecialchars($otp, ENT_QUOTES, 'UTF-8') . '
-                </div>
-            </div>
-            <p style="font-size:13px;color:#64748b;">Kode OTP ini berlaku selama <strong>10 menit</strong>.
-               Demi keamanan, mohon tidak membagikan kode OTP ini kepada siapa pun.</p>'
+               Gunakan kode OTP berikut untuk memverifikasi alamat email Anda:</p>'
+            . self::otpBlock($otp, $accent)
+            . self::loginButton($accent)
             . self::signatureBlock();
 
         $body = self::wrapHtml($content, $accent);

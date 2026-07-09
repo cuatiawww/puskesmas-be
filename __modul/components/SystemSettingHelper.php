@@ -50,14 +50,19 @@ class SystemSettingHelper
         }
 
         if ($absolute) {
-            if (!preg_match('~^(https?:)?//~i', $baseUrl)) {
-                $hostInfo = '';
-                if (Yii::$app->has('request') && Yii::$app->request instanceof \yii\web\Request) {
-                    $hostInfo = rtrim(Yii::$app->request->hostInfo, '/');
-                } else {
-                    $hostInfo = 'http://localhost';
+            $backendUrl = rtrim(Yii::$app->params['backend_url'] ?? '', '/');
+            if (!empty($backendUrl)) {
+                $baseUrl = $backendUrl;
+            } else {
+                if (!preg_match('~^(https?:)?//~i', $baseUrl)) {
+                    $hostInfo = '';
+                    if (Yii::$app->has('request') && Yii::$app->request instanceof \yii\web\Request) {
+                        $hostInfo = rtrim(Yii::$app->request->hostInfo, '/');
+                    } else {
+                        $hostInfo = 'http://localhost';
+                    }
+                    $baseUrl = $hostInfo . $baseUrl;
                 }
-                $baseUrl = $hostInfo . $baseUrl;
             }
         }
 
@@ -68,14 +73,15 @@ class SystemSettingHelper
 
         // Jika value adalah hash (dari FileUploadController dengan db=true)
         // Hash format: panjang > 30 karakter dan tidak mengandung slash
-        if (!str_contains($value, '/') && strlen($value) > 20) {
-            return $baseUrl . '/file-upload/render?inline=1&uxid=' . urlencode($value);
+        $cleanValue = ltrim($value, '/');
+        if (!str_contains($cleanValue, '/') && strlen($cleanValue) > 20) {
+            return $baseUrl . '/file-upload/render?inline=1&uxid=' . urlencode($cleanValue);
         }
 
         // Jika value adalah path file lokal (uploads/system-setting/xxx.jpg)
         // Serve via system-setting/serve-image untuk bypass Nginx routing
-        if (str_starts_with($value, 'uploads/system-setting/')) {
-            return $baseUrl . '/system-setting/serve-image?file=' . urlencode($value);
+        if (str_starts_with($cleanValue, 'uploads/system-setting/')) {
+            return $baseUrl . '/system-setting/serve-image?file=' . urlencode($cleanValue);
         }
 
         // Default: path statis (app_asset, dll)
