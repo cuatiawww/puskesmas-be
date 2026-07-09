@@ -115,6 +115,7 @@ $this->registerCss("
 $listUrl = Url::to(['level-user/get-list']);
 $deleteUrl = Url::to(['level-user/delete']);
 $updateUrl = Url::to(['level-user/update']);
+$hakAksesUrl = Url::to(['level-user/hak-akses']);
 
 $this->registerJs("
 // Load data level user dari backend Yii
@@ -142,6 +143,9 @@ window.loadLevelUser = function() {
                 \${item.is_active ? '<span class=\"badge bg-light-success\">Aktif</span>' : '<span class=\"badge bg-light-danger\">Nonaktif</span>'}
               </td>
               <td class=\"text-center\">
+                <a href=\"$hakAksesUrl?id=\${item.id}\" class=\"btn btn-sm btn-primary\" title=\"Hak Akses\">
+                  <i class=\"ph-duotone ph-key\"></i>
+                </a>
                 <a href=\"$updateUrl?id=\${item.id}\" class=\"btn btn-sm btn-warning\" title=\"Edit\">
                   <i class=\"ti ti-edit\"></i>
                 </a>

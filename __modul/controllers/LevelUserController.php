@@ -247,6 +247,17 @@ class LevelUserController extends BaseController
     }
 
     /**
+     * Set hak akses for an existing LevelUser model.
+     */
+    public function actionHakAkses($id)
+    {
+        $model = $this->findModel($id);
+        return $this->render('hak_akses', [
+            'model' => $model,
+        ]);
+    }
+
+    /**
      * Deletes an existing LevelUser model.
      */
     public function actionDelete($id)
