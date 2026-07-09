@@ -95,3 +95,35 @@ INSERT INTO system_setting ("key", "value", "type", "label", category, created_a
   ('login_dashboard_link', 'https://puskes-kappa.vercel.app/login', 'text', 'Link ke Dashboard Web', 'general', NOW(), NOW())
 ON CONFLICT ("key") DO NOTHING;
 
+-- 7. TABEL USER ACTIVITY LOG & SEED MENU ITEM
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.user_activity_log (
+    id BIGSERIAL PRIMARY KEY,
+    user_id INT,
+    username VARCHAR(255),
+    action VARCHAR(50) NOT NULL,
+    module VARCHAR(100),
+    controller VARCHAR(100) NOT NULL,
+    action_id VARCHAR(100) NOT NULL,
+    route VARCHAR(255) NOT NULL,
+    url TEXT NOT NULL,
+    target_model VARCHAR(255),
+    target_id VARCHAR(255),
+    changes TEXT,
+    ip_address VARCHAR(50),
+    user_agent TEXT,
+    browser VARCHAR(50),
+    platform VARCHAR(50),
+    created_at TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_activity_log_action ON public.user_activity_log (action);
+CREATE INDEX IF NOT EXISTS idx_user_activity_log_created_at ON public.user_activity_log (created_at);
+CREATE INDEX IF NOT EXISTS idx_user_activity_log_route ON public.user_activity_log (route);
+CREATE INDEX IF NOT EXISTS idx_user_activity_log_user_id ON public.user_activity_log (user_id);
+CREATE INDEX IF NOT EXISTS idx_user_activity_log_username ON public.user_activity_log (username);
+
+INSERT INTO sub_modul (modul_id, nama_sub_modul, label, route, icon, urutan, is_active, parent_id, created_at, updated_at)
+SELECT 3, 'user-activity-log', 'LOG AKTIVITAS USER', '/user-activity/index', 'ph-duotone ph-clock-counter-clockwise', 3, true, 36, NOW(), NOW()
+WHERE NOT EXISTS (SELECT 1 FROM sub_modul WHERE route = '/user-activity/index' OR nama_sub_modul = 'user-activity-log');
+

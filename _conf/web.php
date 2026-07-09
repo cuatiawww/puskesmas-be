@@ -42,7 +42,7 @@ $params['redis'] = [
 
 $config = [
     'id' => 'basic',    
-    'bootstrap' => ['log'],
+    'bootstrap' => ['log', 'activityLogger'],
     'basePath' => dirname(__DIR__) . '/__modul',
     'runtimePath' => dirname(__DIR__) . '/runtime',
     'vendorPath' => dirname(__DIR__) . '/vendor',
@@ -99,6 +99,9 @@ $config = [
             'parsers' => [
                 'application/json' => 'yii\web\JsonParser',
             ],
+        ],
+        'activityLogger' => [
+            'class' => 'app\components\ActivityLogger',
         ],
         'cache' => $redisEnabled ? [
             'class' => 'yii\redis\Cache',
