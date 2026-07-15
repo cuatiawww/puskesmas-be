@@ -16,6 +16,7 @@ class MenuService
             $user = Yii::$app->user;
             $db = Yii::$app->get('db_user');
 
+
             $levelName = (string)($user->identity->level_user_id ?? '');
             $isSuperAdmin = (stripos($levelName, '1') !== false);
 
@@ -28,13 +29,15 @@ class MenuService
                         m.label as modul_label,
                         m.deskripsi as modul_deskripsi,
                         m.urutan as modul_urutan,
+                        m.search_keywords as modul_search_keywords,
                         sm.id as sub_modul_id,
                         sm.nama_sub_modul,
                         sm.label as sub_modul_label,
                         sm.route,
                         sm.icon,
                         sm.urutan as sub_modul_urutan,
-                        sm.parent_id
+                        sm.parent_id,
+                        sm.search_keywords
                     FROM modul m
                     LEFT JOIN sub_modul sm
                         ON m.id = sm.modul_id
@@ -53,7 +56,8 @@ class MenuService
                         route,
                         icon,
                         urutan,
-                        parent_id
+                        parent_id,
+                        search_keywords
                     FROM sub_modul
                     WHERE is_active = true AND parent_id IS NOT NULL
                     ORDER BY urutan ASC
@@ -70,13 +74,15 @@ class MenuService
                         m.label as modul_label,
                         m.deskripsi as modul_deskripsi,
                         m.urutan as modul_urutan,
+                        m.search_keywords as modul_search_keywords,
                         sm.id as sub_modul_id,
                         sm.nama_sub_modul,
                         sm.label as sub_modul_label,
                         sm.route,
                         sm.icon,
                         sm.urutan as sub_modul_urutan,
-                        sm.parent_id
+                        sm.parent_id,
+                        sm.search_keywords
                     FROM modul m
                     INNER JOIN sub_modul sm
                         ON m.id = sm.modul_id
@@ -99,7 +105,8 @@ class MenuService
                         sm.route,
                         sm.icon,
                         sm.urutan,
-                        sm.parent_id
+                        sm.parent_id,
+                        sm.search_keywords
                     FROM sub_modul sm
                     INNER JOIN hak_akses ha
                         ON sm.id = ha.sub_modul_id
@@ -118,13 +125,15 @@ class MenuService
                         m.label as modul_label,
                         m.deskripsi as modul_deskripsi,
                         m.urutan as modul_urutan,
+                        m.search_keywords as modul_search_keywords,
                         parent_sm.id as sub_modul_id,
                         parent_sm.nama_sub_modul,
                         parent_sm.label as sub_modul_label,
                         parent_sm.route,
                         parent_sm.icon,
                         parent_sm.urutan as sub_modul_urutan,
-                        parent_sm.parent_id
+                        parent_sm.parent_id,
+                        parent_sm.search_keywords
                     FROM sub_modul child_sm
                     INNER JOIN hak_akses ha
                         ON child_sm.id = ha.sub_modul_id
@@ -177,6 +186,7 @@ class MenuService
                         'label' => $row['modul_label'],
                         'deskripsi' => $row['modul_deskripsi'],
                         'urutan' => $row['modul_urutan'],
+                        'search_keywords' => $row['modul_search_keywords'] ?? '',
                         'sub_modules' => []
                     ];
                 }
@@ -190,6 +200,7 @@ class MenuService
                         'route' => self::normalizeRoute($row['route'] ?? ''),
                         'icon' => $row['icon'],
                         'urutan' => $row['sub_modul_urutan'],
+                        'search_keywords' => $row['search_keywords'] ?? '',
                         'children' => $childrenByParent[$row['sub_modul_id']] ?? [],
                     ];
                 }
@@ -241,5 +252,114 @@ class MenuService
         }
 
         return $r;
+    }
+
+    /**
+     * Search accessible menus by keyword.
+     * @param string $q
+     * @return array
+     */
+    public static function searchMenus(string $q): array
+    {
+        $q = strtolower(trim($q));
+        if ($q === '') return [];
+
+        $menu = self::getMenu();
+        $suggestions = [];
+
+        foreach ($menu as $modul) {
+            // Check if module itself matches the query
+            $modulLabel = $modul['label'];
+            $modulKeywords = strtolower($modul['search_keywords'] ?? '');
+            
+            $modulMatch = (stripos($modulLabel, $q) !== false) || (stripos($modulKeywords, $q) !== false);
+            if ($modulMatch) {
+                // Find first sub-module route to redirect to
+                $firstRoute = '';
+                if (!empty($modul['sub_modules'])) {
+                    foreach ($modul['sub_modules'] as $sub) {
+                        if ($sub['route'] !== '#!' && $sub['route'] !== '#') {
+                            $firstRoute = $sub['route'];
+                            break;
+                        }
+                        if (!empty($sub['children'])) {
+                            foreach ($sub['children'] as $child) {
+                                if ($child['route'] !== '#!' && $child['route'] !== '#') {
+                                    $firstRoute = $child['route'];
+                                    break 2;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                if ($firstRoute !== '') {
+                    $suggestions[] = [
+                        'label' => 'Buka Kategori: ' . $modulLabel,
+                        'category' => 'Modul Utama',
+                        'route' => self::getMenuUrl($firstRoute),
+                    ];
+                }
+            }
+
+            if (!empty($modul['sub_modules'])) {
+                foreach ($modul['sub_modules'] as $subModul) {
+                    if (empty($subModul['children'])) {
+                        // Check if route is valid
+                        if ($subModul['route'] === '#!' || $subModul['route'] === '#') {
+                            continue;
+                        }
+                        
+                        $label = $subModul['label'];
+                        $keywords = strtolower($subModul['search_keywords'] ?? '');
+                        
+                        $match = (stripos($label, $q) !== false) || (stripos($keywords, $q) !== false);
+                        if ($match) {
+                            $suggestions[] = [
+                                'label' => $label,
+                                'category' => $modul['label'],
+                                'route' => self::getMenuUrl($subModul['route']),
+                            ];
+                        }
+                    } else {
+                        foreach ($subModul['children'] as $child) {
+                            if ($child['route'] === '#!' || $child['route'] === '#') {
+                                continue;
+                            }
+                            
+                            $label = $subModul['label'] . ' - ' . $child['label'];
+                            $keywords = strtolower($child['search_keywords'] ?? '');
+                            
+                            $match = (stripos($label, $q) !== false) || (stripos($keywords, $q) !== false);
+                            if ($match) {
+                                $suggestions[] = [
+                                    'label' => $label,
+                                    'category' => $modul['label'],
+                                    'route' => self::getMenuUrl($child['route']),
+                                ];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return array_slice($suggestions, 0, 10);
+    }
+
+    /**
+     * Helper to get menu absolute/relative URL.
+     */
+    private static function getMenuUrl(string $route): string
+    {
+        $r = trim($route);
+        if ($r === '' || $r === '#' || $r === '#!') {
+            return $r;
+        }
+        if (preg_match('~^(https?:)?//~i', $r)) {
+            return $r;
+        }
+        $cleanRoute = '/' . ltrim($r, '/');
+        return \yii\helpers\Url::to([$cleanRoute]);
     }
 }

@@ -78,6 +78,22 @@ class SiteController extends BaseController
         }
     }
 
+    public function actionSearchMenu($q = '')
+    {
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        
+        if (Yii::$app->user->isGuest) {
+            return [];
+        }
+        
+        $q = trim((string)$q);
+        if ($q === '') {
+            return [];
+        }
+        
+        return \app\components\MenuService::searchMenus($q);
+    }
+
     /**
      * Login action.
      *

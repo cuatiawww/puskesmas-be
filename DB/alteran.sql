@@ -204,3 +204,34 @@ UPDATE public.sub_modul SET label = 'MANAJEMEN MODUL & NAVIGASI', route = '/navi
 DELETE FROM public.sub_modul WHERE UPPER(label) = 'DASHBOARD UTAMA' OR route = '/auth/sso';
 DELETE FROM public.modul WHERE UPPER(label) = 'DASHBOARD UTAMA' OR nama_modul = 'dashboard-utama';
 
+-- 13. TAMBAH FIELD KEYWORDS UNTUK PENCARIAN DI SUB_MODUL
+-- ============================================================
+ALTER TABLE public.sub_modul ADD COLUMN IF NOT EXISTS search_keywords TEXT;
+
+-- Set default keywords sebagai label lowercase
+UPDATE public.sub_modul SET search_keywords = LOWER(label);
+
+-- Update keywords tambahan untuk menu/sub_modul agar pencarian lebih kaya
+UPDATE public.sub_modul SET search_keywords = search_keywords || ', rs, rumah sakit, faskes, sarana, rujukan' WHERE route LIKE '%rumah-sakit%';
+UPDATE public.sub_modul SET search_keywords = search_keywords || ', puskesmas, pkm, faskes, sarana' WHERE route LIKE '%puskesmas%';
+UPDATE public.sub_modul SET search_keywords = search_keywords || ', klinik, faskes, sarana' WHERE route LIKE '%klinik%';
+UPDATE public.sub_modul SET search_keywords = search_keywords || ', posyandu, faskes, sarana, balita' WHERE route LIKE '%posyandu%';
+UPDATE public.sub_modul SET search_keywords = search_keywords || ', pustu, puskesmas pembantu, faskes, sarana' WHERE route LIKE '%pustu%';
+UPDATE public.sub_modul SET search_keywords = search_keywords || ', bbk, bblk, balai laboratorium, faskes' WHERE route LIKE '%bbk-bblk%';
+UPDATE public.sub_modul SET search_keywords = search_keywords || ', user, pengguna, hak akses, privilege, role, level' WHERE route LIKE '%level-user%' OR route LIKE '%user-model%' OR route LIKE '%user-registration%';
+UPDATE public.sub_modul SET search_keywords = search_keywords || ', wilayah, provinsi, daerah' WHERE route LIKE '%provinsi%';
+UPDATE public.sub_modul SET search_keywords = search_keywords || ', wilayah, kabupaten, kota, daerah' WHERE route LIKE '%kabupaten-kota%';
+UPDATE public.sub_modul SET search_keywords = search_keywords || ', wilayah, kecamatan, daerah' WHERE route LIKE '%kecamatan%';
+UPDATE public.sub_modul SET search_keywords = search_keywords || ', sistem, setting, konfigurasi, aplikasi' WHERE route LIKE '%system-setting%';
+
+-- 14. TAMBAH FIELD KEYWORDS UNTUK PENCARIAN DI MODUL (KATEGORI INDUK)
+-- ============================================================
+ALTER TABLE public.modul ADD COLUMN IF NOT EXISTS search_keywords TEXT;
+
+-- Set default keywords sebagai label lowercase
+UPDATE public.modul SET search_keywords = LOWER(label);
+
+-- Tambahkan sinonim pencarian spesifik untuk modul utama
+UPDATE public.modul SET search_keywords = search_keywords || ', konfigurasi, setting, pengaturan, admin' WHERE nama_modul = 'master-data';
+UPDATE public.modul SET search_keywords = search_keywords || ', chart, grafik, statistika, info' WHERE nama_modul = 'dashboard-laporan';
+

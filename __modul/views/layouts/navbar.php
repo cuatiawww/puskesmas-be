@@ -75,11 +75,14 @@ if ($isAdmin) {
       >
         <i class="ph-duotone ph-magnifying-glass"></i>
       </a>
-      <div class="dropdown-menu pc-h-dropdown drp-search">
-        <form class="px-1">
-          <div class="mb-0 d-flex align-items-center">
-            <input type="search" class="form-control border-0 shadow-none" placeholder="Search here. . ." />
-            <button class="btn btn-light-secondary btn-search">Search</button>
+      <div class="dropdown-menu pc-h-dropdown drp-search" style="min-width: 320px; overflow: visible;">
+        <form class="px-1" onsubmit="return false;">
+          <div class="mb-0 d-flex align-items-center position-relative w-100">
+            <input type="search" id="menu-search-input" class="form-control border-0 shadow-none" placeholder="Search here. . ." autocomplete="off" />
+            <button class="btn btn-light-secondary btn-search" type="button" style="display: none;">Search</button>
+          </div>
+          <div id="menu-search-suggestions" class="dropdown-menu show w-100 border-0 shadow" style="display: none; position: absolute; top: 100%; left: 0; max-height: 350px; overflow-y: auto; z-index: 1100; padding: 5px 0; background: #ffffff;">
+            <!-- Suggestions will be generated here -->
           </div>
         </form>
       </div>
@@ -275,3 +278,79 @@ if ($isAdmin) {
  </div>
 </header>
 <!-- [ Header ] end -->
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('menu-search-input');
+    const suggestionsContainer = document.getElementById('menu-search-suggestions');
+    let debounceTimer;
+
+    if (!searchInput || !suggestionsContainer) return;
+
+    searchInput.addEventListener('input', function() {
+        clearTimeout(debounceTimer);
+        const query = this.value.trim();
+
+        if (query.length < 2) {
+            suggestionsContainer.style.display = 'none';
+            suggestionsContainer.innerHTML = '';
+            return;
+        }
+
+        debounceTimer = setTimeout(function() {
+            const url = '<?= Yii::$app->params['base_url'] ?>/site/search-menu?q=' + encodeURIComponent(query);
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    suggestionsContainer.innerHTML = '';
+                    if (data && data.length > 0) {
+                        data.forEach(item => {
+                            const a = document.createElement('a');
+                            a.className = 'dropdown-item d-flex flex-column align-items-start py-2 px-3';
+                            a.href = item.route;
+                            a.style.borderBottom = '1px solid #f1f5f9';
+                            a.style.whiteSpace = 'normal';
+                            a.style.cursor = 'pointer';
+                            
+                            const labelSpan = document.createElement('span');
+                            labelSpan.className = 'fw-bold text-dark';
+                            labelSpan.textContent = item.label;
+                            
+                            const categorySpan = document.createElement('small');
+                            categorySpan.className = 'text-muted text-uppercase';
+                            categorySpan.style.fontSize = '0.7rem';
+                            categorySpan.style.marginTop = '2px';
+                            categorySpan.textContent = item.category;
+
+                            a.appendChild(labelSpan);
+                            a.appendChild(categorySpan);
+                            suggestionsContainer.appendChild(a);
+                        });
+                        suggestionsContainer.style.display = 'block';
+                    } else {
+                        const div = document.createElement('div');
+                        div.className = 'text-center text-muted py-3 px-3';
+                        div.textContent = 'Menu tidak ditemukan';
+                        suggestionsContainer.appendChild(div);
+                        suggestionsContainer.style.display = 'block';
+                    }
+                })
+                .catch(err => {
+                    console.error('Search error:', err);
+                });
+        }, 300);
+    });
+
+    // Close suggestions dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !suggestionsContainer.contains(e.target)) {
+            suggestionsContainer.style.display = 'none';
+        }
+    });
+
+    // Prevent closing search dropdown when clicking suggestions container
+    suggestionsContainer.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+});
+</script>
