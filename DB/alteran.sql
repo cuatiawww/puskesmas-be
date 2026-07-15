@@ -198,3 +198,9 @@ ON CONFLICT (key) DO NOTHING;
 DELETE FROM public.hak_akses WHERE sub_modul_id IN (2, 39);
 DELETE FROM public.sub_modul WHERE id IN (2, 39);
 UPDATE public.sub_modul SET label = 'MANAJEMEN MODUL & NAVIGASI', route = '/navigasi/index' WHERE id = 1;
+
+-- 12. HAPUS MENU HARDCODE DASHBOARD UTAMA DARI DATABASE
+-- ============================================================
+DELETE FROM public.sub_modul WHERE UPPER(label) = 'DASHBOARD UTAMA' OR route = '/auth/sso';
+DELETE FROM public.modul WHERE UPPER(label) = 'DASHBOARD UTAMA' OR nama_modul = 'dashboard-utama';
+
