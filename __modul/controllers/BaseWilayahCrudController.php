@@ -163,15 +163,15 @@ abstract class BaseWilayahCrudController extends BaseController
         }
 
         if ($level === 2 && !empty($scope['prov_tbl_id'])) {
-            $query->andWhere(['w.tbl_wilayah_id' => (int) $scope['prov_tbl_id']]);
+            $query->andWhere(['w.id' => (int) $scope['prov_tbl_id']]);
             return $query;
         }
 
         if ($level === 3) {
             if (($scope['mode'] ?? null) === 'provinsi' && !empty($scope['prov_tbl_id'])) {
-                $query->andWhere(['w.parent_tbl_wilayah_id' => (int) $scope['prov_tbl_id']]);
+                $query->andWhere(['w.parent_master_wilayah_id' => (int) $scope['prov_tbl_id']]);
             } elseif (($scope['mode'] ?? null) === 'kabupaten' && !empty($scope['kab_tbl_id'])) {
-                $query->andWhere(['w.tbl_wilayah_id' => (int) $scope['kab_tbl_id']]);
+                $query->andWhere(['w.id' => (int) $scope['kab_tbl_id']]);
             }
 
             return $query;
@@ -180,40 +180,40 @@ abstract class BaseWilayahCrudController extends BaseController
         if ($level === 4) {
             if (($scope['mode'] ?? null) === 'provinsi' && !empty($scope['prov_tbl_id'])) {
                 $kabupatenIds = MasterWilayah::find()
-                    ->select(['tbl_wilayah_id'])
+                    ->select(['id'])
                     ->where([
                         'level_wilayah' => 3,
-                        'parent_tbl_wilayah_id' => (int) $scope['prov_tbl_id'],
+                        'parent_master_wilayah_id' => (int) $scope['prov_tbl_id'],
                     ]);
-                $query->andWhere(['w.parent_tbl_wilayah_id' => $kabupatenIds]);
+                $query->andWhere(['w.parent_master_wilayah_id' => $kabupatenIds]);
             } elseif (($scope['mode'] ?? null) === 'kabupaten' && !empty($scope['kab_tbl_id'])) {
-                $query->andWhere(['w.parent_tbl_wilayah_id' => (int) $scope['kab_tbl_id']]);
+                $query->andWhere(['w.parent_master_wilayah_id' => (int) $scope['kab_tbl_id']]);
             }
         }
 
         if ($level === 5) {
             if (($scope['mode'] ?? null) === 'provinsi' && !empty($scope['prov_tbl_id'])) {
                 $kabupatenIds = MasterWilayah::find()
-                    ->select(['tbl_wilayah_id'])
+                    ->select(['id'])
                     ->where([
                         'level_wilayah' => 3,
-                        'parent_tbl_wilayah_id' => (int) $scope['prov_tbl_id'],
+                        'parent_master_wilayah_id' => (int) $scope['prov_tbl_id'],
                     ]);
                 $kecamatanIds = MasterWilayah::find()
-                    ->select(['tbl_wilayah_id'])
+                    ->select(['id'])
                     ->where([
                         'level_wilayah' => 4,
-                        'parent_tbl_wilayah_id' => $kabupatenIds,
+                        'parent_master_wilayah_id' => $kabupatenIds,
                     ]);
-                $query->andWhere(['w.parent_tbl_wilayah_id' => $kecamatanIds]);
+                $query->andWhere(['w.parent_master_wilayah_id' => $kecamatanIds]);
             } elseif (($scope['mode'] ?? null) === 'kabupaten' && !empty($scope['kab_tbl_id'])) {
                 $kecamatanIds = MasterWilayah::find()
-                    ->select(['tbl_wilayah_id'])
+                    ->select(['id'])
                     ->where([
                         'level_wilayah' => 4,
-                        'parent_tbl_wilayah_id' => (int) $scope['kab_tbl_id'],
+                        'parent_master_wilayah_id' => (int) $scope['kab_tbl_id'],
                     ]);
-                $query->andWhere(['w.parent_tbl_wilayah_id' => $kecamatanIds]);
+                $query->andWhere(['w.parent_master_wilayah_id' => $kecamatanIds]);
             }
         }
 

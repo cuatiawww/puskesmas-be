@@ -359,7 +359,7 @@ class BaseController extends Controller
             return $codeScope;
         }
 
-        $db = Yii::$app->db;
+        $db = Yii::$app->get('db_user');
 
         if (!empty($scope['prov_tbl_id'])) {
             $provCode = $db->createCommand("SELECT kd_user FROM master_wilayah WHERE id = :id", [':id' => (int) $scope['prov_tbl_id']])->queryScalar();
