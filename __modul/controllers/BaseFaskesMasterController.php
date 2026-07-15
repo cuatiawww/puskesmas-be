@@ -138,11 +138,26 @@ abstract class BaseFaskesMasterController extends BaseController
     {
         $config = $this->facilityConfig();
         $row = [];
+        $scope = $this->currentUserWilayahScope();
+        $codeScope = $this->currentUserWilayahCodeScope();
+        $jenis = (string) ($config['jenis'] ?? 'rs');
 
         if (is_string($snapshot) && $snapshot !== '') {
             $decoded = json_decode(base64_decode($snapshot, true) ?: '', true);
             if (is_array($decoded)) {
                 $row = $decoded;
+                
+                if ($scope['mode'] === 'provinsi') {
+                    $faskesProv = in_array($jenis, ['rs', 'puskesmas', 'klinik'], true) ? ($row['kode_prop'] ?? '') : ($row['kode_provinsi'] ?? '');
+                    if ((string)$faskesProv !== (string)$codeScope['prov_code']) {
+                        throw new \yii\web\ForbiddenHttpException('Anda tidak memiliki wewenang untuk melihat data faskes di luar wilayah Anda.');
+                    }
+                } elseif ($scope['mode'] === 'kabupaten') {
+                    $faskesKab = in_array($jenis, ['rs', 'puskesmas', 'klinik'], true) ? ($row['kode_kab'] ?? '') : ($row['kode_kabkota'] ?? '');
+                    if ((string)$faskesKab !== (string)$codeScope['kab_code']) {
+                        throw new \yii\web\ForbiddenHttpException('Anda tidak memiliki wewenang untuk melihat data faskes di luar wilayah Anda.');
+                    }
+                }
             }
         }
 
@@ -404,6 +419,11 @@ abstract class BaseFaskesMasterController extends BaseController
         Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         $scope = $this->currentUserWilayahScope();
         $codeScope = $this->currentUserWilayahCodeScope();
+        
+        if ($scope['mode'] === 'provinsi' && (string)$kode_provinsi !== (string)$codeScope['prov_code']) {
+            return [];
+        }
+        
         $options = (new WilayahService())->getKabupatenOptions($kode_provinsi);
         
         if ($scope['mode'] === 'kabupaten') {
@@ -419,12 +439,49 @@ abstract class BaseFaskesMasterController extends BaseController
     public function actionGetKecamatan($kode_kabkota)
     {
         Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $scope = $this->currentUserWilayahScope();
+        $codeScope = $this->currentUserWilayahCodeScope();
+
+        if ($scope['mode'] === 'kabupaten' && (string)$kode_kabkota !== (string)$codeScope['kab_code']) {
+            return [];
+        }
+
+        if ($scope['mode'] === 'provinsi') {
+            $db = Yii::$app->db;
+            $parentCode = $db->createCommand("SELECT parent_code FROM wilayah_kabupaten WHERE code = :code", [':code' => $kode_kabkota])->queryScalar();
+            if ((string)$parentCode !== (string)$codeScope['prov_code']) {
+                return [];
+            }
+        }
+
         return (new WilayahService())->getKecamatanOptions($kode_kabkota);
     }
 
     public function actionGetDesa($kode_kecamatan)
     {
         Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $scope = $this->currentUserWilayahScope();
+        $codeScope = $this->currentUserWilayahCodeScope();
+
+        if ($scope['mode'] === 'kabupaten') {
+            $db = Yii::$app->db;
+            $parentCode = $db->createCommand("SELECT parent_code FROM wilayah_kecamatan WHERE code = :code", [':code' => $kode_kecamatan])->queryScalar();
+            if ((string)$parentCode !== (string)$codeScope['kab_code']) {
+                return [];
+            }
+        } elseif ($scope['mode'] === 'provinsi') {
+            $db = Yii::$app->db;
+            $kabCode = $db->createCommand("SELECT parent_code FROM wilayah_kecamatan WHERE code = :code", [':code' => $kode_kecamatan])->queryScalar();
+            if ($kabCode) {
+                $provCode = $db->createCommand("SELECT parent_code FROM wilayah_kabupaten WHERE code = :code", [':code' => $kabCode])->queryScalar();
+                if ((string)$provCode !== (string)$codeScope['prov_code']) {
+                    return [];
+                }
+            } else {
+                return [];
+            }
+        }
+
         return (new WilayahService())->getDesaOptions($kode_kecamatan);
     }
 }
