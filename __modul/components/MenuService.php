@@ -234,7 +234,8 @@ class MenuService
         $base = Yii::$app->params['base_url'] ?? '';
         if (!empty($base)) {
             $base = rtrim($base, '/');
-            if ($base !== '' && strpos($r, $base . '/') === 0) {
+            // Only strip if the base URL prefix is repeated, e.g. /puskesmas/puskesmas/index
+            if ($base !== '' && strpos($r, $base . $base . '/') === 0) {
                 $r = substr($r, strlen($base));
             }
         }
