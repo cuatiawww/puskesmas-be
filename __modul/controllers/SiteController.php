@@ -226,12 +226,26 @@ class SiteController extends BaseController
             return $this->redirect($returnUrl);
         }
 
+        $source = Yii::$app->request->get('source');
+        $referrer = Yii::$app->request->getReferrer();
         $frontendUrl = Yii::$app->params['frontend_url'] ?? '';
-        if (!empty($frontendUrl)) {
+
+        $fromFrontend = false;
+        if ($source === 'frontend') {
+            $fromFrontend = true;
+        } elseif (!empty($referrer) && !empty($frontendUrl)) {
+            $refHost = parse_url($referrer, PHP_URL_HOST);
+            $frontHost = parse_url($frontendUrl, PHP_URL_HOST);
+            if ($refHost === $frontHost) {
+                $fromFrontend = true;
+            }
+        }
+
+        if ($fromFrontend && !empty($frontendUrl)) {
             return $this->redirect(rtrim($frontendUrl, '/') . '/login?logout=1');
         }
 
-        return $this->goHome();
+        return $this->redirect(['/site/login']);
     }
 
         /**
