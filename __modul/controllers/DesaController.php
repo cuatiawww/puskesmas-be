@@ -166,9 +166,9 @@ class DesaController extends BaseWilayahCrudController
         }
 
         if ($scope['mode'] === 'provinsi' && !empty($codeScope['prov_code'])) {
-            $query->andWhere(['w.province_code' => $codeScope['prov_code']]);
+            $query->andWhere(['like', 'w.code', $codeScope['prov_code'] . '%', false]);
         } elseif ($scope['mode'] === 'kabupaten' && !empty($codeScope['kab_code'])) {
-            $query->andWhere(['w.district_code' => $codeScope['kab_code']]);
+            $query->andWhere(['like', 'w.code', $codeScope['kab_code'] . '%', false]);
         }
 
         return $query;
