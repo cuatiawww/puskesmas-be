@@ -62,7 +62,7 @@ JS;
                     <h5>DAFTAR KABUPATEN/KOTA</h5>
                     <p class="mb-0">Data yang muncul mengikuti provinsi atau kabupaten user.</p>
                 </div>
-                <?php if ($canCrud): ?>
+                <?php if (Yii::$app->controller->canCreate()): ?>
                     <div>
                         <a href="<?= Url::to(['create']) ?>" class="btn btn-primary">
                             <i class="ph-duotone ph-plus-square"></i> TAMBAH
@@ -113,7 +113,9 @@ JS;
                             [
                                 'class' => 'yii\grid\ActionColumn',
                                 'header' => 'AKSI',
-                                'template' => $canCrud ? '{view} {update} {delete}' : '{view}',
+                                'template' => (Yii::$app->controller->canUpdate() || Yii::$app->controller->canDelete()) 
+                                    ? '{view} ' . (Yii::$app->controller->canUpdate() ? '{update} ' : '') . (Yii::$app->controller->canDelete() ? '{delete}' : '') 
+                                    : '{view}',
                                 'buttons' => [
                                     'view' => static fn($url, MasterWilayah $model) => Html::a('<i class="ti ti-eye"></i>', ['view', 'id' => $model->id], ['class' => 'btn btn-sm btn-info text-white', 'title' => 'Lihat', 'data-pjax' => 0]),
                                     'update' => static fn($url, MasterWilayah $model) => Html::a('<i class="ti ti-pencil"></i>', ['update', 'id' => $model->id], ['class' => 'btn btn-sm btn-warning', 'title' => 'Edit', 'data-pjax' => 0]),

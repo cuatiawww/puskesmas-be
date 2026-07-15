@@ -6,7 +6,10 @@ use yii\helpers\Url;
 $this->title = 'Versi Sistem';
 $this->params['active_menu'] = 'versi-sistem';
 
-$isAdmin = Yii::$app->user->identity && (int) (Yii::$app->user->identity->id_user_level ?? Yii::$app->user->identity->level_user_id ?? 0) === 1;
+$canCreate = Yii::$app->controller->canCreate();
+$canUpdate = Yii::$app->controller->canUpdate();
+$canDelete = Yii::$app->controller->canDelete();
+$hasCrudAction = $canUpdate || $canDelete;
 
 $swal = Yii::$app->session->getFlash('swal', null);
 if ($swal) {
@@ -82,7 +85,7 @@ JS;
           <h5 class="mb-0 fw-bold">MATRIKS UPDATE LOG</h5>
           <p class="mb-0 text-muted">Daftar riwayat pembaruan sistem dan catatan rilis</p>
         </div>
-        <?php if ($isAdmin): ?>
+        <?php if ($canCreate): ?>
           <a href="<?= Url::to(['versi-sistem/create']) ?>" class="btn btn-sm btn-primary">
             <i class="ti ti-plus me-1"></i> Tambah Log Versi
           </a>
@@ -98,7 +101,7 @@ JS;
                 <th width="15%">VERSI</th>
                 <th width="20%">TANGGAL RILIS</th>
                 <th>KETERANGAN / LOG UPDATE</th>
-                <?php if ($isAdmin): ?>
+                <?php if ($hasCrudAction): ?>
                   <th width="12%">AKSI</th>
                 <?php endif; ?>
               </tr>
@@ -109,7 +112,7 @@ JS;
               if (empty($models)):
                 ?>
                 <tr>
-                  <td colspan="<?= $isAdmin ? 5 : 4 ?>" class="text-center text-muted py-4">Data versi sistem belum
+                   <td colspan="<?= $hasCrudAction ? 5 : 4 ?>" class="text-center text-muted py-4">Data versi sistem belum
                     tersedia.</td>
                 </tr>
               <?php
@@ -130,17 +133,21 @@ JS;
                     <td class="text-dark">
                       <?= nl2br(Html::encode($model->keterangan)) ?>
                     </td>
-                    <?php if ($isAdmin): ?>
+                    <?php if ($hasCrudAction): ?>
                       <td class="text-center">
                         <div class="d-flex justify-content-center gap-1">
-                          <?= Html::a('<i class="ti ti-edit"></i>', ['update', 'id' => $model->id], ['class' => 'btn btn-xs btn-warning']) ?>
-                          <?= Html::a('<i class="ti ti-trash"></i>', ['delete', 'id' => $model->id], [
-                            'class' => 'btn btn-xs btn-danger',
-                            'data' => [
-                              'confirm' => 'Apakah Anda yakin ingin menghapus log versi ini?',
-                              'method' => 'post',
-                            ]
-                          ]) ?>
+                          <?php if ($canUpdate): ?>
+                            <?= Html::a('<i class="ti ti-edit"></i>', ['update', 'id' => $model->id], ['class' => 'btn btn-xs btn-warning']) ?>
+                          <?php endif; ?>
+                          <?php if ($canDelete): ?>
+                            <?= Html::a('<i class="ti ti-trash"></i>', ['delete', 'id' => $model->id], [
+                              'class' => 'btn btn-xs btn-danger',
+                              'data' => [
+                               'confirm' => 'Apakah Anda yakin ingin menghapus log versi ini?',
+                                'method' => 'post',
+                              ]
+                            ]) ?>
+                          <?php endif; ?>
                         </div>
                       </td>
                     <?php endif; ?>

@@ -49,9 +49,11 @@ JS;
           <h5>Daftar Standar Profesi</h5>
           <p>Konfigurasi kelengkapan 9 jenis nakes (DLI 6.1) dan 11 jenis nakes.</p>
         </div>
-        <a href="<?= Url::to(['master-nakes/create']) ?>" class="btn btn-sm btn-primary">
-          <i class="ti ti-plus me-1"></i> Tambah Ketenagaan
-        </a>
+        <?php if (Yii::$app->controller->canCreate()): ?>
+          <a href="<?= Url::to(['master-nakes/create']) ?>" class="btn btn-sm btn-primary">
+            <i class="ti ti-plus me-1"></i> Tambah Ketenagaan
+          </a>
+        <?php endif; ?>
       </div>
       <div class="card-body table-border-style">
         <div class="table-responsive">
@@ -93,7 +95,7 @@ JS;
                 'class' => 'yii\grid\ActionColumn',
                 'header' => 'Aksi',
                 'options' => ['style' => 'width: 100px; text-align: center;'],
-                'template' => '{update} {delete}',
+                'template' => (Yii::$app->controller->canUpdate() ? '{update} ' : '') . (Yii::$app->controller->canDelete() ? '{delete}' : ''),
                 'buttons' => [
                   'update' => function ($url, $model) {
                     return Html::a('<i class="ti ti-edit"></i>', ['update', 'id' => $model->id], ['class' => 'btn btn-xs btn-warning me-1']);

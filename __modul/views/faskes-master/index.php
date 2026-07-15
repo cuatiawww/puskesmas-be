@@ -107,11 +107,13 @@ $resolveKecamatan = static function (array $row, string $provinsiValue, string $
                     <h5>DAFTAR <?= Html::encode(strtoupper($jenisLabel)) ?></h5>
                     <p class="mb-0">Daftar <?= Html::encode(strtolower($jenisLabel)) ?> menyesuaikan level akses user yang sedang login.</p>
                 </div>
-                <div>
-                    <a href="<?= Url::to(['create']) ?>" class="btn btn-primary">
-                        <i class="ph-duotone ph-plus-square"></i> TAMBAH
-                    </a>
-                </div>
+                <?php if (Yii::$app->controller->canCreate()): ?>
+                    <div>
+                        <a href="<?= Url::to(['create']) ?>" class="btn btn-primary">
+                            <i class="ph-duotone ph-plus-square"></i> TAMBAH
+                        </a>
+                    </div>
+                <?php endif; ?>
             </div>
             <div class="card-body table-border-style">
                 <?php if ($errorMessage): ?>
@@ -267,12 +269,16 @@ $resolveKecamatan = static function (array $row, string $provinsiValue, string $
                                                         <i class="ti ti-eye"></i>
                                                     </a>
                                                 <?php endif; ?>
-                                                <a href="<?= Url::to(['update', 'id' => $row['id']]) ?>" class="btn btn-sm btn-warning text-white" title="Edit Data" data-pjax="0">
-                                                    <i class="ti ti-edit"></i>
-                                                </a>
-                                                <a href="<?= Url::to(['delete', 'id' => $row['id']]) ?>" class="btn btn-sm btn-danger text-white" title="Hapus Data" data-pjax="0" data-confirm="Apakah Anda yakin ingin menghapus data faskes ini?" data-method="post">
-                                                    <i class="ti ti-trash"></i>
-                                                </a>
+                                                <?php if (Yii::$app->controller->canUpdate()): ?>
+                                                    <a href="<?= Url::to(['update', 'id' => $row['id']]) ?>" class="btn btn-sm btn-warning text-white" title="Edit Data" data-pjax="0">
+                                                        <i class="ti ti-edit"></i>
+                                                    </a>
+                                                <?php endif; ?>
+                                                <?php if (Yii::$app->controller->canDelete()): ?>
+                                                    <a href="<?= Url::to(['delete', 'id' => $row['id']]) ?>" class="btn btn-sm btn-danger text-white" title="Hapus Data" data-pjax="0" data-confirm="Apakah Anda yakin ingin menghapus data faskes ini?" data-method="post">
+                                                        <i class="ti ti-trash"></i>
+                                                    </a>
+                                                <?php endif; ?>
                                             </div>
                                         </td>
                                     </tr>

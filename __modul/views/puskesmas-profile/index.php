@@ -8,7 +8,10 @@ use yii\widgets\Pjax;
 $this->title = 'Tata Kelola Kinerja Puskesmas';
 $this->params['active_menu'] = 'puskesmas';
 
-$isAdmin = Yii::$app->user->identity && (int)(Yii::$app->user->identity->id_user_level ?? Yii::$app->user->identity->level_user_id ?? 0) === 1;
+$canCreate = Yii::$app->controller->canCreate();
+$canUpdate = Yii::$app->controller->canUpdate();
+$canDelete = Yii::$app->controller->canDelete();
+$hasCrudAction = $canUpdate || $canDelete;
 
 $swal = Yii::$app->session->getFlash('swal', null);
 if ($swal) {
@@ -57,7 +60,7 @@ JS;
           <h5>DAFTAR PUSKESMAS</h5>
           <p>Daftar data profil faskes dan isi laporan kesiapan.</p>
         </div>
-        <?php if ($isAdmin): ?>
+        <?php if ($canCreate): ?>
         <div class="d-flex gap-2">
           <a href="<?= Url::to(['puskesmas-profile/create']) ?>" class="btn btn-sm btn-primary">
             <i class="ti ti-plus me-1"></i> Tambah Puskesmas
@@ -137,13 +140,13 @@ JS;
               'header' => 'FORMULIR',
               'format' => 'raw',
               'contentOptions' => ['style' => 'width: 150px; text-align: center; vertical-align: middle;'],
-              'value' => function($model) use ($isAdmin) {
+              'value' => function($model) use ($canCreate) {
                 $kinerjaCreateUrl = \yii\helpers\Url::to(['kinerja-create', 'id' => $model->id]);
                 $kinerjaListUrl   = \yii\helpers\Url::to(['kinerja',        'id' => $model->id]);
                 $penyakitUrl      = \yii\helpers\Url::to(['penyakit',       'id' => $model->id]);
                 
                 $createBtn = '';
-                if ($isAdmin) {
+                if ($canCreate) {
                     $createBtn = '
                       <li>
                         <a class="dropdown-item" href="' . $kinerjaCreateUrl . '">
@@ -178,12 +181,12 @@ JS;
             ],
           ];
 
-          if ($isAdmin) {
+          if ($hasCrudAction) {
               $gridColumns[] = [
                 'class' => 'yii\grid\ActionColumn',
                 'header' => 'Aksi',
                 'options' => ['style' => 'width: 120px; text-align: center;'],
-                'template' => '{update} {delete}',
+                'template' => ($canUpdate ? '{update} ' : '') . ($canDelete ? '{delete}' : ''),
                 'buttons' => [
                   'update' => function ($url, $model) {
                     return Html::a('<i class="ti ti-edit"></i>', ['update', 'id' => $model->id], ['class' => 'btn btn-sm btn-warning me-1', 'title' => 'Edit Profil']);

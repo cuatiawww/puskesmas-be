@@ -49,9 +49,11 @@ JS;
           <h5>Daftar Obat Esensial</h5>
           <p>Daftar obat acuan untuk validasi pemenuhan target obat esensial (by SMILE).</p>
         </div>
-        <a href="<?= Url::to(['master-obat/create']) ?>" class="btn btn-sm btn-primary">
-          <i class="ti ti-plus me-1"></i> Tambah Obat
-        </a>
+        <?php if (Yii::$app->controller->canCreate()): ?>
+          <a href="<?= Url::to(['master-obat/create']) ?>" class="btn btn-sm btn-primary">
+            <i class="ti ti-plus me-1"></i> Tambah Obat
+          </a>
+        <?php endif; ?>
       </div>
       <div class="card-body table-border-style">
         <div class="table-responsive">
@@ -74,7 +76,7 @@ JS;
                 'class' => 'yii\grid\ActionColumn',
                 'header' => 'Aksi',
                 'options' => ['style' => 'width: 100px; text-align: center;'],
-                'template' => '{update} {delete}',
+                'template' => (Yii::$app->controller->canUpdate() ? '{update} ' : '') . (Yii::$app->controller->canDelete() ? '{delete}' : ''),
                 'buttons' => [
                   'update' => function ($url, $model) {
                     return Html::a('<i class="ti ti-edit"></i>', ['update', 'id' => $model->id], ['class' => 'btn btn-xs btn-warning me-1']);

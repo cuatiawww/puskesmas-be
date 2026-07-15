@@ -6,7 +6,10 @@ use yii\helpers\Url;
 $this->title = 'Download';
 $this->params['active_menu'] = 'download';
 
-$isAdmin = Yii::$app->user->identity && (int)(Yii::$app->user->identity->id_user_level ?? Yii::$app->user->identity->level_user_id ?? 0) === 1;
+$canCreate = Yii::$app->controller->canCreate();
+$canUpdate = Yii::$app->controller->canUpdate();
+$canDelete = Yii::$app->controller->canDelete();
+$hasCrudAction = $canUpdate || $canDelete;
 
 $swal = Yii::$app->session->getFlash('swal', null);
 if ($swal) {
@@ -52,7 +55,7 @@ JS;
           <h5 class="mb-0 fw-bold">DAFTAR DOWNLOAD</h5>
           <p class="mb-0 text-muted">Daftar aplikasi yang direkomendasikan untuk mengakses sistem</p>
         </div>
-        <?php if ($isAdmin): ?>
+        <?php if ($canCreate): ?>
           <a href="<?= Url::to(['download/create']) ?>" class="btn btn-sm btn-primary">
             <i class="ti ti-plus me-1"></i> Tambah Unduhan
           </a>
@@ -68,7 +71,7 @@ JS;
                 <th width="35%">NAMA DOWNLOAD</th>
                 <th width="30%">KATEGORI / FUNGSI</th>
                 <th width="15%">DOWNLOAD</th>
-                <?php if ($isAdmin): ?>
+                <?php if ($hasCrudAction): ?>
                   <th width="15%">AKSI</th>
                 <?php endif; ?>
               </tr>
@@ -79,7 +82,7 @@ JS;
               if (empty($models)): 
               ?>
                 <tr>
-                  <td colspan="<?= $isAdmin ? 5 : 4 ?>" class="text-center text-muted py-4">Data unduhan belum tersedia.</td>
+                   <td colspan="<?= $hasCrudAction ? 5 : 4 ?>" class="text-center text-muted py-4">Data unduhan belum tersedia.</td>
                 </tr>
               <?php 
               else: 
@@ -101,17 +104,21 @@ JS;
                       <span class="text-muted small">-</span>
                     <?php endif; ?>
                   </td>
-                  <?php if ($isAdmin): ?>
+                  <?php if ($hasCrudAction): ?>
                     <td class="text-center">
                       <div class="d-flex justify-content-center gap-1">
-                        <?= Html::a('<i class="ti ti-edit"></i>', ['update', 'id' => $model->id], ['class' => 'btn btn-xs btn-warning']) ?>
-                        <?= Html::a('<i class="ti ti-trash"></i>', ['delete', 'id' => $model->id], [
-                          'class' => 'btn btn-xs btn-danger',
-                          'data' => [
-                            'confirm' => 'Apakah Anda yakin ingin menghapus data unduhan ini?',
-                            'method' => 'post',
-                          ]
-                        ]) ?>
+                        <?php if ($canUpdate): ?>
+                          <?= Html::a('<i class="ti ti-edit"></i>', ['update', 'id' => $model->id], ['class' => 'btn btn-xs btn-warning']) ?>
+                        <?php endif; ?>
+                        <?php if ($canDelete): ?>
+                          <?= Html::a('<i class="ti ti-trash"></i>', ['delete', 'id' => $model->id], [
+                            'class' => 'btn btn-xs btn-danger',
+                            'data' => [
+                              'confirm' => 'Apakah Anda yakin ingin menghapus data unduhan ini?',
+                              'method' => 'post',
+                            ]
+                          ]) ?>
+                        <?php endif; ?>
                       </div>
                     </td>
                   <?php endif; ?>

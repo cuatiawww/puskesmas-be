@@ -6,7 +6,10 @@ use yii\helpers\Url;
 $this->title = 'Daftar Kontak';
 $this->params['active_menu'] = 'kontak';
 
-$isAdmin = Yii::$app->user->identity && (int)(Yii::$app->user->identity->id_user_level ?? Yii::$app->user->identity->level_user_id ?? 0) === 1;
+$canCreate = Yii::$app->controller->canCreate();
+$canUpdate = Yii::$app->controller->canUpdate();
+$canDelete = Yii::$app->controller->canDelete();
+$hasCrudAction = $canUpdate || $canDelete;
 
 $swal = Yii::$app->session->getFlash('swal', null);
 if ($swal) {
@@ -52,7 +55,7 @@ JS;
           <h5 class="mb-0 fw-bold">DAFTAR KONTAK</h5>
           <p class="mb-0 text-muted">Hubungi tim pengelola atau helpdesk untuk bantuan teknis</p>
         </div>
-        <?php if ($isAdmin): ?>
+        <?php if ($canCreate): ?>
           <a href="<?= Url::to(['kontak/create']) ?>" class="btn btn-sm btn-primary">
             <i class="ti ti-plus me-1"></i> Tambah Kontak
           </a>
@@ -69,7 +72,7 @@ JS;
                 <th width="25%">JABATAN</th>
                 <th width="25%">EMAIL</th>
                 <th width="15%">WHATSAPP</th>
-                <?php if ($isAdmin): ?>
+                <?php if ($hasCrudAction): ?>
                   <th width="10%">AKSI</th>
                 <?php endif; ?>
               </tr>
@@ -80,7 +83,7 @@ JS;
               if (empty($models)): 
               ?>
                 <tr>
-                  <td colspan="<?= $isAdmin ? 6 : 5 ?>" class="text-center text-muted py-4">Data kontak belum tersedia.</td>
+                   <td colspan="<?= $hasCrudAction ? 6 : 5 ?>" class="text-center text-muted py-4">Data kontak belum tersedia.</td>
                 </tr>
               <?php 
               else: 
@@ -121,17 +124,21 @@ JS;
                       <span class="text-muted small">-</span>
                     <?php endif; ?>
                   </td>
-                  <?php if ($isAdmin): ?>
+                  <?php if ($hasCrudAction): ?>
                     <td class="text-center">
                       <div class="d-flex justify-content-center gap-1">
-                        <?= Html::a('<i class="ti ti-edit"></i>', ['update', 'id' => $model->id], ['class' => 'btn btn-xs btn-warning']) ?>
-                        <?= Html::a('<i class="ti ti-trash"></i>', ['delete', 'id' => $model->id], [
-                          'class' => 'btn btn-xs btn-danger',
-                          'data' => [
-                            'confirm' => 'Apakah Anda yakin ingin menghapus kontak ini?',
-                            'method' => 'post',
-                          ]
-                        ]) ?>
+                        <?php if ($canUpdate): ?>
+                          <?= Html::a('<i class="ti ti-edit"></i>', ['update', 'id' => $model->id], ['class' => 'btn btn-xs btn-warning']) ?>
+                        <?php endif; ?>
+                        <?php if ($canDelete): ?>
+                          <?= Html::a('<i class="ti ti-trash"></i>', ['delete', 'id' => $model->id], [
+                            'class' => 'btn btn-xs btn-danger',
+                            'data' => [
+                              'confirm' => 'Apakah Anda yakin ingin menghapus kontak ini?',
+                              'method' => 'post',
+                            ]
+                          ]) ?>
+                        <?php endif; ?>
                       </div>
                     </td>
                   <?php endif; ?>

@@ -252,6 +252,69 @@ class BaseController extends Controller
         return $this->currentUserLevelId() === 1;
     }
 
+    public function canView(string $route = null): bool
+    {
+        return $this->checkPermission('can_view', $route);
+    }
+
+    public function canCreate(string $route = null): bool
+    {
+        return $this->checkPermission('can_create', $route);
+    }
+
+    public function canUpdate(string $route = null): bool
+    {
+        return $this->checkPermission('can_update', $route);
+    }
+
+    public function canDelete(string $route = null): bool
+    {
+        return $this->checkPermission('can_delete', $route);
+    }
+
+    protected function checkPermission(string $permission, ?string $route): bool
+    {
+        if ($this->isCurrentUserSuperAdmin()) {
+            return true;
+        }
+
+        if (Yii::$app->user->isGuest) {
+            return false;
+        }
+
+        if ($route === null) {
+            $controllerId = $this->id;
+            $actionId = $this->action->id ?? 'index';
+        } else {
+            $parts = explode('/', trim($route, '/'));
+            $controllerId = $parts[0] ?? $this->id;
+            $actionId = $parts[1] ?? 'index';
+        }
+
+        $subModul = $this->findSubModulForRoute($controllerId, $actionId);
+        if ($subModul === null) {
+            return true;
+        }
+
+        $levelUserId = $this->currentUserLevelId();
+        if ($levelUserId === null) {
+            return false;
+        }
+
+        $hakAkses = HakAkses::find()
+            ->where([
+                'level_user_id' => $levelUserId,
+                'sub_modul_id' => $subModul->id,
+            ])
+            ->one();
+
+        if (!$hakAkses) {
+            return false;
+        }
+
+        return (bool) ($hakAkses->{$permission} ?? false);
+    }
+
     protected function currentUserWilayahScope(): array
     {
         $identity = Yii::$app->user->identity;
