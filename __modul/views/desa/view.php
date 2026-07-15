@@ -23,11 +23,14 @@ $this->params['active_menu'] = $activeMenu;
     <div class="card-body">
         <table class="table table-bordered">
             <tr><th style="width: 240px;">ID Master</th><td><?= Html::encode((string) $model->id) ?></td></tr>
-            <tr><th>ID Tbl Wilayah</th><td><?= Html::encode((string) $model->tbl_wilayah_id) ?></td></tr>
-            <tr><th>Nama Desa/Kelurahan</th><td><?= Html::encode((string) $model->nama_wilayah) ?></td></tr>
-            <tr><th>Kecamatan</th><td><?= Html::encode((string) ($model->parent->nama_wilayah ?? '-')) ?></td></tr>
-            <tr><th>Status</th><td><?= (int) $model->status_aktif === 1 ? 'Aktif' : 'Nonaktif' ?></td></tr>
-            <tr><th>Keterangan</th><td><?= Html::encode((string) $model->keterangan) ?></td></tr>
+            <tr><th>Kode Wilayah</th><td><?= Html::encode((string) $model->code) ?></td></tr>
+            <tr><th>Kode BPS</th><td><?= Html::encode((string) $model->bps_code) ?></td></tr>
+            <tr><th>Nama Desa/Kelurahan</th><td><?= Html::encode((string) $model->name) ?></td></tr>
+            <tr><th>Kecamatan</th><td><?= Html::encode((string) ($model->kecamatan->name ?? '-')) ?></td></tr>
+            <tr><th>Latitude</th><td><?= Html::encode((string) $model->latitude) ?></td></tr>
+            <tr><th>Longitude</th><td><?= Html::encode((string) $model->longitude) ?></td></tr>
+            <tr><th>Jumlah Penduduk</th><td><?= Html::encode((string) $model->jumlah_penduduk) ?></td></tr>
+            <tr><th>Luas Wilayah</th><td><?= Html::encode((string) $model->luas_wilayah) ?></td></tr>
         </table>
     </div>
 </div>

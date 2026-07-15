@@ -1,6 +1,6 @@
 <?php
 
-use app\models\MasterWilayah;
+use app\models\WilayahDesa;
 use yii\grid\GridView;
 use yii\helpers\Html;
 use yii\helpers\Json;
@@ -93,31 +93,35 @@ JS;
                         'columns' => [
                             ['class' => 'yii\grid\SerialColumn', 'header' => 'NO'],
                             [
-                                'attribute' => 'nama_wilayah',
+                                'attribute' => 'code',
+                                'header' => 'KODE DESA',
+                                'contentOptions' => ['style' => 'width:150px;'],
+                            ],
+                            [
+                                'attribute' => 'name',
                                 'header' => 'NAMA DESA/KELURAHAN',
                                 'contentOptions' => ['style' => 'max-width:260px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;'],
                             ],
                             [
                                 'header' => 'KECAMATAN',
-                                'value' => static function (MasterWilayah $model) {
-                                    return $model->parent ? $model->parent->nama_wilayah : '-';
+                                'value' => static function (WilayahDesa $model) {
+                                    return $model->kecamatan ? $model->kecamatan->name : '-';
                                 },
                                 'contentOptions' => ['style' => 'max-width:220px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;'],
                             ],
                             [
-                                'attribute' => 'status_aktif',
-                                'header' => 'STATUS',
-                                'value' => static fn(MasterWilayah $model) => (int) $model->status_aktif === 1 ? 'Aktif' : 'Nonaktif',
-                                'contentOptions' => ['style' => 'width:110px;'],
+                                'attribute' => 'bps_code',
+                                'header' => 'KODE BPS',
+                                'contentOptions' => ['style' => 'width:120px;'],
                             ],
                             [
                                 'class' => 'yii\grid\ActionColumn',
                                 'header' => 'AKSI',
                                 'template' => $canCrud ? '{view} {update} {delete}' : '{view}',
                                 'buttons' => [
-                                    'view' => static fn($url, MasterWilayah $model) => Html::a('<i class="ti ti-eye"></i>', ['view', 'id' => $model->id], ['class' => 'btn btn-sm btn-info text-white', 'title' => 'Lihat', 'data-pjax' => 0]),
-                                    'update' => static fn($url, MasterWilayah $model) => Html::a('<i class="ti ti-pencil"></i>', ['update', 'id' => $model->id], ['class' => 'btn btn-sm btn-warning', 'title' => 'Edit', 'data-pjax' => 0]),
-                                    'delete' => static fn($url, MasterWilayah $model) => Html::a('<i class="ti ti-trash"></i>', ['delete', 'id' => $model->id], ['class' => 'btn btn-sm btn-danger', 'title' => 'Hapus', 'data-confirm' => 'Yakin hapus data ini?', 'data-method' => 'post', 'data-pjax' => 0]),
+                                    'view' => static fn($url, WilayahDesa $model) => Html::a('<i class="ti ti-eye"></i>', ['view', 'id' => $model->id], ['class' => 'btn btn-sm btn-info text-white', 'title' => 'Lihat', 'data-pjax' => 0]),
+                                    'update' => static fn($url, WilayahDesa $model) => Html::a('<i class="ti ti-pencil"></i>', ['update', 'id' => $model->id], ['class' => 'btn btn-sm btn-warning', 'title' => 'Edit', 'data-pjax' => 0]),
+                                    'delete' => static fn($url, WilayahDesa $model) => Html::a('<i class="ti ti-trash"></i>', ['delete', 'id' => $model->id], ['class' => 'btn btn-sm btn-danger', 'title' => 'Hapus', 'data-confirm' => 'Yakin hapus data ini?', 'data-method' => 'post', 'data-pjax' => 0]),
                                 ],
                                 'contentOptions' => ['style' => 'min-width:160px; text-align:center;'],
                             ],

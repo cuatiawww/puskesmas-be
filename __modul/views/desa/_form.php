@@ -15,20 +15,29 @@ $this->params['active_menu'] = $activeMenu;
     </div>
     <div class="card-body">
         <div class="row g-3">
-            <div class="col-md-4">
-                <?= $form->field($model, 'tbl_wilayah_id')->input('number', ['min' => 1]) ?>
-            </div>
-            <div class="col-md-8">
-                <?= $form->field($model, 'nama_wilayah')->textInput(['maxlength' => true]) ?>
+            <div class="col-md-6">
+                <?= $form->field($model, 'code')->textInput(['maxlength' => true]) ?>
             </div>
             <div class="col-md-6">
-                <?= $form->field($model, 'parent_master_wilayah_id')->dropDownList($parentOptions, ['prompt' => 'Pilih Kecamatan']) ?>
-            </div>
-            <div class="col-md-6">
-                <?= $form->field($model, 'status_aktif')->dropDownList([1 => 'Aktif', 0 => 'Nonaktif']) ?>
+                <?= $form->field($model, 'bps_code')->textInput(['maxlength' => true]) ?>
             </div>
             <div class="col-md-12">
-                <?= $form->field($model, 'keterangan')->textarea(['rows' => 4]) ?>
+                <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
+            </div>
+            <div class="col-md-12">
+                <?= $form->field($model, 'parent_code')->dropDownList($parentOptions, ['prompt' => 'Pilih Kecamatan']) ?>
+            </div>
+            <div class="col-md-6">
+                <?= $form->field($model, 'latitude')->textInput(['maxlength' => true]) ?>
+            </div>
+            <div class="col-md-6">
+                <?= $form->field($model, 'longitude')->textInput(['maxlength' => true]) ?>
+            </div>
+            <div class="col-md-6">
+                <?= $form->field($model, 'jumlah_penduduk')->input('number', ['min' => 0]) ?>
+            </div>
+            <div class="col-md-6">
+                <?= $form->field($model, 'luas_wilayah')->input('number', ['min' => 0]) ?>
             </div>
         </div>
     </div>
