@@ -235,3 +235,20 @@ UPDATE public.modul SET search_keywords = LOWER(label);
 UPDATE public.modul SET search_keywords = search_keywords || ', konfigurasi, setting, pengaturan, admin' WHERE nama_modul = 'master-data';
 UPDATE public.modul SET search_keywords = search_keywords || ', chart, grafik, statistika, info' WHERE nama_modul = 'dashboard-laporan';
 
+-- 15. INSERT SUB_MODUL DESA/KELURAHAN UNDER DATA WILAYAH (PARENT 172)
+-- ============================================================
+DELETE FROM public.hak_akses WHERE sub_modul_id = 44;
+DELETE FROM public.sub_modul WHERE id = 44;
+
+INSERT INTO public.sub_modul (id, modul_id, nama_sub_modul, label, route, icon, urutan, is_active, parent_id, search_keywords)
+VALUES (44, 3, 'desa', 'DESA/KELURAHAN', '/desa/index', NULL, 4, true, 172, 'wilayah, desa, kelurahan, daerah');
+
+-- Replicate hak_akses permissions from Kecamatan (ID 43) to Desa (ID 44)
+INSERT INTO public.hak_akses (level_user_id, modul_id, sub_modul_id, can_view, can_create, can_update, can_delete, created_at, updated_at)
+SELECT level_user_id, modul_id, 44, can_view, can_create, can_update, can_delete, NOW(), NOW()
+FROM public.hak_akses
+WHERE sub_modul_id = 43;
+
+-- Fix sequence
+SELECT setval('public.sub_modul_id_seq', COALESCE((SELECT MAX(id)+1 FROM public.sub_modul), 1), false);
+

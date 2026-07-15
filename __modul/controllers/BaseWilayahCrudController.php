@@ -191,6 +191,32 @@ abstract class BaseWilayahCrudController extends BaseController
             }
         }
 
+        if ($level === 5) {
+            if (($scope['mode'] ?? null) === 'provinsi' && !empty($scope['prov_tbl_id'])) {
+                $kabupatenIds = MasterWilayah::find()
+                    ->select(['tbl_wilayah_id'])
+                    ->where([
+                        'level_wilayah' => 3,
+                        'parent_tbl_wilayah_id' => (int) $scope['prov_tbl_id'],
+                    ]);
+                $kecamatanIds = MasterWilayah::find()
+                    ->select(['tbl_wilayah_id'])
+                    ->where([
+                        'level_wilayah' => 4,
+                        'parent_tbl_wilayah_id' => $kabupatenIds,
+                    ]);
+                $query->andWhere(['w.parent_tbl_wilayah_id' => $kecamatanIds]);
+            } elseif (($scope['mode'] ?? null) === 'kabupaten' && !empty($scope['kab_tbl_id'])) {
+                $kecamatanIds = MasterWilayah::find()
+                    ->select(['tbl_wilayah_id'])
+                    ->where([
+                        'level_wilayah' => 4,
+                        'parent_tbl_wilayah_id' => (int) $scope['kab_tbl_id'],
+                    ]);
+                $query->andWhere(['w.parent_tbl_wilayah_id' => $kecamatanIds]);
+            }
+        }
+
         return $query;
     }
 
