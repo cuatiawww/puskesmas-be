@@ -220,7 +220,7 @@ abstract class BaseWilayahCrudController extends BaseController
         return $query;
     }
 
-    protected function findModel($id): MasterWilayah
+    protected function findModel($id)
     {
         $query = $this->buildScopedQuery()->andWhere(['w.id' => (int) $id]);
         $model = $query->one();

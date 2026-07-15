@@ -455,11 +455,14 @@ class LevelUserController extends BaseController
                         $hakAkses->modul_id = $perm['modul_id'];
                     }
 
-                    $granted = isset($perm['granted']) && $perm['granted'];
-                    $hakAkses->can_view = isset($perm['can_view']) ? (bool)$perm['can_view'] : $granted;
-                    $hakAkses->can_create = isset($perm['can_create']) ? (bool)$perm['can_create'] : $granted;
-                    $hakAkses->can_update = isset($perm['can_update']) ? (bool)$perm['can_update'] : $granted;
-                    $hakAkses->can_delete = isset($perm['can_delete']) ? (bool)$perm['can_delete'] : $granted;
+                    $isTrue = function($val) {
+                        return $val === true || $val === 'true' || $val === 1 || $val === '1';
+                    };
+                    $granted = isset($perm['granted']) && $isTrue($perm['granted']);
+                    $hakAkses->can_view = isset($perm['can_view']) ? $isTrue($perm['can_view']) : $granted;
+                    $hakAkses->can_create = isset($perm['can_create']) ? $isTrue($perm['can_create']) : $granted;
+                    $hakAkses->can_update = isset($perm['can_update']) ? $isTrue($perm['can_update']) : $granted;
+                    $hakAkses->can_delete = isset($perm['can_delete']) ? $isTrue($perm['can_delete']) : $granted;
 
                     if (!$hakAkses->save()) {
                         throw new \Exception('Gagal menyimpan hak akses: ' . implode(', ', $hakAkses->getFirstErrors()));

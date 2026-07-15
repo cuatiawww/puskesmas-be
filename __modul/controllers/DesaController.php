@@ -174,7 +174,7 @@ class DesaController extends BaseWilayahCrudController
         return $query;
     }
 
-    protected function findModel($id): WilayahDesa
+    protected function findModel($id)
     {
         $query = $this->buildScopedQuery()->andWhere(['w.id' => (int) $id]);
         $model = $query->one();
