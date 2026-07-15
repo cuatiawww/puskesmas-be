@@ -140,6 +140,9 @@ ul.pagination > li.next > a{
     .pc-sidebar {
         width: 285px !important;
     }
+    .pc-sidebar .navbar-wrapper {
+        width: 285px !important;
+    }
     .pc-container {
         margin-left: 285px !important;
     }
