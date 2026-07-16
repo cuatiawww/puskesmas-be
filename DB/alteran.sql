@@ -252,3 +252,13 @@ WHERE sub_modul_id = 43;
 -- Fix sequence
 SELECT setval('public.sub_modul_id_seq', COALESCE((SELECT MAX(id)+1 FROM public.sub_modul), 1), false);
 
+
+-- 16. DEDICATED SYSTEM SETTINGS FOR DASHBOARD HEADER
+-- ============================================================
+INSERT INTO system_setting ("key", "value", "type", "label", "category", created_at, updated_at) VALUES
+  ('dashboard_header_logo', '', 'image', 'Logo Header Dashboard', 'general', NOW(), NOW()),
+  ('dashboard_header_title', 'ASISTENSI KINERJA PUSKESMAS', 'text', 'Judul Header Dashboard', 'general', NOW(), NOW()),
+  ('dashboard_header_subtitle', 'Asistensi penilaian kualitas pelayanan kesehatan primer dan evaluasi capaian indikator kinerja Puskesmas secara real-time di wilayah {activeRegion}.', 'text', 'Deskripsi Header Dashboard', 'general', NOW(), NOW())
+ON CONFLICT ("key") DO NOTHING;
+
+

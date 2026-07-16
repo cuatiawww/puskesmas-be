@@ -307,6 +307,40 @@ JS
               <small class="form-text text-muted">Hak cipta di bagian bawah halaman login.</small>
             </div>
 
+            <!-- Header & Logo Dashboard Utama -->
+            <h5 class="mb-4 mt-5 fw-bold text-teal-800 border-bottom pb-2">Header & Logo Dashboard Utama (Web)</h5>
+
+            <!-- Dashboard Navbar Logo -->
+            <div class="form-group mb-4">
+              <label class="form-label font-weight-bold">Logo Header Dashboard</label>
+              <div class="mb-3">
+                <div class="p-3 border rounded bg-dark text-center">
+                  <img src="<?= SystemSettingHelper::getAssetUrl('dashboard_header_logo', '/Logo-Kemenkes.png') ?>" 
+                       style="max-height: 50px; max-width: 100%; object-fit: contain;" alt="Dashboard Logo Preview">
+                </div>
+              </div>
+              <input type="file" name="SettingFile[dashboard_header_logo]" class="form-control mb-2" accept="image/*">
+              <div class="d-flex flex-wrap gap-2 align-items-center mb-1">
+                <span class="badge bg-light-primary text-primary">Rekomendasi Lebar: Maksimal 300 px</span>
+                <span class="badge bg-light-success text-success">Format: PNG Transparan</span>
+              </div>
+            </div>
+
+            <!-- Dashboard Navbar Title -->
+            <div class="form-group mb-4">
+              <label class="form-label font-weight-bold">Judul Header Dashboard</label>
+              <input type="text" name="Setting[dashboard_header_title]" class="form-control" 
+                     value="<?= Html::encode(SystemSettingHelper::get('dashboard_header_title', 'ASISTENSI KINERJA PUSKESMAS')) ?>" required>
+              <small class="form-text text-muted">Judul utama teks besar di header dashboard Puskesmas.</small>
+            </div>
+
+            <!-- Dashboard Navbar Subtitle -->
+            <div class="form-group mb-4">
+              <label class="form-label font-weight-bold">Deskripsi Header Dashboard</label>
+              <textarea name="Setting[dashboard_header_subtitle]" class="form-control" rows="3" required><?= Html::encode(SystemSettingHelper::get('dashboard_header_subtitle', 'Asistensi penilaian kualitas pelayanan kesehatan primer dan evaluasi capaian indikator kinerja Puskesmas secara real-time di wilayah {activeRegion}.')) ?></textarea>
+              <small class="form-text text-muted">Deskripsi di bawah judul utama header dashboard. Gunakan tag <code>{activeRegion}</code> untuk menampilkan nama wilayah secara otomatis.</small>
+            </div>
+
             <!-- Logo (Dashboard) -->
             <div class="form-group mb-4">
               <label class="form-label font-weight-bold">Logo Instansi (Dashboard)</label>
